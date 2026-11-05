@@ -923,11 +923,61 @@ function drawStage(t) {
 
 var QUESTIONS = [{"c":"RETARD","q":"QUI ARRIVE TOUJOURS EN RETARD ?","f":["keumart"]},{"c":"RETARD","q":"QUI RATERAIT SA PROPRE ENTRÉE EN SCÈNE ?"},{"c":"RETARD","q":"QUI ARRIVE EN PREMIER AVANT LE SHOW ?","f":["lea"]},{"c":"RETARD","q":"QUI ARRIVE EN PREMIER ET PART EN DERNIER ?","f":["lea"]},{"c":"RETARD","q":"QUI SE PRÉPARE LE PLUS LENTEMENT ?"},{"c":"RÂLER","q":"QUI RÂLE LE PLUS EN COULISSES ?","f":["olivier","olivier"]},{"c":"RÂLER","q":"QUI RÉPOND LE PLUS MAL LE MATIN ?"},{"c":"RÂLER","q":"QUI RÂLE POUR RIEN ?","f":["olivier","olivier"]},{"c":"RÂLER","q":"QUI PREND LA MOUCHE LE PLUS VITE ?","f":["keumart"]},{"c":"RÂLER","q":"QUI RÉPOND DU TAC AU TAC ?","f":["lea"]},{"c":"RÂLER","q":"QUI NE FAUT SURTOUT PAS EMBÊTER ?","f":["lea"]},{"c":"COSTUMES","q":"QUI A LE PLUS BEAU COSTUME ?"},{"c":"COSTUMES","q":"QUI A LE COSTUME LE PLUS DIFFICILE À ENFILER ?"},{"c":"COSTUMES","q":"QUI CHANGE DE COSTUME LE PLUS VITE ?"},{"c":"COSTUMES","q":"QUI SE TROMPERAIT DE COSTUME ?"},{"c":"COSTUMES","q":"QUI A LE PLUS DE PEINE À DÉFAIRE SA PERRUQUE ?"},{"c":"COSTUMES","q":"QUI A LE MEILLEUR COL ROULÉ ?","f":["olivier"]},{"c":"ÂGE","q":"QUI FERAIT LE MEILLEUR GRAND-PARENT ?"},{"c":"ÂGE","q":"QUI SERAIT UNE MAMIE OU UN PAPI GÂTEAU ?"},{"c":"ÂGE","q":"QUI SERAIT LE GRAND-PARENT LE PLUS FOU ?"},{"c":"ÂGE","q":"QUI A UNE ÂME DE GRAND-PARENT ?"},{"c":"ÂGE","q":"QUI FAIT LE PLUS JEUNE POUR SON ÂGE ?","f":["keumart"]},{"c":"CHANT","q":"QUI CHANTE LE MIEUX ?"},{"c":"CHANT","q":"QUI CHANTE LE MOINS BIEN ?"},{"c":"CHANT","q":"QUI CHANTE FAUX ET S'EN FICHE ?"},{"c":"CHANT","q":"QUI CHANTE SOUS LA DOUCHE ?"},{"c":"DANSE","q":"QUI DANSE LE MIEUX ?"},{"c":"DANSE","q":"QUI A DEUX PIEDS GAUCHES ?"},{"c":"DANSE","q":"QUI DANSERAIT TOUTE LA NUIT ?"},{"c":"LOGES","q":"QUI SE TROUVE SOUVENT DANS LA MAUVAISE LOGE ?","f":["keumart"]},{"c":"LOGES","q":"QUI A LE PLUS DE DÉSORDRE DANS SA LOGE ?"},{"c":"LOGES","q":"QUI SQUATTE LA LOGE DES AUTRES ?"},{"c":"LOGES","q":"QUI S'ÉTALE LE PLUS DANS LES LOGES ?","f":["lea"]},{"c":"LOGES","q":"QUI RACONTE LES MEILLEURS POTINS ?"},{"c":"LOGES","q":"QUI SE RASE ET SE MAQUILLE DANS LES LOGES ?","f":["keumart"]},{"c":"LOGES","q":"QUI FAIT DES POMPES DANS LES LOGES ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI FAIT DU SPORT TOUS LES JOURS ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI TIENDRAIT UN MARATHON ?"},{"c":"SPORT","q":"QUI A LE PLUS DE SUCCÈS EN TENUE DE POMPIER ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI LÂCHERAIT LE PREMIER UN MARATHON ?"},{"c":"MANGER","q":"QUI MANGE LE PLUS EN COULISSES ?"},{"c":"MANGER","q":"QUI SERAIT VÉGAN SI C'ÉTAIT FACILE ?"},{"c":"MANGER","q":"QUI MANGE SANS GLUTEN ET SANS LACTOSE ?","f":["keumart"]},{"c":"MANGER","q":"QUI BOIT LE PLUS DE CAFÉ ?"},{"c":"MANGER","q":"QUI BOIT LE PLUS DE MORESQUE ?","f":["lea","pierre"]},{"c":"MANGER","q":"QUI SERAIT AU BAR EN PREMIER APRÈS LE SHOW ?"},{"c":"SCÈNE","q":"QUI A LE PLUS GROS TRAC ?"},{"c":"SCÈNE","q":"QUI OUBLIE SON TEXTE ?"},{"c":"SCÈNE","q":"QUI IMPROVISE QUAND ÇA SE PASSE MAL ?"},{"c":"SCÈNE","q":"QUI RIT LE PLUS FORT SUR SCÈNE ?"},{"c":"SCÈNE","q":"QUI FAIT CRAQUER SES COLLÈGUES SUR SCÈNE ?"},{"c":"SCÈNE","q":"QUI CHARME LE PLUS LE PUBLIC ?"},{"c":"SCÈNE","q":"QUI VOLE LA VEDETTE À TOUT LE MONDE ?"},{"c":"SCÈNE","q":"QUI A PEUR DE SE TROMPER ?","f":["catherine"]},{"c":"SCÈNE","q":"QUI SE PERD SOUS LES SPOTS ?","f":["catherine"]},{"c":"SCÈNE","q":"QUI DIT DES PHRASES QUI NE SONT PAS LES SIENNES ?","f":["catherine"]},{"c":"TECH","q":"QUI GÈRE TOUTE LA TECHNIQUE ?","f":["lea"]},{"c":"TECH","q":"QUI JOUE LE PLUS D'INSTRUMENTS ?","f":["lea"]},{"c":"TECH","q":"QUI FAIT DES BRUITS AVEC SA BOUCHE ?","f":["keumart"]},{"c":"VIE","q":"QUI EST LA PERSONNE LA PLUS BIENVEILLANTE ?","f":["catherine"]},{"c":"VIE","q":"QUI TAQUINE TOUT LE MONDE ?","f":["karim"]},{"c":"VIE","q":"QUI A TOUJOURS DU STYLE ?","f":["lea"]},{"c":"VIE","q":"QUI FAIT LE PLUS DE BLAGUES ?","f":["karim"]},{"c":"VIE","q":"QUI S'ENDORMIRAIT PENDANT LE SPECTACLE ?"},{"c":"VIE","q":"QUI VOYAGE LE MIEUX ?"},{"c":"VIE","q":"QUI OUBLIE SON TÉLÉPHONE PARTOUT ?"},{"c":"VIE","q":"QUI SURVIVRAIT LE MIEUX SUR UNE ÎLE DÉSERTE ?"},{"c":"VIE","q":"QUI DIRIGERAIT LE MIEUX LA REVUE ?"},{"c":"PATRON","q":"QUI EST L'AMOUR VIRTUEL DE LÉA ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI DIRIGE VRAIMENT LA REVUE ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI A LE PLUS DE SUCCÈS EN PERRUQUE ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI VIENT FAIRE LE CON DANS LES LOGES ?","f":["jeanluc"],"boss":true},{"c":"CAFÉ","q":"QUI LAISSE TOUJOURS LA CAPSULE DANS LA MACHINE ?","f":["cuche","cuche","cuche"]},{"c":"CAFÉ","q":"QUI EST RESPONSABLE DU CAFÉ QUI COLLE ?","f":["cuche","cuche"]},{"c":"CAFÉ","q":"QUI A LA FAUTE QUAND QUELQUE CHOSE CLOCHE ?","f":["cuche","cuche"]},{"c":"CAFÉ","q":"QUI LAISSE TRAÎNER SES AFFAIRES PARTOUT ?","f":["cuche"]},{"c":"CAFÉ","q":"QUI VIDE LA MACHINE À CAFÉ APRÈS USAGE ?"},{"c":"SCÈNE","q":"QUI RATE SON ENTRÉE EN BOSSANT SUR AUTRE CHOSE ?","f":["cuche","cuche"]},{"c":"SCÈNE","q":"QUI EST EN COULISSES QUAND ON LUI OUVRE LE MICRO ?","f":["cuche"]},{"c":"SCÈNE","q":"QUI N'EST JAMAIS CONCENTRÉ AVANT SON PASSAGE ?","f":["cuche"]},{"c":"SCÈNE","q":"QUI REVIENDRA FORCÉMENT UN JOUR ?","f":["cuche","cuche"]},{"c":"AFTER","q":"QUI RESTE LE PLUS TARD AUX AFTERS ?"},{"c":"AFTER","q":"QUI FERME LE BAR DU CONTRETEMPS ?"},{"c":"AFTER","q":"QUI GAGNE L'AFTER EN RESTANT LE DERNIER ?"},{"c":"AFTER","q":"QUI SE FAIT SERVIR LE DERNIER VERRE ?"},{"c":"PATRON","q":"QUI FORME UN DUO AVEC BARBEZA ?","f":["cuche","cuche"],"boss":true},{"c":"SCÈNE","q":"QUI A PEUR DE TOMBER SUR LA TOURNETTE ?","f":["veronique","veronique"]},{"c":"SCÈNE","q":"QUI DEMANDE DES ESCALIERS POUR MONTER SUR SCÈNE ?","f":["veronique"]},{"c":"SCÈNE","q":"QUI A DEMANDÉ 20 FOIS D'ARRÊTER LA TOURNETTE ?","f":["veronique"]},{"c":"SCÈNE","q":"QUI EST CENSÉ NE JAMAIS SE TROMPER DE TEXTE ?","f":["veronique"]},{"c":"SCÈNE","q":"QUI FERAIT LA MEILLEURE FÉE DU MAL ?","f":["veronique"]},{"c":"SCÈNE","q":"QUI A UN LOOK DE FAMILLE ADDAMS ?","f":["veronique"]},{"c":"VIE","q":"QUI RENVOIE TOUJOURS LA RÉPLIQUE QUI TUE ?","f":["veronique","lea"]},{"c":"VIE","q":"QUI APPORTE UN THERMOS DE CAFÉ ?","f":["veronique"]},{"c":"VIE","q":"QUI EST LA PERSONNE LA PLUS PETITE ?","f":["veronique"]},{"c":"VIE","q":"QUI EST LA PERSONNE LA PLUS EXPÉRIMENTÉE ?","f":["veronique"]},{"c":"VIE","q":"QUI RÉPOND LE PLUS SEC QUAND ON L'ENNUIE ?","f":["veronique","lea"]},{"c":"VIE","q":"QUI A FAIT LA REVUE DE NEUCHÂTEL ?","f":["veronique","catherine","david","jenny"]},{"c":"VIE","q":"QUI ORGANISE LA REVUE DE NEUCHÂTEL ?","f":["david"]},{"c":"VIE","q":"QUI GAGNE LE PLUS D'ARGENT DANS LA REVUE ?"},{"c":"VIE","q":"QUI GAGNE LE MOINS D'ARGENT DANS LA REVUE ?","f":["keumart","lea"]},{"c":"SCÈNE","q":"QUI ALLONGE TOUJOURS SES SKETCHS ?","f":["pierre","pierre"]},{"c":"SCÈNE","q":"QUI INVENTE DES CHOSES EN PLEIN SKETCH ?","f":["pierre","pierre"]},{"c":"SCÈNE","q":"QUI GARDE SON PERSONNAGE MÊME EN COULISSES ?","f":["pierre"]},{"c":"SCÈNE","q":"QUI N'ARRIVE PAS À DIRE LE TEXTE TEL QUEL ?","f":["pierre"]},{"c":"SCÈNE","q":"QUI A LE PERSONNAGE LE PLUS BURLESQUE ?","f":["pierre"]},{"c":"SCÈNE","q":"QUI DIVISE : ON ADORE OU ON DÉTESTE ?","f":["pierre"]},{"c":"VIE","q":"QUI EST UNE LÉGENDE DU MILIEU ?","f":["pierre"]},{"c":"VIE","q":"QUI NE CONNAÎT-ON QUE PAR SES PERSONNAGES ?","f":["pierre"]},{"c":"VIE","q":"QUI TAQUINE TOUJOURS OLIVIER ?","f":["pierre","lea"]},{"c":"VIE","q":"QUI SE CHAMAILLE TOUT LE TEMPS POUR RIRE ?","f":["pierre","olivier"]},{"c":"COSTUMES","q":"QUI FAIT TOUS LES COSTUMES ?","f":["virginie","virginie"]},{"c":"COSTUMES","q":"QUI A LES IDÉES LES PLUS FOLLES POUR LES COSTUMES ?","f":["virginie"]},{"c":"COSTUMES","q":"QUI RÉPARE LES COSTUMES EN URGENCE ?","f":["virginie"]},{"c":"VIE","q":"QUI EST UN PETIT CŒUR ?","f":["virginie","catherine"]},{"c":"VIE","q":"QUI EST LA PERSONNE LA PLUS MIGNONNE ?","f":["virginie","catherine"]},{"c":"VIE","q":"QUI EST EN COUPLE AVEC PIERRE ?","f":["virginie","virginie"]},{"c":"SCÈNE","q":"QUI FAIT LE PETIT CHEF ?","f":["karim","karim"]},{"c":"SCÈNE","q":"QUI ÉCRIT LES SKETCHS CETTE ANNÉE ?","f":["karim","karim"]},{"c":"SCÈNE","q":"QUI MET EN SCÈNE LE SPECTACLE ?","f":["karim","karim"]},{"c":"SCÈNE","q":"QUI EST MIME ?","f":["karim","karim"]},{"c":"SCÈNE","q":"QUI CRIE LE PLUS FORT DANS SES PERSONNAGES ?","f":["karim"]},{"c":"SCÈNE","q":"QUI EN REMET TOUJOURS UNE COUCHE ?","f":["karim","pierre"]},{"c":"SCÈNE","q":"QUI EST HILARANT EN POLITICIEN ?","f":["karim"]},{"c":"SCÈNE","q":"QUI FAIT TOUT POUR FAIRE RIRE, MÊME QUAND ÇA NE MARCHE PAS ?","f":["karim","pierre"]},{"c":"CHANT","q":"QUI A DU MAL À TROUVER LA NOTE ?","f":["karim"]},{"c":"CHANT","q":"QUI CHANTE JUSTE SEULEMENT PARFOIS ?","f":["karim"]},{"c":"VIE","q":"QUI DONNE DES NOTES QUE PERSONNE NE SUIT ?","f":["karim"]},{"c":"VIE","q":"QUI SE FAIT ENVOYER DES VANNES TOUT LE TEMPS ?","f":["karim","keumart"]},{"c":"VIE","q":"QUI EST HYPER CHOU AU QUOTIDIEN ?","f":["karim","catherine"]},{"c":"VIE","q":"QUI N'A PAS BESOIN DE COIFFEUR ?","f":["karim"]},{"c":"PATRON","q":"QUI SE CHAMAILLE SUR LES NOTES AVEC LA DIRECTION ?","f":["karim","jeanluc"],"boss":true},{"c":"RÂLER","q":"QUI RÂLE TOUT LE TEMPS ?","f":["olivier","olivier","olivier"]},{"c":"RÂLER","q":"QUI SE VEXE LE PLUS VITE ?","f":["olivier","olivier","keumart"]},{"c":"RÂLER","q":"QUI PROPOSE DES IDÉES QUI SE FONT REFUSER ?","f":["olivier","olivier"]},{"c":"RÂLER","q":"QUI SE FAIT DIRE NON PAR LA DIRECTION ?","f":["olivier"]},{"c":"VIE","q":"QUI FAIT TOUJOURS DU BRUIT ?","f":["olivier","olivier"]},{"c":"VIE","q":"QUI COURT DANS TOUS LES SENS ?","f":["olivier"]},{"c":"VIE","q":"QUI DEMANDE TOUJOURS DE L'ATTENTION ?","f":["olivier","olivier"]},{"c":"VIE","q":"QUI PREND LE PLUS D'ÉNERGIE AUX AUTRES ?","f":["olivier"]},{"c":"TECH","q":"QUI JOUE DU TROMBONE ?","f":["olivier","olivier"]},{"c":"TECH","q":"QUI FAIT DEVINER DES CHANSONS AU TROMBONE ?","f":["olivier","olivier"]},{"c":"COSTUMES","q":"QUI A DES HABITS ASSORTIS JUSQU'AUX CHAUSSETTES ?","f":["olivier","olivier"]},{"c":"COSTUMES","q":"QUI A LE COSTUME LE PLUS SURPRENANT ?","f":["olivier"]},{"c":"COSTUMES","q":"QUI ÉTAIT LE BONHOMME EN MOUSSE ?","f":["olivier"]},{"c":"CHANT","q":"QUI A UN NOM DE RAPPEUR ?","f":["david","david"]},{"c":"CHANT","q":"QUI REPREND DES TUBES À LA VAUDOISE ?","f":["david","david"]},{"c":"CHANT","q":"QUI A FAIT LA CHANSON DU PAPÉ VAUDOIS ?","f":["david","david"]},{"c":"CHANT","q":"QUI A TRANSFORMÉ UN TUBE EN CHANSON SUR LA RACLETTE ?","f":["david","david"]},{"c":"CHANT","q":"QUI FAIT DES REPRISES UN PEU BEAUF QUI MARCHENT ?","f":["david"]},{"c":"DANSE","q":"QUI ÉTAIT DANSEUR OU DANSEUSE HIP-HOP ?","f":["david"]},{"c":"VIE","q":"QUI A UN ACCENT NEUCHÂTELOIS ?","f":["david","david"]},{"c":"VIE","q":"QUI A UNE VOITURE PIMPÉE AVEC DES STICKERS ?","f":["david","david"]},{"c":"VIE","q":"QUI EST UN BEAU GOSSE ?","f":["david","keumart","jenny"]},{"c":"VIE","q":"QUI SE LAISSE ALLER ENTRE DEUX REVUES ?","f":["david"]},{"c":"VIE","q":"QUI TIENT LE MICRO COMME UN VRAI MC ?","f":["david"]},{"c":"PATRON","q":"QUI DIT NON QUAND ON PROPOSE UNE IDÉE ?","f":["jeanluc","jeanluc","jeanluc"],"boss":true},{"c":"PATRON","q":"QUI ÉCOUTE TOUJOURS PUIS DIT NON ?","f":["jeanluc","jeanluc"],"boss":true},{"c":"PATRON","q":"QUI A DU MAL À DONNER DES ORDRES ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI GÈRE TOUTES LES REVUES ?","f":["jeanluc","jeanluc"],"boss":true},{"c":"PATRON","q":"QUI A LE PLUS GROS NOM SUR L'AFFICHE ?","f":["jeanluc","jeanluc"],"boss":true},{"c":"PATRON","q":"QUI EST TOUJOURS PRÉSENT SANS ÊTRE LÀ ?","f":["jeanluc","cuche"],"boss":true},{"c":"PATRON","q":"QUI MET TOUT EN SCÈNE ?","f":["jeanluc","karim"],"boss":true},{"c":"PATRON","q":"QUI ENCHAÎNE CONFÉRENCES, REVUE ET AFTERS ?","f":["jeanluc","jeanluc"],"boss":true},{"c":"PATRON","q":"QUI FAIT LES AFTERS MÊME PENDANT LE MONTREUX COMÉDIE ?","f":["jeanluc","jeanluc"],"boss":true},{"c":"CHANT","q":"QUI CHANTE LE PLUS FORT ?","f":["jenny","jenny"]},{"c":"CHANT","q":"QUI CHANTE JUSTE MAIS PAS TOUJOURS EN RYTHME ?","f":["jenny","jenny"]},{"c":"CHANT","q":"QUI FAIT VIBRER LE CHAPITEAU AVEC SA VOIX ?","f":["jenny","jenny"]},{"c":"CHANT","q":"QUI A DÉJÀ JOUÉ DANS UNE COMÉDIE MUSICALE ?","f":["jenny"]},{"c":"SCÈNE","q":"QUI A LA PLUS BELLE ROBE DU SPECTACLE ?","f":["jenny","jenny"]},{"c":"SCÈNE","q":"QUI ATTEND LE PLUS ENTRE DEUX SKETCHS ?","f":["jenny"]},{"c":"VIE","q":"QUI OUBLIE D'ÉTEINDRE LA LUMIÈRE DE SON MIROIR ?","f":["jenny","jenny","jenny"]},{"c":"VIE","q":"QUI ATTRAPE TOUS LES RHUMES ?","f":["jenny"]}];
 
-/* ---------- vote game: "qui est le plus susceptible de..." (demo with simulated voters) ----------
-   Add questions in QUESTIONS above: { c: 'CATEGORIE', q: 'QUESTION NEUTRE (SANS ACCORD M/F), MAJUSCULES, 4 LIGNES DE 20 LETTRES MAX', f: ['id des favoris pour la simulation'], boss: true si elle ne sort qu'avec Jean-Luc }. */
-var VOTE_ROUNDS = 8, VOTE_TIME = 15000;
+/* ---------- vote game: "qui est le plus susceptible de..." ----------
+   Round types: v (vote), rare (le moins cité gagne), duo (choisir 2 persos), tf (vrai/faux), who (devine qui, indices),
+   gage (un vote normal suivi d'un gage). Add questions in QUESTIONS above: { c: 'CATEGORIE', q: 'QUESTION NEUTRE (SANS ACCORD M/F), MAJUSCULES, 4 LIGNES DE 20 LETTRES MAX', f: ['id des favoris pour la simulation'], boss: true si elle ne sort qu'avec Jean-Luc }.
+   Special rounds live in SPECIAL below; gages in GAGES. */
+var VOTE_TIME = 15000;
 var BTN_V = { x: 30, y: 226, w: 120, h: 24 }, BTN_BACK2 = { x: 48, y: 292, w: 84, h: 22 };
+var BTN_JK = { x: 108, y: 254, w: 66, h: 18 }, BTN_VRAI = { x: 8, y: 96, w: 78, h: 70 }, BTN_FAUX = { x: 94, y: 96, w: 78, h: 70 };
 var vg = null, lb = null;
+var SPECIAL = {
+  duo: [
+    { q: 'QUEL EST LE PLUS BEAU COUPLE ?', f: ['karim', 'catherine'] },
+    { q: 'QUEL DUO FERAIT LE MEILLEUR SKETCH ?', f: ['pierre', 'olivier'] },
+    { q: 'QUEL DUO BOIT LE PLUS DE MORESQUE ?', f: ['lea', 'pierre'] },
+    { q: 'QUEL DUO SE CHAMAILLE LE PLUS ?', f: ['pierre', 'olivier'] },
+    { q: 'QUEL DUO CHANTERAIT LE MIEUX ?', f: ['jenny', 'keumart'] },
+    { q: 'QUEL DUO FAIT LES PLUS BEAUX POMPIERS ?', f: ['keumart', 'david'] },
+    { q: 'QUEL DUO FERAIT UN BON GROUPE DE MUSIQUE ?', f: ['lea', 'keumart'] }
+  ],
+  tf: [
+    { q: 'LÉA JOUE DU VIOLON.', a: 'T' },
+    { q: 'DAVID A ÉTÉ DANSEUR DE HIP-HOP.', a: 'T' },
+    { q: "OLIVIER JOUAIT DU TROMBONE L'AN DERNIER.", a: 'T' },
+    { q: "LE NOM DE JEAN-LUC EST LE PLUS PETIT SUR L'AFFICHE.", a: 'F' },
+    { q: 'VÉRONIQUE ADORE LA TOURNETTE.', a: 'F' },
+    { q: "C'EST TOUJOURS LA FAUTE À CUCHE.", a: 'T' },
+    { q: 'VIRGINIE FAIT TOUS LES COSTUMES.', a: 'T' },
+    { q: "KEUMART JOUAIT LE POMPIER L'AN DERNIER.", a: 'F' },
+    { q: 'LÉA ET PIERRE BOIVENT DE LA MORESQUE.', a: 'T' },
+    { q: 'LA REVUE EST À SA 8E ÉDITION.', a: 'T' },
+    { q: 'LA PREMIÈRE A LIEU LE 6 DÉCEMBRE.', a: 'F' },
+    { q: 'JENNY CHANTE TRÈS FORT.', a: 'T' },
+    { q: 'DAVID ORGANISE LA REVUE NEUCHÂTELOISE.', a: 'T' },
+    { q: 'KARIM ÉCRIT LES SKETCHS CETTE ANNÉE.', a: 'T' },
+    { q: 'LE CHAPITEAU EST AU PORT DE TERRITET.', a: 'T' },
+    { q: 'LA DERNIÈRE EST LE 31 DÉCEMBRE.', a: 'F' },
+    { q: 'PIERRE ET OLIVIER NE SE CHAMAILLENT JAMAIS.', a: 'F' },
+    { q: 'LÉA NE JOUE QUE DE LA BATTERIE.', a: 'F' }
+  ],
+  who: [
+    { a: 'lea', cl: ['GÈRE ABLETON', 'ARRIVE EN PREMIER', 'MANTEAU ORANGE'] },
+    { a: 'olivier', cl: ['A JOUÉ DU TROMBONE', 'LOOK TOUT ASSORTI', 'SE VEXE VITE'] },
+    { a: 'david', cl: ['VOITURE AUTOCOLLANTS', 'PARODIES AU FROMAGE', 'ALIAS MC ROGER'] },
+    { a: 'veronique', cl: ['THERMOS DE CAFÉ', 'DEMANDE UN ESCALIER', 'PEUR DE LA TOURNETTE'] },
+    { a: 'jenny', cl: ['MIROIR LAISSÉ ALLUMÉ', 'RYTHME, CONNAIT PAS', 'CHANTE TRÈS FORT'] },
+    { a: 'karim', cl: ['DONNE DES NOTES', 'ÉCRIT LES SKETCHS', 'FAIT DU MIME'] },
+    { a: 'pierre', cl: ['VIENT DE FRANCE', 'BOIT DE LA MORESQUE', 'LÀ DEPUIS LE DÉBUT'] },
+    { a: 'keumart', cl: ['DANS LA LOGE DU LOVE', 'FAIT DU BEATBOX', 'TOUJOURS EN RETARD'] }
+  ]
+};
+var GAGES = [
+  'IMITE BARBEZA PENDANT 10 SECONDES', "PARLE AVEC L'ACCENT NEUCHÂTELOIS", 'RÂLE 10 SECONDES SUR RIEN',
+  'MIME TON PLUS GROS SKETCH', 'FAIS UN COMPLIMENT À TON VOISIN', 'CHANTE UN REFRAIN TOUT FAUX',
+  "OFFRE UN CAFÉ À QUELQU'UN", 'DIS "RACLER COMME JAMAIS" EN CHANTANT', 'FAIS TA PLUS BELLE RÉVÉRENCE',
+  'RACONTE UNE ANECDOTE DE LOGE', 'FAIS TA POSE DE POMPIER', 'FAIS UN DISCOURS SUR LE CAFÉ'
+];
 function wrapText(t, n) {
   var words = t.split(' '), out = [], cur = '';
   words.forEach(function (w) {
@@ -935,122 +985,313 @@ function wrapText(t, n) {
   });
   out.push(cur); return out;
 }
-function voteStart(simVoters) {
-  var pool = QUESTIONS.filter(function (q) { return !q.boss || bossUnlocked; }), qs = [];
-  while (qs.length < VOTE_ROUNDS && pool.length) qs.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-  vg = { cand: candList(), sim: simVoters, qs: qs, idx: 0, phase: 'ask', pick: -1, t0: performance.now(), score: 0, recv: [], counts: [], mine: -1, pts: 0, winners: [], revT: 0 };
-  for (var i = 0; i < ROSTER.length; i++) vg.recv.push(0);
+function takeOne(pool) { return pool.splice(Math.floor(Math.random() * pool.length), 1)[0]; }
+function buildRounds() {
+  var pool = QUESTIONS.filter(function (q) { return !q.boss || bossUnlocked; }), tf = SPECIAL.tf.slice(), duo = SPECIAL.duo.slice(), who = SPECIAL.who.slice(), gg = GAGES.slice();
+  var plan = ['v', 'v', 'tf', 'vg', 'rare', 'duo', 'who', 'v', 'tf', 'vg'], out = [];
+  plan.forEach(function (k) {
+    var r, x;
+    if (k === 'tf' && tf.length) { x = takeOne(tf); r = { c: 'VRAI/FAUX', q: x.q, t: 'tf', a: x.a }; }
+    else if (k === 'duo' && duo.length) { x = takeOne(duo); r = { c: 'DUO', q: x.q, t: 'duo', f: x.f }; }
+    else if (k === 'who' && who.length) { x = takeOne(who); r = { c: 'QUI EST-CE', q: 'QUI EST-CE ?', t: 'who', a: x.a, cl: x.cl }; }
+    else { x = takeOne(pool); r = { c: x.c, q: x.q, t: k === 'rare' ? 'rare' : 'v', f: x.f }; if (k === 'vg') r.g = takeOne(gg); }
+    out.push(r);
+  });
+  return out;
 }
-function voteCast() {
-  var n = ROSTER.length, w = [], tot = 0, i, k, cd = vg.cand;
-  for (i = 0; i < n; i++) { w.push(cd.indexOf(i) >= 0 ? Math.pow(Math.random(), 2.2) + 0.05 : 0); }
-  for (k = 0; k < 2; k++) w[cd[Math.floor(Math.random() * cd.length)]] += 0.9;
-  (vg.qs[vg.idx].f || []).forEach(function (fid) { for (var fi = 0; fi < n; fi++) if (ROSTER[fi].id === fid && cd.indexOf(fi) >= 0) w[fi] += 1.8; });
-  for (i = 0; i < n; i++) tot += w[i];
-  var counts = []; for (i = 0; i < n; i++) counts.push(0);
-  for (k = 0; k < vg.sim; k++) {
-    var r = Math.random() * tot, a = 0;
-    for (i = 0; i < n; i++) { a += w[i]; if (r <= a) { counts[i]++; break; } }
+function parseVote(s) {
+  s = String(s || ''); var star = s.charAt(s.length - 1) === '*'; if (star) s = s.slice(0, -1);
+  var st = 0, at = s.indexOf('@'); if (at >= 0) { st = +s.slice(at + 1) || 0; s = s.slice(0, at); }
+  return { ids: s.split('+'), star: star, st: st, v: s };
+}
+function zeros() { var a = [], i; for (i = 0; i < ROSTER.length; i++) a.push(0); return a; }
+function scoreRound(r, votes) {
+  var t = r.t || 'v', keys = Object.keys(votes || {}), o = { t: t, pts: {}, counts: zeros(), winners: [], pairs: [], winPairs: [], tf: { T: 0, F: 0 }, n: keys.length }, pv = {}, i, mx = 0, mn = 1e9;
+  keys.forEach(function (k) { pv[k] = parseVote(votes[k]); });
+  if (t === 'tf') {
+    keys.forEach(function (k) { o.tf[pv[k].v === 'T' ? 'T' : 'F']++; o.pts[k] = (pv[k].v === r.a ? 100 : 0) * (pv[k].star ? 2 : 1); });
+    return o;
   }
-  vg.mine = vg.pick;
-  if (vg.mine >= 0) counts[vg.mine]++;
-  var mx = Math.max.apply(null, counts), winners = [];
-  for (i = 0; i < n; i++) if (counts[i] === mx && mx > 0) winners.push(i);
-  vg.counts = counts; vg.winners = winners;
-  vg.pts = (vg.mine >= 0 && winners.indexOf(vg.mine) >= 0) ? 100 : 0;
-  vg.score += vg.pts;
-  for (i = 0; i < n; i++) vg.recv[i] += counts[i];
-  vg.phase = 'reveal'; vg.revT = performance.now();
+  if (t === 'duo') {
+    var pc = {};
+    keys.forEach(function (k) {
+      pv[k].key = pv[k].ids.slice().sort().join('+'); pc[pv[k].key] = (pc[pv[k].key] || 0) + 1;
+      pv[k].ids.forEach(function (id) { var x = rosterIdx(id); if (x >= 0) o.counts[x]++; });
+    });
+    o.pairs = Object.keys(pc).map(function (key) { return { key: key, n: pc[key] }; }).sort(function (a, b) { return b.n - a.n || (a.key < b.key ? -1 : 1); });
+    mx = o.pairs.length ? o.pairs[0].n : 0;
+    o.winPairs = o.pairs.filter(function (p) { return p.n === mx; }).map(function (p) { return p.key.split('+'); });
+    keys.forEach(function (k) {
+      var best = 0; o.winPairs.forEach(function (w) { var m = pv[k].ids.filter(function (id) { return w.indexOf(id) >= 0; }).length; best = Math.max(best, m === 2 ? 100 : (m === 1 ? 40 : 0)); });
+      o.pts[k] = best * (pv[k].star ? 2 : 1);
+    });
+    return o;
+  }
+  keys.forEach(function (k) { var x = rosterIdx(pv[k].ids[0]); if (x >= 0) o.counts[x]++; });
+  for (i = 0; i < o.counts.length; i++) { if (o.counts[i] > mx) mx = o.counts[i]; if (o.counts[i] > 0 && o.counts[i] < mn) mn = o.counts[i]; }
+  if (t === 'who') {
+    o.winners = [rosterIdx(r.a)];
+    keys.forEach(function (k) { o.pts[k] = (pv[k].ids[0] === r.a ? [150, 100, 60][Math.min(2, pv[k].st)] : 0) * (pv[k].star ? 2 : 1); });
+    return o;
+  }
+  var target = t === 'rare' ? mn : mx, base = t === 'rare' ? 150 : 100;
+  for (i = 0; i < o.counts.length; i++) if (target > 0 && target < 1e9 && o.counts[i] === target) o.winners.push(i);
+  keys.forEach(function (k) { var x = rosterIdx(pv[k].ids[0]); o.pts[k] = (x >= 0 && o.winners.indexOf(x) >= 0 ? base : 0) * (pv[k].star ? 2 : 1); });
+  return o;
+}
+function recompute(last, votesAt, me, pkeys, pinfo) {
+  var score = {}, recv = zeros(), titles = [], hist = [], fans = [], j, k, i, myc = pinfo && pinfo[me] ? pinfo[me].c : '';
+  pkeys.forEach(function (q) { score[q] = 0; });
+  for (j = 0; j <= last; j++) {
+    var r = vg.qs[j], vs = votesAt(j) || {}, o = scoreRound(r, vs), t = r.t || 'v';
+    for (k in o.pts) score[k] = (score[k] || 0) + o.pts[k];
+    if (t === 'v' || t === 'rare' || t === 'duo') for (i = 0; i < recv.length; i++) recv[i] += o.counts[i];
+    if (t === 'v') {
+      var bi = -1, bn = 0; for (i = 0; i < o.counts.length; i++) if (o.counts[i] > bn) { bn = o.counts[i]; bi = i; }
+      if (bi >= 0) titles.push({ q: r.q, ci: bi, n: bn });
+    }
+    if (pinfo && myc && (t === 'v' || t === 'rare' || t === 'duo')) {
+      var fw = []; for (k in vs) if (k !== me && parseVote(vs[k]).ids.indexOf(myc) >= 0) fw.push(k);
+      if (fw.length) fans.push({ j: j, who: fw });
+    }
+    hist[j] = o;
+  }
+  vg.hist = hist; vg.score = score[me] || 0; vg.scoreMap = score; vg.recv = recv; vg.titles = titles; vg.fans = fans;
+  vg.rr = (vg.phase !== 'ask' && hist[vg.idx]) ? hist[vg.idx] : null;
+  var mv = vg.rr ? (votesAt(vg.idx) || {})[me] : null;
+  vg.myv = mv || null; vg.pts = vg.rr && vg.rr.pts[me] ? vg.rr.pts[me] : 0;
+}
+function voteStart(simVoters) {
+  vg = { net: false, cand: candList(), sim: simVoters, qs: buildRounds(), idx: 0, phase: 'ask', pick: -1, picks: [], tf: '', jk: false, jokerUsed: false, votes: [], pg: 0, t0: performance.now(), revT: 0, newBoss: false, score: 0, recv: zeros(), titles: [], fans: [], rr: null, pts: 0, myv: null };
+}
+function simSampler() {
+  var n = ROSTER.length, w = [], tot = 0, i, k, cd = vg.cand, r = vg.qs[vg.idx];
+  for (i = 0; i < n; i++) w.push(cd.indexOf(i) >= 0 ? Math.pow(Math.random(), 2.2) + 0.05 : 0);
+  for (k = 0; k < 2; k++) w[cd[Math.floor(Math.random() * cd.length)]] += 0.9;
+  (r.f || []).forEach(function (fid) { var fi = rosterIdx(fid); if (fi >= 0 && cd.indexOf(fi) >= 0) w[fi] += 1.8; });
+  for (i = 0; i < n; i++) tot += w[i];
+  return function (not) {
+    var tries = 0, x, rr, a;
+    do { rr = Math.random() * tot; a = 0; x = cd[0]; for (i = 0; i < n; i++) { a += w[i]; if (rr <= a) { x = i; break; } } tries++; } while (x === not && tries < 20);
+    return x;
+  };
+}
+function simVotes(r, n) {
+  var t = r.t || 'v', out = [], s = simSampler(), k, x, y;
+  for (k = 0; k < n; k++) {
+    if (t === 'tf') out.push(Math.random() < 0.72 ? r.a : (r.a === 'T' ? 'F' : 'T'));
+    else if (t === 'duo') {
+      if (r.f && r.f.length === 2 && Math.random() < 0.55) out.push(r.f.slice().sort().join('+'));
+      else { x = s(-1); y = s(x); out.push([ROSTER[x].id, ROSTER[y].id].sort().join('+')); }
+    } else if (t === 'who') { x = Math.random() < 0.72 ? rosterIdx(r.a) : s(-1); out.push(ROSTER[x].id + '@' + Math.floor(Math.random() * 3)); }
+    else out.push(ROSTER[s(-1)].id);
+  }
+  return out;
+}
+function whoStage(tt) { var e = tt - vg.t0; return e < 5000 ? 0 : (e < 10000 ? 1 : 2); }
+function buildVote(tt) {
+  var r = vg.qs[vg.idx], t = r.t || 'v', s = '';
+  if (t === 'tf') s = vg.tf || '';
+  else if (t === 'duo') s = (vg.picks && vg.picks.length === 2) ? vg.picks.map(function (i) { return ROSTER[i].id; }).sort().join('+') : '';
+  else if (vg.pick >= 0) { s = ROSTER[vg.pick].id; if (t === 'who') s += '@' + whoStage(tt); }
+  if (s && vg.jk && !vg.jokerUsed) s += '*';
+  return s;
+}
+function castLocal(s) {
+  var r = vg.qs[vg.idx], votes = {};
+  if (s) { votes.me = s; if (s.charAt(s.length - 1) === '*') vg.jokerUsed = true; }
+  simVotes(r, vg.sim).forEach(function (v, i) { votes['s' + i] = v; });
+  vg.votes[vg.idx] = votes; vg.phase = 'reveal'; vg.revT = performance.now();
+  recompute(vg.idx, function (j) { return vg.votes[j]; }, 'me', ['me'], null);
   if (vg.pts) jingle(); else boop();
 }
-function voteTap(x, y) {
-  if (vg && vg.net) { netVoteTap(x, y); return; }
-  if (!vg) voteStart();
-  if (isPaused()) { pauseTap(x, y); return; }
-  if (inside(BTN_BACK2, x, y) && vg.phase !== 'end') { pauseOpen(); return; }
-  if (vg.phase === 'ask') {
-    for (var ti = 0; ti < vg.cand.length; ti++) { if (inside(voteTile(ti), x, y)) { vg.pick = vg.cand[ti]; blip(); return; } }
-    if (inside(BTN_V, x, y) && vg.pick >= 0) voteCast();
-  } else if (vg.phase === 'reveal') {
-    if (inside(BTN_V, x, y)) {
-      if (vg.idx + 1 >= vg.qs.length) { vg.phase = 'end'; vg.revT = performance.now(); jingle(); if (!bossUnlocked) { unlockBoss(); vg.newBoss = true; } }
-      else { vg.idx++; vg.phase = 'ask'; vg.pick = -1; vg.t0 = performance.now(); blip(); }
-    }
-  } else if (vg.phase === 'end') {
-    if (inside(BTN_E1, x, y)) { vg = null; lb.ready = false; blip(); }
-    else if (inside(BTN_E2, x, y)) { scene = 'select'; fadeT = performance.now(); boop(); }
+function nextLocal() {
+  if (vg.idx + 1 >= vg.qs.length) {
+    vg.phase = 'end'; vg.revT = performance.now(); vg.pg = 0; jingle();
+    if (!bossUnlocked) { unlockBoss(); vg.newBoss = true; }
+  } else {
+    vg.idx++; vg.phase = 'ask'; vg.pick = -1; vg.picks = []; vg.tf = ''; vg.jk = false; vg.t0 = performance.now(); blip();
+    recompute(vg.idx - 1, function (j) { return vg.votes[j]; }, 'me', ['me'], null);
   }
 }
+function submitVote() {
+  var s = buildVote(performance.now()); if (!s) return;
+  if (vg.net) netVote(s); else castLocal(s);
+}
+function endPages() { return vg.net ? [0, 1, 2, 3] : [0, 2]; }
+var PG_NAMES = ['SCORE', 'CLASSEMENT', 'TITRES', "QUI T'A VOTÉ"];
+function pgLabel() { var p = endPages(); return PG_NAMES[p[((vg.pg || 0) + 1) % p.length]]; }
+function gameTap(x, y) {
+  var isNet = vg.net, host = !isNet || (net && net.host);
+  if (isPaused()) { pauseTap(x, y); return; }
+  if (vg.phase !== 'end' && inside(BTN_BACK2, x, y)) { pauseOpen(); return; }
+  var r = vg.qs[vg.idx] || {}, t = r.t || 'v', ti;
+  if (vg.phase === 'ask') {
+    if (vg.voted) return;
+    if (t === 'tf') {
+      if (inside(BTN_VRAI, x, y)) { vg.tf = 'T'; blip(); return; }
+      if (inside(BTN_FAUX, x, y)) { vg.tf = 'F'; blip(); return; }
+    } else {
+      for (ti = 0; ti < vg.cand.length; ti++) {
+        if (inside(voteTile(ti), x, y)) {
+          var ci = vg.cand[ti];
+          if (t === 'duo') { var at = vg.picks.indexOf(ci); if (at >= 0) vg.picks.splice(at, 1); else { vg.picks.push(ci); if (vg.picks.length > 2) vg.picks.shift(); } }
+          else vg.pick = ci;
+          blip(); return;
+        }
+      }
+    }
+    if (!vg.jokerUsed && inside(BTN_JK, x, y)) { vg.jk = !vg.jk; blip(); return; }
+    if (inside(BTN_V, x, y) && buildVote(performance.now())) submitVote();
+  } else if (vg.phase === 'reveal') {
+    if (host && inside(BTN_V, x, y)) { if (isNet) netNext(); else nextLocal(); }
+  } else {
+    if (inside(BTN_PG, x, y)) { vg.pg = ((vg.pg || 0) + 1) % endPages().length; blip(); }
+    else if (inside(BTN_E1, x, y)) { if (!isNet) { vg = null; if (lb) lb.ready = false; blip(); } else if (net && net.host) netReplay(); }
+    else if (inside(BTN_E2, x, y)) { if (isNet) netLeave(true); else { vg = null; scene = 'select'; fadeT = performance.now(); boop(); } }
+  }
+}
+function voteTap(x, y) { if (!vg) voteStart(); gameTap(x, y); }
 function voteTile(k) { return { x: 5 + (k % 5) * 34, y: 88 + Math.floor(k / 5) * 34, w: 31, h: 30 }; }
-function votePanel(title, q) {
+function panelFor(r, tt) {
+  var t = r.t || 'v', n = (vg.idx + 1) + '/' + vg.qs.length, title, ls, hint = '';
+  if (t === 'who') {
+    var st = vg.phase === 'ask' ? whoStage(tt) : 2, cl = r.cl || [];
+    title = 'QUI EST-CE ? ' + n;
+    ls = [cl[0] || '', st >= 1 ? (cl[1] || '') : '? ? ?', st >= 2 ? (cl[2] || '') : '? ? ?', vg.phase === 'ask' ? 'INDICE ' + (st + 1) + '/3 : ' + [150, 100, 60][st] + ' PTS' : ''];
+    return { title: title, lines: ls, gold3: vg.phase === 'ask' };
+  }
+  title = t === 'rare' ? 'CONTRE-COURANT ' + n : (t === 'duo' ? 'DUO ' + n : (t === 'tf' ? 'VRAI OU FAUX ' + n : (r.g ? 'QUESTION GAGE ' + n : 'QUESTION ' + n)));
+  hint = t === 'rare' ? 'LE MOINS CITÉ GAGNE' : (t === 'duo' ? 'CHOISIS 2 PERSONNES' : '');
+  ls = wrapText(r.q, 20);
+  if (hint && ls.length <= 3) ls.push(hint);
+  return { title: title, lines: ls, hintLast: !!hint && ls.length > 1 };
+}
+function votePanel(pn) {
   R(P.gold, 6, 6, 168, 64); R(P.ink, 7, 7, 166, 62);
-  T(title, 90, 11, P.gold, 8, 'center');
-  var ls = wrapText(q, 20);
-  for (var i = 0; i < ls.length && i < 4; i++) T(ls[i], 90, 24 + i * 11, P.cream, 8, 'center');
+  T(pn.title, 90, 11, P.gold, 8, 'center');
+  for (var i = 0; i < pn.lines.length && i < 4; i++) {
+    var last = i === pn.lines.length - 1 && (pn.hintLast || pn.gold3);
+    T(pn.lines[i], 90, 24 + i * 11, last ? P.goldDim : P.cream, 8, 'center');
+  }
+}
+function pickLabel(r) {
+  var t = r.t || 'v';
+  if (t === 'tf') return vg.tf ? (vg.tf === 'T' ? 'VRAI' : 'FAUX') : 'VRAI OU FAUX ?';
+  if (t === 'duo') {
+    if (vg.picks.length === 2) return nm(ROSTER[vg.picks[0]]).slice(0, 7) + '+' + nm(ROSTER[vg.picks[1]]).slice(0, 7);
+    if (vg.picks.length === 1) return nm(ROSTER[vg.picks[0]]).slice(0, 8) + ' + ?';
+    return 'CHOISIS 2 PERSOS';
+  }
+  return vg.pick >= 0 ? nm(ROSTER[vg.pick]) : 'TOUCHE UN PERSO';
+}
+function drawAsk(t, tt, r) {
+  var i, ty = r.t || 'v', on = Math.floor(t / 250) % 2 === 0;
+  var left = Math.max(0, 1 - (tt - vg.t0) / VOTE_TIME);
+  R(P.ink, 6, 74, 168, 7); R(lerpCol('#d93a3a', '#3fbf6f', left), 7, 75, Math.round(166 * left), 5);
+  if (left <= 0 && !vg.net) { castLocal(''); return; }
+  if (ty === 'tf') {
+    [[BTN_VRAI, 'VRAI', 'T', '#2e8b57'], [BTN_FAUX, 'FAUX', 'F', '#b3202e']].forEach(function (b) {
+      var sel = vg.tf === b[2], bb = b[0];
+      R(sel ? (on ? P.gold : '#fff2b8') : '#4a2a1c', bb.x - 2, bb.y - 2, bb.w + 4, bb.h + 4);
+      R(b[3], bb.x, bb.y, bb.w, bb.h); R(shade(b[3], 0.65), bb.x, bb.y + bb.h - 6, bb.w, 6);
+      Tout(b[1], bb.x + bb.w / 2, bb.y + 26, P.cream, 16, '#2a0712', P.ink);
+    });
+  } else {
+    for (var ti = 0; ti < vg.cand.length; ti++) {
+      i = vg.cand[ti];
+      var rc = voteTile(ti), isSel = ty === 'duo' ? vg.picks.indexOf(i) >= 0 : i === vg.pick;
+      R(isSel ? (on ? P.gold : '#fff2b8') : '#4a2a1c', rc.x - 1, rc.y - 1, rc.w + 2, rc.h + 2);
+      R(isSel ? '#2a1220' : '#140c18', rc.x, rc.y, rc.w, rc.h);
+      c.save(); c.beginPath(); c.rect(rc.x, rc.y, rc.w, rc.h); c.clip();
+      drawChar(ROSTER[i], rc.x + rc.w / 2, rc.y + rc.h - 1, 1, false, 0);
+      c.restore();
+    }
+  }
+  var has = !!buildVote(tt);
+  R(P.gold, 28, 194, 124, 22); R(P.ink, 29, 195, 122, 20);
+  T(pickLabel(r), 90, 201, has || vg.pick >= 0 || vg.tf || vg.picks.length ? P.cream : P.goldDim, 8, 'center');
+  var sent = vg.net && vg.voted;
+  btn(BTN_V, sent ? 'VOTE ENVOYÉ' : 'VOTER !', sent ? '#6a7a3a' : (has ? '#2e8b57' : '#3a3f55'));
+  T('SCORE ' + vg.score, 8, 260, P.cream, 8, 'left', P.ink);
+  if (!vg.jokerUsed) btn(BTN_JK, 'JOKER x2', vg.jk ? '#d98a1f' : '#3a3f55');
+  if (vg.net) T('VOTES ' + Math.min(vg.nv, Math.max(vg.na, vg.nv)) + '/' + Math.max(vg.na, vg.nv), 90, 276, '#8d84b8', 8, 'center');
+  else T('(VOTANTS SIMULÉS : ' + vg.sim + ')', 90, 276, '#8d84b8', 8, 'center');
+  btn(BTN_BACK2, 'PAUSE', '#3a3f55');
+}
+function pairLabel(key) { return key.split('+').map(function (id) { var x = rosterIdx(id); return x >= 0 ? nm(ROSTER[x]).slice(0, 6) : '?'; }).join('+'); }
+function drawReveal(t, r) {
+  var o = vg.rr, ty = r.t || 'v', rows = [], tot = 0, mx = 0, i, k, gage = !!r.g, my = vg.myv ? parseVote(vg.myv) : null;
+  if (!o) return;
+  if (ty === 'tf') {
+    rows = [{ l: 'VRAI', n: o.tf.T, w: r.a === 'T', me: my && my.v === 'T' }, { l: 'FAUX', n: o.tf.F, w: r.a === 'F', me: my && my.v === 'F' }];
+  } else if (ty === 'duo') {
+    var mk = my ? my.ids.slice().sort().join('+') : '';
+    rows = o.pairs.slice(0, gage ? 3 : 5).map(function (p) { return { l: pairLabel(p.key), n: p.n, w: p.n === o.pairs[0].n, me: p.key === mk }; });
+  } else {
+    var order = vg.cand.slice(), mi = my ? rosterIdx(my.ids[0]) : -1;
+    order.sort(function (a, b) { return o.counts[b] - o.counts[a] || a - b; });
+    rows = order.slice(0, gage ? 3 : 5).map(function (ci) { return { l: nm(ROSTER[ci]), n: o.counts[ci], w: o.winners.indexOf(ci) >= 0, me: ci === mi }; });
+  }
+  if (ty === 'tf') tot = o.tf.T + o.tf.F; else if (ty === 'duo') o.pairs.forEach(function (p) { tot += p.n; }); else vg.cand.forEach(function (ci) { tot += o.counts[ci]; });
+  rows.forEach(function (rw) { if (rw.n > mx) mx = rw.n; });
+  var ease = Math.min(1, (t - vg.revT) / 700); ease = 1 - Math.pow(1 - ease, 3);
+  for (k = 0; k < rows.length; k++) {
+    var rw = rows[k], y = 80 + k * 20, pct = tot ? rw.n / tot : 0, win = rw.w && (ty !== 'v' || rw.n > 0);
+    T((rw.me ? '*' : '') + rw.l, 8, y, win ? P.gold : P.cream, 8, 'left', P.ink);
+    T(Math.round(pct * 100) + '%', 172, y, win ? P.gold : P.cream, 8, 'right', P.ink);
+    R(P.ink, 7, y + 9, 166, 6);
+    R(win ? P.gold : '#6a5aa8', 8, y + 10, Math.round(164 * (mx ? rw.n / mx : 0) * ease), 4);
+  }
+  var by = gage ? 142 : 186, head, names;
+  if (o.n === 0) { head = 'PERSONNE'; names = "N'A VOTÉ"; }
+  else if (ty === 'tf') { head = 'BONNE RÉPONSE :'; names = r.a === 'T' ? 'VRAI' : 'FAUX'; }
+  else if (ty === 'who') { head = "C'ÉTAIT :"; names = nm(ROSTER[rosterIdx(r.a)]); }
+  else if (ty === 'duo') { head = 'LE DUO ÉLU :'; names = o.winPairs.length > 1 ? 'ÉGALITÉ : ' + o.winPairs.length + ' DUOS' : o.winPairs[0].map(function (id) { return nm(ROSTER[rosterIdx(id)]); }).join(' + '); }
+  else { head = ty === 'rare' ? 'LE MOINS CITÉ :' : 'LA MAJORITÉ A VOTÉ'; names = o.winners.length > 2 ? 'ÉGALITÉ : ' + o.winners.length + ' PERSOS' : o.winners.map(function (w) { return nm(ROSTER[w]); }).join(' + '); }
+  T(head, 90, by, P.cream, 8, 'center', P.ink);
+  var wl = wrapText(names, 20);
+  for (i = 0; i < wl.length && i < (gage ? 1 : 2); i++) T(wl[i], 90, by + 12 + i * 11, P.gold, 8, 'center', P.velvet);
+  var sy = gage ? 166 : 214;
+  T(!vg.myv ? 'TEMPS ÉCOULÉ' : (vg.pts ? '+' + vg.pts + ' PTS !' + (my && my.star ? ' (JOKER)' : '') : 'PAS DE POINT'), 90, sy, vg.pts ? P.mint : '#e07b7b', 8, 'center', P.ink);
+  if (gage) {
+    R(P.gold, 8, 180, 164, 42); R('#2a1220', 9, 181, 162, 40);
+    var tg = !o.winners.length ? 'PERSONNE' : (o.winners.length > 1 ? nm(ROSTER[o.winners[0]]).slice(0, 7) + ' +' + (o.winners.length - 1) : nm(ROSTER[o.winners[0]]));
+    T('GAGE POUR ' + tg, 90, 186, P.gold, 8, 'center');
+    var gl = wrapText(r.g, 20);
+    for (i = 0; i < gl.length && i < 2; i++) T(gl[i], 90, 198 + i * 11, P.cream, 8, 'center');
+  }
+  if (!vg.net || (net && net.host)) btn(BTN_V, vg.idx + 1 >= vg.qs.length ? 'RÉSULTATS' : 'SUIVANT', '#2e8b57');
+  else { T('LE MAÎTRE DU JEU', 90, 228, P.goldDim, 8, 'center', P.ink); T('PASSE À LA SUITE', 90, 239, P.goldDim, 8, 'center', P.ink); }
+  T('SCORE ' + vg.score, 90, 262, P.cream, 8, 'center', P.ink);
+  btn(BTN_BACK2, 'PAUSE', '#3a3f55');
 }
 function drawVote(t) {
   if (!vg) voteStart();
   drawHall(t); R('rgba(10,6,16,0.62)', 0, 0, W, H);
-  var q = vg.qs[vg.idx], i;
   if (vg.phase === 'end') { drawVoteEnd(t); muteIcon(); return; }
-  votePanel('QUESTION ' + (vg.idx + 1) + '/' + vg.qs.length, q.q);
-  if (vg.phase === 'ask') {
-    var tt = (vg.net && net && net.paused) ? net.pauseAt : (vg.menu ? vg.mT : t), left = Math.max(0, 1 - (tt - vg.t0) / VOTE_TIME);
-    R(P.ink, 6, 74, 168, 7); R(lerpCol('#d93a3a', '#3fbf6f', left), 7, 75, Math.round(166 * left), 5);
-    if (left <= 0 && !vg.net) { vg.pick = -1; voteCast(); return; }
-    var on = Math.floor(t / 250) % 2 === 0;
-    for (var ti = 0; ti < vg.cand.length; ti++) {
-      i = vg.cand[ti];
-      var r = voteTile(ti), isSel = i === vg.pick;
-      R(isSel ? (on ? P.gold : '#fff2b8') : '#4a2a1c', r.x - 1, r.y - 1, r.w + 2, r.h + 2);
-      R(isSel ? '#2a1220' : '#140c18', r.x, r.y, r.w, r.h);
-      c.save(); c.beginPath(); c.rect(r.x, r.y, r.w, r.h); c.clip();
-      drawChar(ROSTER[i], r.x + r.w / 2, r.y + r.h - 1, 1, false, 0);
-      c.restore();
-    }
-    R(P.gold, 28, 194, 124, 22); R(P.ink, 29, 195, 122, 20);
-    T(vg.pick >= 0 ? nm(ROSTER[vg.pick]) : 'TOUCHE UN PERSO', 90, 201, vg.pick >= 0 ? P.cream : P.goldDim, 8, 'center');
-    if (vg.net) {
-      btn(BTN_V, vg.voted ? 'VOTE ENVOYÉ' : 'VOTER !', vg.voted ? '#6a7a3a' : (vg.pick >= 0 ? '#2e8b57' : '#3a3f55'));
-      T('SCORE ' + vg.score, 90, 262, P.cream, 8, 'center', P.ink);
-      T('VOTES ' + Math.min(vg.nv, Math.max(vg.na, vg.nv)) + '/' + Math.max(vg.na, vg.nv), 90, 274, '#8d84b8', 8, 'center');
-    } else {
-      btn(BTN_V, 'VOTER !', vg.pick >= 0 ? '#2e8b57' : '#3a3f55');
-      T('SCORE ' + vg.score, 90, 262, P.cream, 8, 'center', P.ink);
-      T('(VOTANTS SIMULÉS : ' + vg.sim + ')', 90, 274, '#8d84b8', 8, 'center');
-    }
-    btn(BTN_BACK2, 'PAUSE', '#3a3f55');
-  } else {
-    var order = [], mx = Math.max.apply(null, vg.counts), tot = 0;
-    for (var oi = 0; oi < vg.cand.length; oi++) { order.push(vg.cand[oi]); tot += vg.counts[vg.cand[oi]]; }
-    order.sort(function (a, b) { return vg.counts[b] - vg.counts[a] || a - b; });
-    var ease = Math.min(1, (t - vg.revT) / 700); ease = 1 - Math.pow(1 - ease, 3);
-    for (var k = 0; k < 5; k++) {
-      var ci = order[k], y = 80 + k * 20, pct = tot ? vg.counts[ci] / tot : 0, win = vg.winners.indexOf(ci) >= 0;
-      T((ci === vg.mine ? '*' : '') + nm(ROSTER[ci]), 8, y, win ? P.gold : P.cream, 8, 'left', P.ink);
-      T(Math.round(pct * 100) + '%', 172, y, win ? P.gold : P.cream, 8, 'right', P.ink);
-      R(P.ink, 7, y + 9, 166, 6);
-      R(win ? P.gold : '#6a5aa8', 8, y + 10, Math.round(164 * (mx ? vg.counts[ci] / mx : 0) * ease), 4);
-    }
-    var wn = vg.winners.length > 2 ? 'ÉGALITÉ : ' + vg.winners.length + ' PERSOS' : vg.winners.map(function (w) { return nm(ROSTER[w]); }).join(' + ');
-    T('LA MAJORITÉ A VOTÉ', 90, 186, P.cream, 8, 'center', P.ink);
-    var wl = wrapText(wn, 20);
-    for (i = 0; i < wl.length && i < 2; i++) T(wl[i], 90, 198 + i * 11, P.gold, 8, 'center', P.velvet);
-    T(vg.mine < 0 ? 'TEMPS ÉCOULÉ' : (vg.pts ? '+' + vg.pts + ' PTS !' : 'PAS DE POINT'), 90, 214, vg.pts ? P.mint : '#e07b7b', 8, 'center', P.ink);
-    if (!vg.net || (net && net.host)) btn(BTN_V, vg.idx + 1 >= vg.qs.length ? 'RÉSULTATS' : 'SUIVANT', '#2e8b57');
-    else { T('LE MAÎTRE DU JEU', 90, 228, P.goldDim, 8, 'center', P.ink); T('PASSE À LA SUITE', 90, 239, P.goldDim, 8, 'center', P.ink); }
-    T('SCORE ' + vg.score, 90, 262, P.cream, 8, 'center', P.ink);
-    btn(BTN_BACK2, 'PAUSE', '#3a3f55');
-  }
+  var r = vg.qs[vg.idx];
+  if (!r) { muteIcon(); return; }
+  var tt = (vg.net && net && net.paused) ? net.pauseAt : (vg.menu ? vg.mT : t);
+  votePanel(panelFor(r, tt));
+  if (vg.phase === 'ask') drawAsk(t, tt, r); else drawReveal(t, r);
   if (isPaused()) drawPause(t);
   muteIcon();
 }
+function endButtons() {
+  btn(BTN_PG, pgLabel(), '#3a6fb0');
+  if (vg.net) { btn(BTN_E1, net && net.host ? 'REJOUER' : 'ATTENTE', net && net.host ? '#2e8b57' : '#3a3f55'); btn(BTN_E2, 'QUITTER', '#b3202e'); }
+  else { btn(BTN_E1, 'REJOUER', '#2e8b57'); btn(BTN_E2, 'MENU', '#b3202e'); }
+}
 function drawVoteEnd(t) {
-  if (vg.net && vg.page === 1) { drawRanking(t); return; }
+  var pg = endPages()[vg.pg || 0];
+  if (pg === 1) { drawRanking(t); return; }
+  if (pg === 2) { drawTitles(t); return; }
+  if (pg === 3) { drawFans(t); return; }
   Tout('FIN DU VOTE', 90, 10, P.gold, 8, P.velvet, P.red);
   T('TON SCORE', 90, 30, P.cream, 8, 'center', P.ink);
   Tout(String(vg.score), 90, 44, P.gold, 16, '#2a0712', P.red);
-  T('SUR ' + vg.qs.length * 100, 90, 66, '#8d84b8', 8, 'center');
+  T('POINTS', 90, 66, '#8d84b8', 8, 'center');
   R(P.gold, 8, 84, 164, 12); R(P.ink, 9, 85, 162, 10);
   T('PRIX DU PUBLIC', 90, 87, P.gold, 8, 'center');
   var order = [], i;
@@ -1069,18 +1310,13 @@ function drawVoteEnd(t) {
     T(vg.recv[ci] + ' VOIX', cx, ty + 45, '#8d84b8', 8, 'center');
   }
   T('ÉLU PAR LE PUBLIC :', 90, 200, P.cream, 8, 'center', P.ink);
-  var wl = wrapText(nm(ROSTER[order[0]]), 20);
-  Tout(wl[0], 90, 214, P.gold, 8, P.velvet, P.red);
+  Tout(nm(ROSTER[order[0]]), 90, 214, P.gold, 8, P.velvet, P.red);
   if (vg.newBoss) {
-    var by = vg.net ? 224 : 232, bh = vg.net ? 26 : 30;
-    R(P.gold, 8, by, 164, bh); R(P.ink, 9, by + 1, 162, bh - 2);
-    if (Math.floor(t / 400) % 2) T('PERSO CACHÉ DÉBLOQUÉ !', 90, by + 5, P.mint, 8, 'center'); else T('PERSO CACHÉ DÉBLOQUÉ !', 90, by + 5, P.gold, 8, 'center');
-    T('JEAN-LUC, LE PATRON', 90, by + 16, P.cream, 8, 'center');
+    R(P.gold, 8, 224, 164, 26); R(P.ink, 9, 225, 162, 24);
+    if (Math.floor(t / 400) % 2) T('PERSO CACHÉ DÉBLOQUÉ !', 90, 229, P.mint, 8, 'center'); else T('PERSO CACHÉ DÉBLOQUÉ !', 90, 229, P.gold, 8, 'center');
+    T('JEAN-LUC, LE PATRON', 90, 240, P.cream, 8, 'center');
   }
-  if (vg.net) {
-    btn(BTN_PG, 'CLASSEMENT', '#3a6fb0');
-    btn(BTN_E1, net && net.host ? 'REJOUER' : 'ATTENTE', net && net.host ? '#2e8b57' : '#3a3f55'); btn(BTN_E2, 'QUITTER', '#b3202e');
-  } else { btn(BTN_E1, 'REJOUER', '#2e8b57'); btn(BTN_E2, 'MENU', '#b3202e'); }
+  endButtons();
 }
 function drawRanking(t) {
   Tout('CLASSEMENT', 90, 8, P.gold, 8, P.velvet, P.red);
@@ -1095,10 +1331,36 @@ function drawRanking(t) {
     T(r.name || nm(ROSTER[r.ci]), 58, y + 9, k === 0 ? P.gold : P.cream, 8, 'left', P.ink);
     T(String(r.score), 168, y + 9, k === 0 ? P.gold : P.cream, 8, 'right', P.ink);
   }
-  btn(BTN_PG, 'MON SCORE', '#3a6fb0');
-  btn(BTN_E1, net && net.host ? 'REJOUER' : 'ATTENTE', net && net.host ? '#2e8b57' : '#3a3f55'); btn(BTN_E2, 'QUITTER', '#b3202e');
+  endButtons();
 }
-
+function drawTitles(t) {
+  Tout('TITRES DU SOIR', 90, 8, P.gold, 8, P.velvet, P.red);
+  var n = Math.min(5, vg.titles.length), k, i;
+  if (!n) T('PAS ENCORE DE TITRE', 90, 100, P.cream, 8, 'center', P.ink);
+  for (k = 0; k < n; k++) {
+    var ti = vg.titles[k], y = 22 + k * 46, ql = wrapText(ti.q.replace(/^QUI /, '').replace(/ \?$/, ''), 15);
+    R(k === 0 ? P.gold : '#4a2a1c', 8, y, 164, 44); R('#140c18', 9, y + 1, 162, 42);
+    c.save(); c.beginPath(); c.rect(10, y + 2, 28, 40); c.clip();
+    drawChar(ROSTER[ti.ci], 24, y + 41, 1, false, 0);
+    c.restore();
+    T(nm(ROSTER[ti.ci]), 42, y + 4, P.gold, 8, 'left', P.ink);
+    T(ti.n + ' VOIX', 168, y + 4, '#8d84b8', 8, 'right');
+    for (i = 0; i < ql.length && i < 3; i++) T(ql[i], 42, y + 14 + i * 10, P.cream, 8, 'left', P.ink);
+  }
+  endButtons();
+}
+function drawFans(t) {
+  Tout("QUI T'A VOTÉ ?", 90, 8, P.gold, 8, P.velvet, P.red);
+  var f = vg.fans.slice().sort(function (a, b) { return b.who.length - a.who.length || a.j - b.j; }).slice(0, 5), k, i;
+  if (!f.length) { T('PERSONNE NE T\'A', 90, 100, P.cream, 8, 'center', P.ink); T('VOTÉ... POUR', 90, 111, P.cream, 8, 'center', P.ink); T('L\'INSTANT !', 90, 122, P.cream, 8, 'center', P.ink); }
+  for (k = 0; k < f.length; k++) {
+    var y = 24 + k * 44, nms = f[k].who.map(function (pid) { return (vg.pname[pid] || '?').slice(0, 8); }), nl = wrapText(nms.join(' '), 20);
+    R(P.gold, 8, y, 164, 40); R('#140c18', 9, y + 1, 162, 38);
+    T('QUESTION ' + (f[k].j + 1) + ' : ' + f[k].who.length + (f[k].who.length > 1 ? ' VOIX' : ' VOIX'), 90, y + 5, P.gold, 8, 'center');
+    for (i = 0; i < nl.length && i < 2; i++) T(nl[i], 90, y + 18 + i * 11, P.cream, 8, 'center');
+  }
+  endButtons();
+}
 
 /* ---------- network: Firebase Realtime Database (REST + polling) ----------
    Room layout: rooms/CODE = { h: hostPid, st: 'lobby'|'play'|'end', p: {pid: {c: charId, n: name, r: ready, j: joinTime, b: heartbeat}},
@@ -1266,11 +1528,9 @@ function netNext() {
 }
 function netStart() {
   var my = net; if (!my || !my.host || my.starting) return;
-  var pool = QUESTIONS.filter(function (q) { return !q.boss || bossUnlocked; }), qs = [];
-  while (qs.length < VOTE_ROUNDS && pool.length) qs.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-  var cd = candList().map(function (i) { return ROSTER[i].id; });
+  var qs = buildRounds(), cd = candList().map(function (i) { return ROSTER[i].id; });
   my.starting = true;
-  fbReq('PATCH', '/rooms/' + my.code, { st: 'play', g: { i: 0, ph: 'ask', n: qs.length, cd: cd, q: qs.map(function (q) { return { c: q.c, q: q.q }; }) }, v: null, res: null })
+  fbReq('PATCH', '/rooms/' + my.code, { st: 'play', g: { i: 0, ph: 'ask', n: qs.length, cd: cd, q: qs.map(function (r) { return { c: r.c, q: r.q, t: r.t, a: r.a, cl: r.cl, g: r.g }; }) }, v: null, res: null })
     .then(function () { my.starting = false; jingle(); netPoll(); }, function () { my.starting = false; lbMsg('ERREUR RÉSEAU'); });
 }
 function netReplay() {
@@ -1286,20 +1546,12 @@ function netReady() {
   if (r) jingle(); else boop();
   if (lb && lb.players) lb.players.forEach(function (q) { if (q.me) q.ready = !!r; });
 }
-function netVote() {
-  var my = net, i = vg.idx; if (!my || vg.voted || vg.pick < 0) return;
-  var id = ROSTER[vg.pick].id; vg.voted = id; my.myv[i] = id; blip();
-  fbReq('PUT', '/rooms/' + my.code + '/v/' + i + '/' + my.pid, id).then(function () { netPoll(); }, function () {
-    if (my.myv[i] === id) { delete my.myv[i]; if (vg && vg.idx === i) vg.voted = null; lbMsg('ERREUR RÉSEAU'); }
+function netVote(s) {
+  var my = net, i = vg.idx; if (!my || vg.voted || !s) return;
+  vg.voted = s; my.myv[i] = s; blip();
+  fbReq('PUT', '/rooms/' + my.code + '/v/' + i + '/' + my.pid, s).then(function () { netPoll(); }, function () {
+    if (my.myv[i] === s) { delete my.myv[i]; if (vg && vg.idx === i) vg.voted = null; lbMsg('ERREUR RÉSEAU'); }
   });
-}
-function tally(votes) {
-  var counts = [], i, k, mx = 0, winners = [];
-  for (i = 0; i < ROSTER.length; i++) counts.push(0);
-  for (k in votes) { i = rosterIdx(votes[k]); if (i >= 0) counts[i]++; }
-  for (i = 0; i < counts.length; i++) if (counts[i] > mx) mx = counts[i];
-  for (i = 0; i < counts.length; i++) if (mx > 0 && counts[i] === mx) winners.push(i);
-  return { counts: counts, winners: winners };
 }
 function netSync(my) {
   var rm = my.rm, g = rm.g, p = rm.p || {}, now = performance.now(), k, i, j, ch = my.changed;
@@ -1320,53 +1572,34 @@ function netSync(my) {
     lb.hostName = p[rm.h] ? (p[rm.h].n || '') : '';
     return;
   }
-  if (!vg || !vg.net) { vg = { net: true, page: 0, pick: -1, newBoss: false }; my.lastIdx = -1; }
-  var ids = arr(g.cd), qs = arr(g.q);
+  if (!vg || !vg.net) { vg = { net: true, pg: 0, pick: -1, picks: [], tf: '', jk: false, jokerUsed: false, newBoss: false }; my.lastIdx = -1; }
+  var ids = arr(g.cd);
+  vg.qs = arr(g.q).map(function (r) { return { c: r.c, q: r.q, t: r.t || 'v', a: r.a, cl: arr(r.cl), g: r.g }; });
   vg.cand = ids.map(rosterIdx).filter(function (x) { return x >= 0; });
-  vg.qs = qs; vg.idx = g.i; vg.phase = rm.st === 'end' ? 'end' : g.ph;
-  if (g.i !== my.lastIdx) { my.lastIdx = g.i; vg.pick = -1; }
+  vg.idx = g.i; vg.phase = rm.st === 'end' ? 'end' : g.ph;
+  if (g.i !== my.lastIdx) { my.lastIdx = g.i; vg.pick = -1; vg.picks = []; vg.tf = ''; vg.jk = false; }
   vg.t0 = my.phT; vg.revT = my.phT;
-  var mv = (rm.v && rm.v[g.i]) || {};
+  var mv = (rm.v && rm.v[g.i]) || {}, rt = (vg.qs[g.i] || {}).t || 'v';
   vg.voted = my.myv[g.i] || mv[my.pid] || null;
-  if (vg.voted && rosterIdx(vg.voted) >= 0) vg.pick = rosterIdx(vg.voted);
-  vg.nv = Object.keys(mv).length; vg.na = netActive(my).length;
-  var last = vg.phase === 'ask' ? g.i - 1 : g.i, score = {}, recv = [];
-  for (i = 0; i < ROSTER.length; i++) recv.push(0);
-  for (k in p) score[k] = 0;
-  vg.counts = recv.slice(); vg.winners = []; vg.mine = -1; vg.pts = 0;
-  for (j = 0; j <= last; j++) {
-    var vs = (rm.res && rm.res[j]) || {}, t = tally(vs);
-    for (k in vs) if (t.winners.indexOf(rosterIdx(vs[k])) >= 0) score[k] = (score[k] || 0) + 100;
-    for (i = 0; i < recv.length; i++) recv[i] += t.counts[i];
-    if (j === g.i) {
-      vg.counts = t.counts; vg.winners = t.winners; vg.mine = vs[my.pid] ? rosterIdx(vs[my.pid]) : -1;
-      vg.pts = (vg.mine >= 0 && t.winners.indexOf(vg.mine) >= 0) ? 100 : 0;
-    }
+  if (vg.voted) {
+    var pv = parseVote(vg.voted);
+    if (rt === 'tf') vg.tf = pv.v; else if (rt === 'duo') vg.picks = pv.ids.map(rosterIdx).filter(function (x) { return x >= 0; });
+    else vg.pick = rosterIdx(pv.ids[0]);
+    vg.jk = pv.star;
   }
-  vg.score = score[my.pid] || 0; vg.recv = recv;
-  vg.rank = Object.keys(p).filter(function (q) { return p[q] && p[q].c; }).map(function (q) {
-    return { pid: q, ci: Math.max(0, rosterIdx(p[q].c)), name: (p[q].n || '').slice(0, 8), score: score[q] || 0, me: q === my.pid, j: p[q].j || 0 };
+  var ju = false; for (j = 0; j < g.i; j++) { var pr = rm.res && rm.res[j] && rm.res[j][my.pid]; if (pr && parseVote(pr).star) ju = true; }
+  vg.jokerUsed = ju;
+  vg.nv = Object.keys(mv).length; vg.na = netActive(my).length;
+  vg.pname = {}; for (k in p) if (p[k] && p[k].c) vg.pname[k] = p[k].n || (ROSTER[Math.max(0, rosterIdx(p[k].c))].name);
+  var pk = Object.keys(p).filter(function (q) { return p[q] && p[q].c; });
+  recompute(vg.phase === 'ask' ? g.i - 1 : g.i, function (jj) { return rm.res && rm.res[jj]; }, my.pid, pk, p);
+  vg.rank = pk.map(function (q) {
+    return { pid: q, ci: Math.max(0, rosterIdx(p[q].c)), name: (p[q].n || '').slice(0, 8), score: vg.scoreMap[q] || 0, me: q === my.pid, j: p[q].j || 0 };
   }).sort(function (a, b) { return b.score - a.score || a.j - b.j; });
   if (ch) {
     if (vg.phase === 'reveal') { if (vg.pts) jingle(); else boop(); }
-    else if (vg.phase === 'end') { jingle(); if (!bossUnlocked) { unlockBoss(); vg.newBoss = true; } }
+    else if (vg.phase === 'end') { vg.pg = 0; jingle(); if (!bossUnlocked) { unlockBoss(); vg.newBoss = true; } }
     else blip();
-  }
-}
-function netVoteTap(x, y) {
-  var my = net; if (!my) return;
-  if (isPaused()) { pauseTap(x, y); return; }
-  if (vg.phase !== 'end' && inside(BTN_BACK2, x, y)) { pauseOpen(); return; }
-  if (vg.phase === 'ask') {
-    if (vg.voted) return;
-    for (var ti = 0; ti < vg.cand.length; ti++) { if (inside(voteTile(ti), x, y)) { vg.pick = vg.cand[ti]; blip(); return; } }
-    if (inside(BTN_V, x, y) && vg.pick >= 0) netVote();
-  } else if (vg.phase === 'reveal') {
-    if (my.host && inside(BTN_V, x, y)) netNext();
-  } else {
-    if (inside(BTN_PG, x, y)) { vg.page = vg.page ? 0 : 1; blip(); }
-    else if (inside(BTN_E1, x, y) && my.host) netReplay();
-    else if (inside(BTN_E2, x, y)) netLeave(true);
   }
 }
 
