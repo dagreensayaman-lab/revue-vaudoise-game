@@ -104,13 +104,27 @@ function ellipse(cx, cy, rx, ry, col) {
 /* ---------- characters ----------
    Real sprites: list the id and file name in REAL_FILES (PNG, transparent background, one frame, facing right),
    for example { a1: 'sprites/a1.png' }. Anyone without a file keeps the placeholder drawn below. */
-var REAL_FILES = {};
+var REAL_FILES = { keumart: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACN0lEQVR4Xu2Yy04CMRSGW2K8xCARibedCcbEy0ZXLtz6AurekPgE+hi6cq8PoL6ASzVhpRvRhGCiK2CBGiRGcWFNizN2ZjoM0L/Iol9ywkxnSs/fc05bIMRisVj+E2pocNbke6FjxgwIaOY8J+p5W6AFQJ1rBbSArmMFtAIr5oWZALUitJv7qHFhKcQdomKmq2XCGGuY6v4pCw2EsRqg9G+S5Ws0WAHDCbR/kcBy0YFVy8F6eH0kZHSGkPcqodNz0DGhEUhv+Io5sUOE9SeF8+TrJfhOr8Cdr18ssI9vxngUhBXzf/aUZWR7SrwTEKpBn0ZfF+5Q4ZSRr8tF0fYZnyBLW95MeYhPue/z6/RGiT2c6aewtgDHeYfYVUPE7QkjQ5lpt72eSQbmivfVFQGtgf61nDCH5bFFwo6L4pMzcPQijCNHRAeoAJnB3wxa2Vv3CEJjTIDD9f452mcPxgXIETABRMDsJhWmQhWBdK0kDIH2KlQ4zIsNanZ3VelPWAQKB1mxwdGzOS0d+hHg5x++04bQtAYAZyd9ARGE1kAT0e1gXEDPr0I0MelWr6qQ5QjcPOc8xSv37RTo0bbVQ5ru8UEGKoC93bX025iOLMDGNVMD8XkizMF/D0R7H/AgO60i6nkHmIlAF7ECPNTuuzj3DbARcHI8TAhvB4vEFrG86nSpiKECKpWKz+3xxn3d344DtqEw/meoD0dQKpUKeExB/zdCakDlfBSd9FEBSaFg6niJem6xWDrnB9vcyOFvjrLZAAAAAElFTkSuQmCC' };
 var REAL = {};
 Object.keys(REAL_FILES).forEach(function (id) {
   var files = [].concat(REAL_FILES[id]);
   REAL[id] = { cur: 0, skins: files.map(function (f) {
     var o = { img: new Image(), ok: false };
-    o.img.onload = function () { o.ok = true; };
+    o.img.onload = function () {
+      var cv = document.createElement('canvas'), w = o.img.naturalWidth, h = o.img.naturalHeight;
+      cv.width = w; cv.height = h;
+      var cx = cv.getContext('2d'); cx.drawImage(o.img, 0, 0);
+      var x0 = w, y0 = h, x1 = -1, y1 = -1;
+      try {
+        var d = cx.getImageData(0, 0, w, h).data;
+        for (var yy = 0; yy < h; yy++) for (var xx = 0; xx < w; xx++) {
+          if (d[(yy * w + xx) * 4 + 3] > 10) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+        }
+      } catch (e) { x1 = -1; }
+      if (x1 < 0) { x0 = 0; y0 = 0; x1 = w - 1; y1 = h - 1; }
+      o.sx = x0; o.sy = y0; o.sw = x1 - x0 + 1; o.sh = y1 - y0 + 1;
+      o.ok = true;
+    };
     o.img.src = f;
     return o;
   }) };
@@ -219,17 +233,20 @@ var SP = {};
 function spriteOf(ch) { if (!SP[ch.id]) SP[ch.id] = buildSprite(ch); return SP[ch.id]; }
 
 function drawChar(ch, fx, fy, sc, flip, dy) {
-  var real = REAL[ch.id], sk = real && real.skins[real.cur % real.skins.length], img, w, h;
-  if (sk && sk.ok) { img = sk.img; w = img.naturalWidth; h = img.naturalHeight; }
+  var real = REAL[ch.id], sk = real && real.skins[real.cur % real.skins.length], img, w, h, isReal = false;
+  if (sk && sk.ok) { img = sk.img; w = sk.sw; h = sk.sh; isReal = true; sc = sc >= 2 ? 2 : 0.75; }
   else { img = spriteOf(ch); w = img.width; h = img.height; }
   var dw = w * sc, dh = h * sc;
-  R('rgba(0,0,0,0.35)', fx - dw * 0.36, fy - 1, dw * 0.72, 2);
-  R('rgba(0,0,0,0.25)', fx - dw * 0.26, fy + 1, dw * 0.52, 1);
+  if (!isReal) {
+    R('rgba(0,0,0,0.35)', fx - dw * 0.36, fy - 1, dw * 0.72, 2);
+    R('rgba(0,0,0,0.25)', fx - dw * 0.26, fy + 1, dw * 0.52, 1);
+  }
   c.save();
   c.imageSmoothingEnabled = false;
-  c.translate(Math.round(fx), Math.round(fy - dh + (dy || 0)));
+  c.translate(Math.round(fx), Math.round(fy - dh + (dy || 0) + (isReal ? 2 * sc : 0)));
   if (flip) c.scale(-1, 1);
-  c.drawImage(img, -Math.round(dw / 2), 0, dw, dh);
+  if (isReal) c.drawImage(img, sk.sx, sk.sy, sk.sw, sk.sh, -Math.round(dw / 2), 0, Math.round(dw), Math.round(dh));
+  else c.drawImage(img, -Math.round(dw / 2), 0, dw, dh);
   c.restore();
 }
 
