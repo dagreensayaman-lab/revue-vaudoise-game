@@ -966,7 +966,8 @@ function voteCast() {
 function voteTap(x, y) {
   if (vg && vg.net) { netVoteTap(x, y); return; }
   if (!vg) voteStart();
-  if (inside(BTN_BACK2, x, y) && vg.phase !== 'end') { vg = null; scene = 'select'; fadeT = performance.now(); boop(); return; }
+  if (isPaused()) { pauseTap(x, y); return; }
+  if (inside(BTN_BACK2, x, y) && vg.phase !== 'end') { pauseOpen(); return; }
   if (vg.phase === 'ask') {
     for (var ti = 0; ti < vg.cand.length; ti++) { if (inside(voteTile(ti), x, y)) { vg.pick = vg.cand[ti]; blip(); return; } }
     if (inside(BTN_V, x, y) && vg.pick >= 0) voteCast();
@@ -994,7 +995,7 @@ function drawVote(t) {
   if (vg.phase === 'end') { drawVoteEnd(t); muteIcon(); return; }
   votePanel('QUESTION ' + (vg.idx + 1) + '/' + vg.qs.length, q.q);
   if (vg.phase === 'ask') {
-    var left = Math.max(0, 1 - (t - vg.t0) / VOTE_TIME);
+    var tt = (vg.net && net && net.paused) ? net.pauseAt : (vg.menu ? vg.mT : t), left = Math.max(0, 1 - (tt - vg.t0) / VOTE_TIME);
     R(P.ink, 6, 74, 168, 7); R(lerpCol('#d93a3a', '#3fbf6f', left), 7, 75, Math.round(166 * left), 5);
     if (left <= 0 && !vg.net) { vg.pick = -1; voteCast(); return; }
     var on = Math.floor(t / 250) % 2 === 0;
@@ -1018,7 +1019,7 @@ function drawVote(t) {
       T('SCORE ' + vg.score, 90, 262, P.cream, 8, 'center', P.ink);
       T('(VOTANTS SIMULÉS : ' + vg.sim + ')', 90, 274, '#8d84b8', 8, 'center');
     }
-    btn(BTN_BACK2, 'RETOUR', '#3a3f55');
+    btn(BTN_BACK2, 'PAUSE', '#3a3f55');
   } else {
     var order = [], mx = Math.max.apply(null, vg.counts), tot = 0;
     for (var oi = 0; oi < vg.cand.length; oi++) { order.push(vg.cand[oi]); tot += vg.counts[vg.cand[oi]]; }
@@ -1039,8 +1040,9 @@ function drawVote(t) {
     if (!vg.net || (net && net.host)) btn(BTN_V, vg.idx + 1 >= vg.qs.length ? 'RÉSULTATS' : 'SUIVANT', '#2e8b57');
     else { T('LE MAÎTRE DU JEU', 90, 228, P.goldDim, 8, 'center', P.ink); T('PASSE À LA SUITE', 90, 239, P.goldDim, 8, 'center', P.ink); }
     T('SCORE ' + vg.score, 90, 262, P.cream, 8, 'center', P.ink);
-    btn(BTN_BACK2, 'RETOUR', '#3a3f55');
+    btn(BTN_BACK2, 'PAUSE', '#3a3f55');
   }
+  if (isPaused()) drawPause(t);
   muteIcon();
 }
 function drawVoteEnd(t) {
@@ -1107,6 +1109,37 @@ var MAXP = 12, net = null, autoRoom = '', memPid = '';
 var BTN_NEW = { x: 20, y: 92, w: 140, h: 26 }, BTN_JOIN = { x: 20, y: 126, w: 140, h: 26 }, BTN_DEMO = { x: 20, y: 160, w: 140, h: 26 };
 var BTN_OK = { x: 30, y: 240, w: 120, h: 26 }, BTN_PG = { x: 40, y: 254, w: 100, h: 18 };
 var CODE_BOX = { x: 40, y: 104, w: 100, h: 26 };
+var BTN_PA = { x: 30, y: 142, w: 120, h: 26 }, BTN_PB = { x: 30, y: 178, w: 120, h: 26 };
+/* pause: menu opened by PAUSE (or Escape). In an online room the host's pause freezes the round for everyone. */
+function isPaused() { return !!(vg && (vg.menu || (vg.net && net && net.paused))); }
+function pauseOpen() {
+  if (!vg || vg.menu || vg.phase === 'end') return;
+  vg.menu = true; vg.mT = performance.now(); boop();
+  if (vg.net && net && net.host) fbReq('PATCH', '/rooms/' + net.code, { 'g/pz': 1 }).then(function () { netPoll(); }, function () {});
+}
+function pauseClose() {
+  if (!vg || !vg.menu) { if (vg && vg.net && net && net.host && net.paused) fbReq('PATCH', '/rooms/' + net.code, { 'g/pz': null }).then(function () { netPoll(); }, function () {}); return; }
+  vg.menu = false; blip();
+  if (!vg.net) vg.t0 += performance.now() - vg.mT;
+  else if (net && net.host) fbReq('PATCH', '/rooms/' + net.code, { 'g/pz': null }).then(function () { netPoll(); }, function () {});
+}
+function pauseQuit() { if (vg.net) netLeave(true); else { vg = null; scene = 'select'; fadeT = performance.now(); boop(); } }
+function pauseTap(x, y) {
+  if (inside(BTN_PB, x, y)) pauseQuit();
+  else if ((vg.menu || (net && net.host)) && inside(BTN_PA, x, y)) pauseClose();
+}
+function drawPause(t) {
+  R('rgba(10,6,16,0.9)', 0, 0, W, H);
+  Tout('PAUSE', 90, 62, P.gold, 16, '#2a0712', P.red);
+  var gp = vg.net && net && net.paused;
+  if (vg.net) {
+    if (net.host) T('PAUSE POUR TOUS', 90, 104, P.goldDim, 8, 'center');
+    else if (gp) { T('LE MAÎTRE DU JEU', 90, 98, P.cream, 8, 'center'); T('A MIS EN PAUSE', 90, 109, P.cream, 8, 'center'); }
+    else { T('LE JEU CONTINUE', 90, 98, P.goldDim, 8, 'center'); T('POUR LES AUTRES', 90, 109, P.goldDim, 8, 'center'); }
+  }
+  if (vg.menu || (net && net.host)) btn(BTN_PA, 'REPRENDRE', '#2e8b57');
+  btn(BTN_PB, 'QUITTER', '#b3202e');
+}
 function myPid() {
   var p = memPid;
   try { p = sessionStorage.getItem('rv_pid') || p; } catch (e) {}
@@ -1197,6 +1230,9 @@ function netObserve(my) {
   for (k in p) { if (!p[k]) continue; var s = my.seen[k]; if (!s || s.b !== p[k].b) my.seen[k] = { b: p[k].b, t: now }; }
   var key = rm.st + ':' + (rm.g ? rm.g.i + ':' + rm.g.ph : '');
   if (key !== my.phKey) { my.phKey = key; my.phT = now; my.acted = ''; my.changed = true; }
+  var pz = !!(rm.g && rm.g.pz);
+  if (pz && !my.paused) { my.paused = true; my.pauseAt = now; }
+  else if (!pz && my.paused) { my.paused = false; my.phT += now - my.pauseAt; }
   if (!p[my.pid] || !p[my.pid].c) { var rec = meRec(0); fbReq('PATCH', '/rooms/' + my.code + '/p/' + my.pid, rec).catch(function () {}); }
   var hs = my.seen[rm.h];
   if (rm.h !== my.pid && (!p[rm.h] || (hs && now - hs.t > 15000))) {
@@ -1213,7 +1249,7 @@ function netHost(my) {
     for (k in p) if (k !== my.pid && my.seen[k] && now - my.seen[k].t > 40000 && my.acted !== 'c' + k) { my.acted = 'c' + k; var u0 = {}; u0['p/' + k] = null; netWrite(my, u0); }
     return;
   }
-  if (rm.st !== 'play' || !rm.g || my.acted === my.phKey) return;
+  if (rm.st !== 'play' || !rm.g || my.acted === my.phKey || rm.g.pz) return;
   var g = rm.g;
   if (g.ph === 'ask') {
     var votes = (rm.v && rm.v[g.i]) || {}, act = netActive(my);
@@ -1319,7 +1355,8 @@ function netSync(my) {
 }
 function netVoteTap(x, y) {
   var my = net; if (!my) return;
-  if (vg.phase !== 'end' && inside(BTN_BACK2, x, y)) { netLeave(true); return; }
+  if (isPaused()) { pauseTap(x, y); return; }
+  if (vg.phase !== 'end' && inside(BTN_BACK2, x, y)) { pauseOpen(); return; }
   if (vg.phase === 'ask') {
     if (vg.voted) return;
     for (var ti = 0; ti < vg.cand.length; ti++) { if (inside(voteTile(ti), x, y)) { vg.pick = vg.cand[ti]; blip(); return; } }
@@ -1570,7 +1607,7 @@ window.addEventListener('keydown', function (e) {
     var dl = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 5, ArrowUp: -5 }[e.key];
     if (dl) { var ns = sel, tries = 0; do { ns = (ns + dl + NSEL * 2) % NSEL; tries++; } while (!avail(ns) && tries < 20); setSel(ns); }
     else if (e.key === 'Enter') startMode('multi');
-  } else if (scene === 'stage' && mode === 'multi') { if (e.key === 'Escape') netLeave(true); }
+  } else if (scene === 'stage' && mode === 'multi') { if (e.key === 'Escape') { if (vg && vg.phase !== 'end') { if (vg.menu) pauseClose(); else pauseOpen(); } else netLeave(true); } }
   else if (scene === 'stage' && (e.key === 'Escape' || e.key === 'Backspace')) { scene = 'select'; fadeT = performance.now(); }
 });
 
