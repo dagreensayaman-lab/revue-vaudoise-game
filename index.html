@@ -304,13 +304,9 @@ function lakeStrip(t) {
   }
 }
 function ground() {
-  R('#1c1730', 0, 214, W, 106);
-  for (var r = 0; r < 16; r++) {
-    var y = 216 + r * 7;
-    R('#261f3d', 0, y, W, 1);
-    for (var x = (r % 2) * 7; x < W; x += 14) R('#261f3d', x, y, 1, 7);
-  }
-  R('#0f0b1c', 0, 214, W, 3);
+  R('#100c18', 0, 214, W, 106);
+  for (var k = 0; k < 70; k++) R('#1a1426', (k * 37) % W, 218 + (k * 53) % 100, 2, 1);
+  R('#0a0710', 0, 214, W, 3);
 }
 function mirrorPanel(x, y, w, h, t) {
   R(P.gold, x - 2, y - 2, w + 4, h + 4);
@@ -372,6 +368,63 @@ function tent(t) {
   R('#d4af37', 90, 91, 1, 9);
   for (i = 0; i < 12; i++) R(i < 6 ? P.green : '#f4f4f4', 91 + i, 91 + Math.round(Math.sin(t / 160 + i * 0.6)), 1, 6);
 }
+function facade(t) {
+  var x, y, k = Math.floor(t / 400);
+  for (x = 15; x <= 165; x++) {
+    var top = 124;
+    if (x >= 56 && x <= 124) top -= Math.round(18 * Math.sin(Math.PI * (x - 56) / 68));
+    if (x < 30) top += Math.round((30 - x) * 0.5);
+    if (x > 150) top += Math.round((x - 150) * 0.5);
+    R(lerpCol('#eaa63d', '#c9741f', Math.min(1, Math.abs(x - 90) / 75)), x, top, 1, 214 - top);
+    R('#7a3f12', x, top, 1, 1);
+  }
+  R('#7a3f12', 15, 131, 1, 83); R('#7a3f12', 165, 131, 1, 83);
+  [20, 126].forEach(function (px) {
+    R('#7a3f12', px - 1, 135, 36, 31);
+    for (var s2 = 0; s2 < 8; s2++) R(s2 % 2 ? '#e9c872' : '#d9a94a', px + s2 * 4 + 1, 136, 3, 29);
+    R('#b9661c', px, 136, 34, 3);
+  });
+  var gc = ['#2f9e57', '#c93a2a', '#e0b23a', '#2d6fb5', '#e8742a', '#7fc6a0'];
+  [20, 126].forEach(function (px) {
+    R('#4a2a12', px - 1, 171, 36, 29);
+    for (var gj = 0; gj < 4; gj++) for (var gi = 0; gi < 5; gi++) {
+      var cc = gc[(gi * 7 + gj * 3 + px) % 6];
+      if ((gi + gj * 2 + k) % 11 === 0) cc = lerpCol(cc, '#ffffff', 0.35);
+      R(cc, px + gi * 7, 172 + gj * 7, 6, 6);
+    }
+  });
+  for (var dx = -26; dx <= 26; dx++) {
+    var ay = 124 - Math.round(9 * Math.sqrt(1 - (dx * dx) / 676));
+    R('#2f7d3b', 90 + dx, ay - 2, 1, 2);
+    R('#1f5a2a', 90 + dx, ay + 2, 1, 1);
+  }
+  R('#b8321f', 87, 111, 6, 10); R('#e0b23a', 79, 114, 8, 3); R('#e0b23a', 93, 114, 8, 3); R('#2f7d3b', 89, 108, 2, 3);
+  R(P.goldDim, 56, 133, 68, 27); R('#5a1022', 57, 134, 66, 25);
+  T('LA REVUE', 90, 137, '#ffffff', 8, 'center');
+  T('VAUDOISE', 90, 147, '#ffffff', 8, 'center');
+  for (x = 58; x < 122; x += 6) R((((x - 58) / 6) + k) % 2 ? '#fff2b8' : '#e0b23a', x, 160, 2, 1);
+  R('#4a1610', 62, 163, 56, 51);
+  [65, 83, 101].forEach(function (bx, bi) {
+    R('#140a10', bx, 165, 16, 25);
+    R('rgba(255,200,110,0.18)', bx + 2, 170, 12, 18);
+    R('#ffd98a', bx + 7, 168 + (bi === 1 ? 1 : 0), 2, 2);
+    R('#a8321f', bx, 190, 16, 2);
+    for (var bj = 0; bj < 5; bj++) R('#7a1f14', bx + bj * 3 + 1, 192, 1, 4);
+    R('#9a2a1c', bx, 196, 16, 18); R('#7a1f14', bx + 8, 196, 1, 18); R('#b8402a', bx, 196, 16, 1);
+  });
+  R('#a8321f', 81, 165, 2, 49); R('#a8321f', 99, 165, 2, 49);
+  for (y = 150; y < 214; y++) R('rgba(255,150,40,' + (0.0025 * (y - 150)).toFixed(4) + ')', 15, y, 151, 1);
+}
+function foliage(t) {
+  [[8, 226, 14], [20, 238, 12], [2, 208, 11], [172, 226, 14], [160, 238, 12], [178, 208, 11], [28, 246, 8], [152, 246, 8]].forEach(function (b) {
+    disc(b[0], b[1], b[2], '#0c1a12');
+    disc(b[0] - 2, b[1] - 3, Math.max(3, b[2] - 5), '#14291b');
+  });
+  for (var k = 0; k < 26; k++) {
+    var fx = k < 13 ? (k * 5 + 3) % 30 : 150 + (k * 7) % 30, fy = 200 + (k * 13) % 44;
+    R(Math.sin(t / 700 + k * 1.3) > -0.4 ? '#d4502e' : '#8a2c18', fx, fy, 2, 2);
+  }
+}
 function lamps(t) {
   [12, 168].forEach(function (lx) {
     R('#14101f', lx, 196, 2, 40); R('#14101f', lx - 2, 194, 6, 2); R('#14101f', lx - 3, 234, 8, 2);
@@ -388,7 +441,7 @@ function carpetAndGlow(t) {
     R('rgba(255,200,100,0.08)', 90 - gw, y, gw * 2, 1);
     var hw = Math.round(16 + (y - 214) * 0.45);
     R('#8f1626', 90 - hw, y, hw * 2, 1);
-    R(P.gold, 90 - hw, y, 1, 1); R(P.gold, 90 + hw - 1, y, 1, 1);
+    if (y % 8 === 0) { R('#ffe9b0', 90 - hw, y, 1, 1); R('#ffe9b0', 90 + hw - 1, y, 1, 1); } else { R(P.goldDim, 90 - hw, y, 1, 1); R(P.goldDim, 90 + hw - 1, y, 1, 1); }
     if ((y % 12) < 2) R(P.goldDim, 90 - hw + 3, y, hw * 2 - 6, 1);
   }
 }
@@ -406,7 +459,7 @@ function muteIcon() {
   else { R(P.cream, x + 6, y + 2, 1, 4); R(P.cream, x + 8, y + 1, 1, 6); }
 }
 function drawTitle(t, hideUi) {
-  skyAndStars(t); mountains(); lakeStrip(t); ground(); tent(t); lamps(t); carpetAndGlow(t); queue(t);
+  skyAndStars(t); mountains(); ground(); facade(t); carpetAndGlow(t); foliage(t); queue(t);
   // marquee sign carrying the logo
   var k0 = Math.floor(t / 300);
   R(P.goldDim, 20, 12, 140, 68);
@@ -475,6 +528,8 @@ function buildHall() {
       if ((dx + 9) % 2 === 0) R('#d4a537', cx + dx, 47 + h, 1, 2);
     }
   }
+  R('#6a4a1a', 90, 20, 1, 8);
+  for (var ca = 0; ca < 6.28; ca += 0.08) R('#c9a25a', 90 + 16 * Math.cos(ca), 31 + 4 * Math.sin(ca), 1, 1);
   // black fabric above the partition
   R('#0a0710', 0, 54, W, 22);
   // stained glass window
@@ -572,6 +627,7 @@ function drawHall(t) {
     var aa = Math.PI + 0.3 + k * 0.4;
     R(((Math.floor(t / 300) + k) % 2) ? '#ff3b3b' : '#8a1a1a', 90 + 66 * Math.cos(aa) - 2, 126 + 14 * Math.sin(aa) - 2, 5, 1);
   }
+  for (var cb = 0; cb < 6.28; cb += 0.52) R(((Math.floor(t / 250) + Math.round(cb * 2)) % 3) ? '#fff6dc' : '#c9a25a', 90 + 16 * Math.cos(cb), 30 + 4 * Math.sin(cb), 1, 2);
   // audience: heads bobbing behind round-back chairs
   for (x = -4; x < W + 10; x += 12) {
     var b = (Math.floor(t / 420 + x) % 2) ? 1 : 0;
