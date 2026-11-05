@@ -22,3 +22,9 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 - Le maître du jeu (celui qui crée la salle) lance avec OK et fait avancer les questions ; s'il part, le plus ancien joueur reprend.
 - Structure : `rooms/CODE/{h, st, p, g, v, res}`.
 - Règles de sécurité à publier dans la console Firebase : voir `firebase-rules.json`.
+
+## Nouveaux tours et mini-jeux
+- **Menteur** : chacun raconte une anecdote sur un thème, l'app désigne un menteur (secret) ; la salle vote pour le démasquer. Il faut au moins 3 joueurs.
+- **Duel de taps** : deux joueurs tapent le plus vite possible pendant 10 s (ou jusqu'à 28 taps d'avance).
+- **Roue des gages** : chaque joueur propose un gage anonyme au salon (bouton « MON GAGE ») ; la roue désigne un joueur et révèle un gage au hasard.
+- **ARCADE** : Arkanoid (3 niveaux) et Pousse ton adversaire (contre un bot) ; **VERSUS** : Pousse à deux sur le même téléphone.
