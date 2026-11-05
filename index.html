@@ -143,8 +143,10 @@ var ROSTER = [
   { id: 'prod', name: 'PRODUCTION', last: '', role: 'PRODUCTION', custom: true, hair: '#4a3020', skin: '#f6c9a0', shirt: '#14101f', pants: '#14101f', style: 'long', acc: 'tie' },
   { id: 'tech', name: 'TECHNICIEN', last: '', role: 'TECHNIQUE', custom: true, hair: '#3b2417', skin: '#e0a67a', shirt: '#2a2a2a', pants: '#1f2a3a', acc: 'cap', accCol: '#f2c14e' },
   { id: 'guest', name: 'GUEST', last: '', role: 'PUBLIC', custom: true, hair: '#5a3a22', skin: '#f0b98d', shirt: '#e07b39', pants: '#2b3a5a' },
-  { id: 'jeanluc', name: 'JEAN-LUC', last: 'BARBEZA', role: 'LE PATRON', secret: true, beard: true, hair: '#8a8f98', skin: '#e8b48a', shirt: '#1c1c24', pants: '#1c1c24', acc: 'tie' }
+  { id: 'jeanluc', name: 'JEAN-LUC', last: 'BARBEZA', role: 'LE PATRON', secret: true, beard: true, hair: '#8a8f98', skin: '#e8b48a', shirt: '#1c1c24', pants: '#1c1c24', acc: 'tie' },
+  { id: 'cuche', name: 'CUCHE', last: '', role: 'ABSENT', ghost: true, hair: '#6b4a2a', skin: '#d8d8e8', shirt: '#8a8fb0', pants: '#555a70', acc: 'glasses' }
 ];
+var NSEL = ROSTER.filter(function (r) { return !r.ghost; }).length;
 var bossUnlocked = false;
 try { bossUnlocked = localStorage.getItem('rv_boss') === '1'; } catch (e) {}
 function unlockBoss() { bossUnlocked = true; try { localStorage.setItem('rv_boss', '1'); } catch (e) {} }
@@ -244,13 +246,14 @@ function drawChar(ch, fx, fy, sc, flip, dy) {
   if (sk && sk.ok) { img = sk.img; w = sk.sw; h = sk.sh; isReal = true; sc = sc >= 2 ? 2 : 0.75; }
   else { img = spriteOf(ch); w = img.width; h = img.height; }
   var dw = w * sc, dh = h * sc;
-  if (!isReal) {
+  if (!isReal && !ch.ghost) {
     R('rgba(0,0,0,0.35)', fx - dw * 0.36, fy - 1, dw * 0.72, 2);
     R('rgba(0,0,0,0.25)', fx - dw * 0.26, fy + 1, dw * 0.52, 1);
   }
   c.save();
   c.imageSmoothingEnabled = false;
-  c.translate(Math.round(fx), Math.round(fy - dh + (dy || 0) + (isReal ? 2 * sc : 0)));
+  if (ch.ghost) c.globalAlpha = 0.55;
+  c.translate(Math.round(fx), Math.round(fy - dh + (dy || 0) + (isReal ? 2 * sc : 0) + (ch.ghost ? Math.round(Math.sin(performance.now() / 300) * 1.5) : 0)));
   if (flip) c.scale(-1, 1);
   if (isReal) c.drawImage(img, sk.sx, sk.sy, sk.sw, sk.sh, -Math.round(dw / 2), 0, Math.round(dw), Math.round(dh));
   else c.drawImage(img, -Math.round(dw / 2), 0, dw, dh);
@@ -877,7 +880,7 @@ function drawSelect(t) {
   if (ch.custom && !names[ch.id] && Math.floor(t / 500) % 2 === 0) { l2 = 'ÉCRIS TON NOM'; l2c = P.gold; }
   T(l2, 90, 159, l2c, 8, 'center');
   var on = Math.floor(t / 250) % 2 === 0;
-  for (var i = 0; i < ROSTER.length; i++) {
+  for (var i = 0; i < NSEL; i++) {
     var r = slotRect(i), isSel = i === sel;
     R(isSel ? (on ? P.gold : '#fff2b8') : '#4a2a1c', r.x - 1, r.y - 1, r.w + 2, r.h + 2);
     R(isSel ? '#2a1220' : '#140c18', r.x, r.y, r.w, r.h);
@@ -917,7 +920,7 @@ function drawStage(t) {
   muteIcon();
 }
 
-var QUESTIONS = [{"c":"RETARD","q":"QUI ARRIVE TOUJOURS EN RETARD ?","f":["keumart"]},{"c":"RETARD","q":"QUI RATERAIT SA PROPRE ENTRÉE EN SCÈNE ?"},{"c":"RETARD","q":"QUI ARRIVE EN PREMIER AVANT LE SHOW ?","f":["lea"]},{"c":"RETARD","q":"QUI ARRIVE EN PREMIER ET PART EN DERNIER ?","f":["lea"]},{"c":"RETARD","q":"QUI SE PRÉPARE LE PLUS LENTEMENT ?"},{"c":"RÂLER","q":"QUI RÂLE LE PLUS EN COULISSES ?"},{"c":"RÂLER","q":"QUI RÉPOND LE PLUS MAL LE MATIN ?"},{"c":"RÂLER","q":"QUI RÂLE POUR RIEN ?"},{"c":"RÂLER","q":"QUI PREND LA MOUCHE LE PLUS VITE ?","f":["keumart"]},{"c":"RÂLER","q":"QUI RÉPOND DU TAC AU TAC ?","f":["lea"]},{"c":"RÂLER","q":"QUI NE FAUT SURTOUT PAS EMBÊTER ?","f":["lea"]},{"c":"COSTUMES","q":"QUI A LE PLUS BEAU COSTUME ?"},{"c":"COSTUMES","q":"QUI A LE COSTUME LE PLUS DIFFICILE À ENFILER ?"},{"c":"COSTUMES","q":"QUI CHANGE DE COSTUME LE PLUS VITE ?"},{"c":"COSTUMES","q":"QUI SE TROMPERAIT DE COSTUME ?"},{"c":"COSTUMES","q":"QUI A LE PLUS DE PEINE À DÉFAIRE SA PERRUQUE ?"},{"c":"COSTUMES","q":"QUI A LE MEILLEUR COL ROULÉ ?","f":["olivier"]},{"c":"ÂGE","q":"QUI FERAIT LE MEILLEUR GRAND-PARENT ?"},{"c":"ÂGE","q":"QUI SERAIT UNE MAMIE OU UN PAPI GÂTEAU ?"},{"c":"ÂGE","q":"QUI SERAIT LE GRAND-PARENT LE PLUS FOU ?"},{"c":"ÂGE","q":"QUI A UNE ÂME DE GRAND-PARENT ?"},{"c":"ÂGE","q":"QUI FAIT LE PLUS JEUNE POUR SON ÂGE ?","f":["keumart"]},{"c":"CHANT","q":"QUI CHANTE LE MIEUX ?"},{"c":"CHANT","q":"QUI CHANTE LE MOINS BIEN ?"},{"c":"CHANT","q":"QUI CHANTE FAUX ET S'EN FICHE ?"},{"c":"CHANT","q":"QUI CHANTE SOUS LA DOUCHE ?"},{"c":"DANSE","q":"QUI DANSE LE MIEUX ?"},{"c":"DANSE","q":"QUI A DEUX PIEDS GAUCHES ?"},{"c":"DANSE","q":"QUI DANSERAIT TOUTE LA NUIT ?"},{"c":"LOGES","q":"QUI SE TROUVE SOUVENT DANS LA MAUVAISE LOGE ?","f":["keumart"]},{"c":"LOGES","q":"QUI A LE PLUS DE DÉSORDRE DANS SA LOGE ?"},{"c":"LOGES","q":"QUI SQUATTE LA LOGE DES AUTRES ?"},{"c":"LOGES","q":"QUI S'ÉTALE LE PLUS DANS LES LOGES ?","f":["lea"]},{"c":"LOGES","q":"QUI RACONTE LES MEILLEURS POTINS ?"},{"c":"LOGES","q":"QUI SE RASE ET SE MAQUILLE DANS LES LOGES ?","f":["keumart"]},{"c":"LOGES","q":"QUI FAIT DES POMPES DANS LES LOGES ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI FAIT DU SPORT TOUS LES JOURS ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI TIENDRAIT UN MARATHON ?"},{"c":"SPORT","q":"QUI A LE PLUS DE SUCCÈS EN TENUE DE POMPIER ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI LÂCHERAIT LE PREMIER UN MARATHON ?"},{"c":"MANGER","q":"QUI MANGE LE PLUS EN COULISSES ?"},{"c":"MANGER","q":"QUI SERAIT VÉGAN SI C'ÉTAIT FACILE ?"},{"c":"MANGER","q":"QUI MANGE SANS GLUTEN ET SANS LACTOSE ?","f":["keumart"]},{"c":"MANGER","q":"QUI BOIT LE PLUS DE CAFÉ ?"},{"c":"MANGER","q":"QUI BOIT LE PLUS DE MORESQUE ?","f":["lea","pierre"]},{"c":"MANGER","q":"QUI SERAIT AU BAR EN PREMIER APRÈS LE SHOW ?"},{"c":"SCÈNE","q":"QUI A LE PLUS GROS TRAC ?"},{"c":"SCÈNE","q":"QUI OUBLIE SON TEXTE ?"},{"c":"SCÈNE","q":"QUI IMPROVISE QUAND ÇA SE PASSE MAL ?"},{"c":"SCÈNE","q":"QUI RIT LE PLUS FORT SUR SCÈNE ?"},{"c":"SCÈNE","q":"QUI FAIT CRAQUER SES COLLÈGUES SUR SCÈNE ?"},{"c":"SCÈNE","q":"QUI CHARME LE PLUS LE PUBLIC ?"},{"c":"SCÈNE","q":"QUI VOLE LA VEDETTE À TOUT LE MONDE ?"},{"c":"SCÈNE","q":"QUI A PEUR DE SE TROMPER ?","f":["catherine"]},{"c":"SCÈNE","q":"QUI SE PERD SOUS LES SPOTS ?","f":["catherine"]},{"c":"SCÈNE","q":"QUI DIT DES PHRASES QUI NE SONT PAS LES SIENNES ?","f":["catherine"]},{"c":"TECH","q":"QUI GÈRE TOUTE LA TECHNIQUE ?","f":["lea"]},{"c":"TECH","q":"QUI JOUE LE PLUS D'INSTRUMENTS ?","f":["lea"]},{"c":"TECH","q":"QUI FAIT DES BRUITS AVEC SA BOUCHE ?","f":["keumart"]},{"c":"VIE","q":"QUI EST LA PERSONNE LA PLUS BIENVEILLANTE ?","f":["catherine"]},{"c":"VIE","q":"QUI TAQUINE TOUT LE MONDE ?","f":["karim"]},{"c":"VIE","q":"QUI A TOUJOURS DU STYLE ?","f":["lea"]},{"c":"VIE","q":"QUI FAIT LE PLUS DE BLAGUES ?","f":["karim"]},{"c":"VIE","q":"QUI S'ENDORMIRAIT PENDANT LE SPECTACLE ?"},{"c":"VIE","q":"QUI VOYAGE LE MIEUX ?"},{"c":"VIE","q":"QUI OUBLIE SON TÉLÉPHONE PARTOUT ?"},{"c":"VIE","q":"QUI SURVIVRAIT LE MIEUX SUR UNE ÎLE DÉSERTE ?"},{"c":"VIE","q":"QUI DIRIGERAIT LE MIEUX LA REVUE ?"},{"c":"PATRON","q":"QUI EST L'AMOUR VIRTUEL DE LÉA ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI DIRIGE VRAIMENT LA REVUE ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI A LE PLUS DE SUCCÈS EN PERRUQUE ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI VIENT FAIRE LE CON DANS LES LOGES ?","f":["jeanluc"],"boss":true}];
+var QUESTIONS = [{"c":"RETARD","q":"QUI ARRIVE TOUJOURS EN RETARD ?","f":["keumart"]},{"c":"RETARD","q":"QUI RATERAIT SA PROPRE ENTRÉE EN SCÈNE ?"},{"c":"RETARD","q":"QUI ARRIVE EN PREMIER AVANT LE SHOW ?","f":["lea"]},{"c":"RETARD","q":"QUI ARRIVE EN PREMIER ET PART EN DERNIER ?","f":["lea"]},{"c":"RETARD","q":"QUI SE PRÉPARE LE PLUS LENTEMENT ?"},{"c":"RÂLER","q":"QUI RÂLE LE PLUS EN COULISSES ?"},{"c":"RÂLER","q":"QUI RÉPOND LE PLUS MAL LE MATIN ?"},{"c":"RÂLER","q":"QUI RÂLE POUR RIEN ?"},{"c":"RÂLER","q":"QUI PREND LA MOUCHE LE PLUS VITE ?","f":["keumart"]},{"c":"RÂLER","q":"QUI RÉPOND DU TAC AU TAC ?","f":["lea"]},{"c":"RÂLER","q":"QUI NE FAUT SURTOUT PAS EMBÊTER ?","f":["lea"]},{"c":"COSTUMES","q":"QUI A LE PLUS BEAU COSTUME ?"},{"c":"COSTUMES","q":"QUI A LE COSTUME LE PLUS DIFFICILE À ENFILER ?"},{"c":"COSTUMES","q":"QUI CHANGE DE COSTUME LE PLUS VITE ?"},{"c":"COSTUMES","q":"QUI SE TROMPERAIT DE COSTUME ?"},{"c":"COSTUMES","q":"QUI A LE PLUS DE PEINE À DÉFAIRE SA PERRUQUE ?"},{"c":"COSTUMES","q":"QUI A LE MEILLEUR COL ROULÉ ?","f":["olivier"]},{"c":"ÂGE","q":"QUI FERAIT LE MEILLEUR GRAND-PARENT ?"},{"c":"ÂGE","q":"QUI SERAIT UNE MAMIE OU UN PAPI GÂTEAU ?"},{"c":"ÂGE","q":"QUI SERAIT LE GRAND-PARENT LE PLUS FOU ?"},{"c":"ÂGE","q":"QUI A UNE ÂME DE GRAND-PARENT ?"},{"c":"ÂGE","q":"QUI FAIT LE PLUS JEUNE POUR SON ÂGE ?","f":["keumart"]},{"c":"CHANT","q":"QUI CHANTE LE MIEUX ?"},{"c":"CHANT","q":"QUI CHANTE LE MOINS BIEN ?"},{"c":"CHANT","q":"QUI CHANTE FAUX ET S'EN FICHE ?"},{"c":"CHANT","q":"QUI CHANTE SOUS LA DOUCHE ?"},{"c":"DANSE","q":"QUI DANSE LE MIEUX ?"},{"c":"DANSE","q":"QUI A DEUX PIEDS GAUCHES ?"},{"c":"DANSE","q":"QUI DANSERAIT TOUTE LA NUIT ?"},{"c":"LOGES","q":"QUI SE TROUVE SOUVENT DANS LA MAUVAISE LOGE ?","f":["keumart"]},{"c":"LOGES","q":"QUI A LE PLUS DE DÉSORDRE DANS SA LOGE ?"},{"c":"LOGES","q":"QUI SQUATTE LA LOGE DES AUTRES ?"},{"c":"LOGES","q":"QUI S'ÉTALE LE PLUS DANS LES LOGES ?","f":["lea"]},{"c":"LOGES","q":"QUI RACONTE LES MEILLEURS POTINS ?"},{"c":"LOGES","q":"QUI SE RASE ET SE MAQUILLE DANS LES LOGES ?","f":["keumart"]},{"c":"LOGES","q":"QUI FAIT DES POMPES DANS LES LOGES ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI FAIT DU SPORT TOUS LES JOURS ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI TIENDRAIT UN MARATHON ?"},{"c":"SPORT","q":"QUI A LE PLUS DE SUCCÈS EN TENUE DE POMPIER ?","f":["keumart","david"]},{"c":"SPORT","q":"QUI LÂCHERAIT LE PREMIER UN MARATHON ?"},{"c":"MANGER","q":"QUI MANGE LE PLUS EN COULISSES ?"},{"c":"MANGER","q":"QUI SERAIT VÉGAN SI C'ÉTAIT FACILE ?"},{"c":"MANGER","q":"QUI MANGE SANS GLUTEN ET SANS LACTOSE ?","f":["keumart"]},{"c":"MANGER","q":"QUI BOIT LE PLUS DE CAFÉ ?"},{"c":"MANGER","q":"QUI BOIT LE PLUS DE MORESQUE ?","f":["lea","pierre"]},{"c":"MANGER","q":"QUI SERAIT AU BAR EN PREMIER APRÈS LE SHOW ?"},{"c":"SCÈNE","q":"QUI A LE PLUS GROS TRAC ?"},{"c":"SCÈNE","q":"QUI OUBLIE SON TEXTE ?"},{"c":"SCÈNE","q":"QUI IMPROVISE QUAND ÇA SE PASSE MAL ?"},{"c":"SCÈNE","q":"QUI RIT LE PLUS FORT SUR SCÈNE ?"},{"c":"SCÈNE","q":"QUI FAIT CRAQUER SES COLLÈGUES SUR SCÈNE ?"},{"c":"SCÈNE","q":"QUI CHARME LE PLUS LE PUBLIC ?"},{"c":"SCÈNE","q":"QUI VOLE LA VEDETTE À TOUT LE MONDE ?"},{"c":"SCÈNE","q":"QUI A PEUR DE SE TROMPER ?","f":["catherine"]},{"c":"SCÈNE","q":"QUI SE PERD SOUS LES SPOTS ?","f":["catherine"]},{"c":"SCÈNE","q":"QUI DIT DES PHRASES QUI NE SONT PAS LES SIENNES ?","f":["catherine"]},{"c":"TECH","q":"QUI GÈRE TOUTE LA TECHNIQUE ?","f":["lea"]},{"c":"TECH","q":"QUI JOUE LE PLUS D'INSTRUMENTS ?","f":["lea"]},{"c":"TECH","q":"QUI FAIT DES BRUITS AVEC SA BOUCHE ?","f":["keumart"]},{"c":"VIE","q":"QUI EST LA PERSONNE LA PLUS BIENVEILLANTE ?","f":["catherine"]},{"c":"VIE","q":"QUI TAQUINE TOUT LE MONDE ?","f":["karim"]},{"c":"VIE","q":"QUI A TOUJOURS DU STYLE ?","f":["lea"]},{"c":"VIE","q":"QUI FAIT LE PLUS DE BLAGUES ?","f":["karim"]},{"c":"VIE","q":"QUI S'ENDORMIRAIT PENDANT LE SPECTACLE ?"},{"c":"VIE","q":"QUI VOYAGE LE MIEUX ?"},{"c":"VIE","q":"QUI OUBLIE SON TÉLÉPHONE PARTOUT ?"},{"c":"VIE","q":"QUI SURVIVRAIT LE MIEUX SUR UNE ÎLE DÉSERTE ?"},{"c":"VIE","q":"QUI DIRIGERAIT LE MIEUX LA REVUE ?"},{"c":"PATRON","q":"QUI EST L'AMOUR VIRTUEL DE LÉA ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI DIRIGE VRAIMENT LA REVUE ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI A LE PLUS DE SUCCÈS EN PERRUQUE ?","f":["jeanluc"],"boss":true},{"c":"PATRON","q":"QUI VIENT FAIRE LE CON DANS LES LOGES ?","f":["jeanluc"],"boss":true},{"c":"CAFÉ","q":"QUI LAISSE TOUJOURS LA CAPSULE DANS LA MACHINE ?","f":["cuche","cuche","cuche"]},{"c":"CAFÉ","q":"QUI EST RESPONSABLE DU CAFÉ QUI COLLE ?","f":["cuche","cuche"]},{"c":"CAFÉ","q":"QUI A LA FAUTE QUAND QUELQUE CHOSE CLOCHE ?","f":["cuche","cuche"]},{"c":"CAFÉ","q":"QUI LAISSE TRAÎNER SES AFFAIRES PARTOUT ?","f":["cuche"]},{"c":"CAFÉ","q":"QUI VIDE LA MACHINE À CAFÉ APRÈS USAGE ?"},{"c":"SCÈNE","q":"QUI RATE SON ENTRÉE EN BOSSANT SUR AUTRE CHOSE ?","f":["cuche","cuche"]},{"c":"SCÈNE","q":"QUI EST EN COULISSES QUAND ON LUI OUVRE LE MICRO ?","f":["cuche"]},{"c":"SCÈNE","q":"QUI N'EST JAMAIS CONCENTRÉ AVANT SON PASSAGE ?","f":["cuche"]},{"c":"SCÈNE","q":"QUI REVIENDRA FORCÉMENT UN JOUR ?","f":["cuche","cuche"]},{"c":"AFTER","q":"QUI RESTE LE PLUS TARD AUX AFTERS ?"},{"c":"AFTER","q":"QUI FERME LE BAR DU CONTRETEMPS ?"},{"c":"AFTER","q":"QUI GAGNE L'AFTER EN RESTANT LE DERNIER ?"},{"c":"AFTER","q":"QUI SE FAIT SERVIR LE DERNIER VERRE ?"},{"c":"PATRON","q":"QUI FORME UN DUO AVEC BARBEZA ?","f":["cuche","cuche"],"boss":true}];
 
 /* ---------- vote game: "qui est le plus susceptible de..." (demo with simulated voters) ----------
    Add questions in QUESTIONS above: { c: 'CATEGORIE', q: 'QUESTION NEUTRE (SANS ACCORD M/F), MAJUSCULES, 4 LIGNES DE 20 LETTRES MAX', f: ['id des favoris pour la simulation'], boss: true si elle ne sort qu'avec Jean-Luc }. */
@@ -1076,7 +1079,7 @@ function lobbyUpdate(t) {
   if (lb.players.length < 9 && t >= lb.next) {
     var used = {}, i;
     lb.players.forEach(function (p) { used[p.ci] = 1; });
-    var free = []; for (i = 0; i < ROSTER.length; i++) if (!used[i] && avail(i)) free.push(i);
+    var free = []; for (i = 0; i < ROSTER.length; i++) if (!used[i] && avail(i) && !ROSTER[i].ghost) free.push(i);
     if (free.length) {
       lb.players.push({ ci: free[Math.floor(Math.random() * free.length)], ready: false, joinT: t, rdy: t + 1200 + Math.random() * 3500 });
       blip();
@@ -1201,7 +1204,7 @@ function setSel(i) { if (i !== sel) { sel = i; selT = performance.now(); blip();
 function startEnter() { scene = 'enter'; enterT = performance.now(); jingle(); }
 function startMode(m) {
   mode = m;
-  do { opp = (sel + 1 + Math.floor(Math.random() * (ROSTER.length - 1))) % ROSTER.length; } while (ROSTER[opp].secret && !bossUnlocked);
+  do { opp = (sel + 1 + Math.floor(Math.random() * (ROSTER.length - 1))) % ROSTER.length; } while ((ROSTER[opp].secret && !bossUnlocked) || ROSTER[opp].ghost);
   scene = 'stage'; fadeT = performance.now(); blip();
   if (m === 'multi') lobbyStart();
 }
@@ -1216,7 +1219,7 @@ function handle(x, y) {
       if (rl && rl.skins.length > 1) { rl.cur = (rl.cur + 1) % rl.skins.length; selT = performance.now(); blip(); }
       return;
     }
-    for (var i = 0; i < ROSTER.length; i++) { if (inside(slotRect(i), x, y)) { if (avail(i)) setSel(i); else boop(); return; } }
+    for (var i = 0; i < NSEL; i++) { if (inside(slotRect(i), x, y)) { if (avail(i)) setSel(i); else boop(); return; } }
     if (inside(BTN_A, x, y)) startMode('arcade');
     else if (inside(BTN_B, x, y)) startMode('versus');
     else if (inside(BTN_C, x, y)) startMode('multi');
@@ -1235,7 +1238,7 @@ window.addEventListener('keydown', function (e) {
   if (scene === 'title' && (e.key === 'Enter' || e.key === ' ')) { startEnter(); e.preventDefault(); }
   else if (scene === 'select') {
     var dl = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 5, ArrowUp: -5 }[e.key];
-    if (dl) { var ns = sel, tries = 0; do { ns = (ns + dl + ROSTER.length * 2) % ROSTER.length; tries++; } while (!avail(ns) && tries < 20); setSel(ns); }
+    if (dl) { var ns = sel, tries = 0; do { ns = (ns + dl + NSEL * 2) % NSEL; tries++; } while (!avail(ns) && tries < 20); setSel(ns); }
     else if (e.key === 'Enter') startMode('multi');
   } else if (scene === 'stage' && (e.key === 'Escape' || e.key === 'Backspace')) { scene = 'select'; fadeT = performance.now(); }
 });
