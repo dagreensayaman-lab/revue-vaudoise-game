@@ -38,3 +38,6 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 - Musique : « Les Sardines » (8 bits, en boucle) par défaut ; la petite note en bas à droite change de morceau (Phase 1 / Les Sardines).
 - Fin de partie : « We Are the Champions » (8 bits) joue pendant l'annonce des gagnants, puis la musique reprend.
 - Écran d'accueil : accompagnement 8 bits de « Ces soirées-là » (1er toucher = musique, 2e toucher = entrer).
+
+## Duel en ligne
+VERSUS → DUEL EN LIGNE ouvre la salle. Dans la salle, touche le perso d un joueur puis INVITER : il reçoit une invitation (OUI/NON) et vous jouez au POUSSE en 1 contre 1, chacun sur son téléphone.
