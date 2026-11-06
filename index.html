@@ -932,7 +932,7 @@ function drawSelect(t) {
     R(isSel ? '#2a1220' : '#140c18', r.x, r.y, r.w, r.h);
     if (!avail(i)) { T('?', r.x + r.w / 2, r.y + 11, '#6a5aa8', 8, 'center'); continue; }
     c.save(); c.beginPath(); c.rect(r.x, r.y, r.w, r.h); c.clip();
-    drawChar(ROSTER[i], r.x + r.w / 2, r.y + r.h - 1, 1, false, 0);
+    drawCharTop(ROSTER[i], r.x + r.w / 2, r.y + 1, 2, false);
     c.restore();
     if (i === dedicated) R(P.mint, r.x + 2, r.y + 2, 3, 3);
   }
