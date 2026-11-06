@@ -28,3 +28,9 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 - **Duel de taps** : deux joueurs tapent le plus vite possible pendant 10 s (ou jusqu'à 28 taps d'avance).
 - **Roue des gages** : chaque joueur propose un gage anonyme au salon (bouton « MON GAGE ») ; la roue désigne un joueur et révèle un gage au hasard.
 - **ARCADE** : Arkanoid (3 niveaux) et Pousse ton adversaire (contre un bot) ; **VERSUS** : Pousse à deux sur le même téléphone.
+
+## Nouveautés
+- Manches TAUPES (marteau, taper sa propre tête fait perdre des points) et ARKANOID (tout le monde joue, le premier qui finit gagne).
+- Roue des gages avec les gages écrits par les joueurs (bouton GAGE dans le salon).
+- Bouton QUESTION dans le salon : chaque joueur propose « QUI… » ; 2 questions sont tirées au sort dans la partie.
+- Skins : touche le grand perso pour changer (Virginie, public, techniciens, prod).
