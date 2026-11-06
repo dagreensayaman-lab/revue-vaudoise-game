@@ -34,3 +34,5 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 - Roue des gages avec les gages écrits par les joueurs (bouton GAGE dans le salon).
 - Bouton QUESTION dans le salon : chaque joueur propose « QUI… » ; 2 questions sont tirées au sort dans la partie.
 - Skins : touche le grand perso pour changer (Virginie, public, techniciens, prod).
+
+- Musique : « Les Sardines » (8 bits, en boucle) par défaut ; la petite note en bas à droite change de morceau (Phase 1 / Les Sardines).
