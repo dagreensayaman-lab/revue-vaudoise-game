@@ -1785,7 +1785,7 @@ function drawFans(t) {
 var FB_URL = 'https://revue-vaudoise-2b13c-default-rtdb.europe-west1.firebasedatabase.app';
 var MAXP = 12, net = null, autoRoom = '', memPid = '';
 var BTN_NEW = { x: 20, y: 92, w: 140, h: 26 }, BTN_JOIN = { x: 20, y: 126, w: 140, h: 26 }, BTN_DEMO = { x: 20, y: 160, w: 140, h: 26 };
-var BTN_DUEL = { x: 30, y: 204, w: 120, h: 24 }, BTN_YES = { x: 20, y: 160, w: 66, h: 22 }, BTN_NO = { x: 94, y: 160, w: 66, h: 22 };
+var BTN_DUEL = { x: 14, y: 204, w: 76, h: 24 }, BTN_DUEL2 = { x: 94, y: 204, w: 76, h: 24 }, BTN_YES = { x: 20, y: 160, w: 66, h: 22 }, BTN_NO = { x: 94, y: 160, w: 66, h: 22 };
 var BTN_OK = { x: 30, y: 240, w: 120, h: 26 }, BTN_PG = { x: 40, y: 254, w: 100, h: 18 };
 var CODE_BOX = { x: 40, y: 104, w: 100, h: 26 }, BTN_GAGE = { x: 3, y: 268, w: 86, h: 14 }, BTN_QUEST = { x: 91, y: 268, w: 86, h: 14 }, GAGE_BOX = { x: 10, y: 150, w: 160, h: 28 };
 var BTN_PA = { x: 30, y: 142, w: 120, h: 26 }, BTN_PB = { x: 30, y: 178, w: 120, h: 26 };
@@ -1949,9 +1949,9 @@ function netVote(s) {
 
 /* ---------- online duel (1 vs 1 "POUSSE") inside a room ---------- */
 function duelWrite(my, upd) { return fbReq('PATCH', '/rooms/' + my.code + '/duel', upd).catch(function () {}); }
-function duelInvite(pid) {
+function duelInvite(pid, g) {
   var my = net; if (!my || !my.rm || !pid) return;
-  var d = { a: my.pid, b: pid, st: 'invite', ts: Date.now() };
+  var d = { a: my.pid, b: pid, st: 'invite', ts: Date.now(), g: g || 'push', sd: 1 + Math.floor(Math.random() * 1e9) };
   my.rm.duel = d; lbMsg('INVITATION ENVOYÉE', 4000); blip();
   fbReq('PUT', '/rooms/' + my.code + '/duel', d).then(function () { netPoll(); }, function () { lbMsg('ERREUR RÉSEAU'); });
 }
@@ -1972,6 +1972,11 @@ function duelBegin(my, d) {
   var role = d.a === my.pid ? 'a' : 'b', op = role === 'a' ? d.b : d.a, p = (my.rm.p || {})[op] || {}, now = performance.now();
   var age = Math.max(0, Math.min(2500, Date.now() - (d.ts2 || Date.now())));
   my.duelId = d.ts; lb.target = '';
+  if (d.g === 'mole') {
+    mini = moleNew(d.sd || 1, sel, now - age + 3000); mini.id = 'molenet';
+    mini.net = true; mini.role = role; mini.dts = d.ts; mini.opn = p.n || ''; mini.oc = 0; mini.of = null; mini.fin = false; mini.myFin = 0; mini.finT = 0; mini.wt = 0; mini.lastSent = null; mini.win = 0;
+    scene = 'stage'; mode = 'multi'; jingle(); return;
+  }
   mini = { id: 'pushnet', net: true, role: role, dts: d.ts, a: sel, b: Math.max(0, rosterIdx(p.c)), opn: p.n || '', pos: 0, t0: now - age, over: false, win: 0, flash: [-1e9, -1e9], taps: [0, 0], oc: 0, of: null, fin: false, myFin: 0, finT: 0, overT: 0, last: now, dirty: false, wt: 0 };
   scene = 'stage'; mode = 'multi'; jingle();
 }
@@ -1982,26 +1987,26 @@ function netDuel(my) {
   lb.invite = null; lb.wait = null;
   if (d && d.a && d.b) {
     var P = rm.p || {}, nA = (P[d.a] || {}).n || '', nB = (P[d.b] || {}).n || '';
-    if (d.st === 'invite' && d.b === my.pid && now - d.ts < 45000) lb.invite = { name: nA, ci: Math.max(0, rosterIdx((P[d.a] || {}).c)) };
+    if (d.st === 'invite' && d.b === my.pid && now - d.ts < 45000) lb.invite = { name: nA, g: d.g || 'push', ci: Math.max(0, rosterIdx((P[d.a] || {}).c)) };
     else if (d.st === 'invite' && d.a === my.pid && now - d.ts < 45000) lb.wait = nB;
     else if (d.st === 'no' && d.a === my.pid && my.noSeen !== d.ts) { my.noSeen = d.ts; lbMsg((nB || 'ILS') + ' REFUSE', 4500); }
     else if (d.st === 'play' && (d.a === my.pid || d.b === my.pid) && my.duelId !== d.ts && !(mini && mini.net) && d.ts2 && now - d.ts2 < 12000) duelBegin(my, d);
     if (mini && mini.net && d.ts === mini.dts) {
       var oc = mini.role === 'a' ? d.cb : d.ca, of = mini.role === 'a' ? d.fb : d.fa;
-      if (typeof oc === 'number' && oc > mini.oc) mini.oc = oc;
+      if (typeof oc === 'number' && (mini.id === 'molenet' || oc > mini.oc)) mini.oc = oc;
       if (typeof of === 'number') mini.of = of;
     }
   }
   my.fast = !!(mini && mini.net && !mini.over);
 }
-function duelSend(m) {
+function duelSend(m, val) {
   var my = net; if (!my) return;
-  var u = {}; u[m.role === 'a' ? 'ca' : 'cb'] = m.taps[0];
+  var u = {}; u[m.role === 'a' ? 'ca' : 'cb'] = (val === undefined ? m.taps[0] : val);
   duelWrite(my, u);
 }
 function duelFinish(m) {
   var my = net; if (!my || m.sent) return; m.sent = true;
-  var u = {}; u[m.role === 'a' ? 'fa' : 'fb'] = m.myFin; u[m.role === 'a' ? 'ca' : 'cb'] = Math.max(0, m.taps[0]);
+  var u = {}; u[m.role === 'a' ? 'fa' : 'fb'] = m.myFin; u[m.role === 'a' ? 'ca' : 'cb'] = m.id === 'molenet' ? m.myFin : Math.max(0, m.taps[0]);
   duelWrite(my, u);
 }
 
@@ -2043,7 +2048,8 @@ function lobbyTap(x, y) {
   } else if (v === 'room') {
     if (lb.invite) { if (inside(BTN_YES, x, y)) duelAnswer(true); else if (inside(BTN_NO, x, y)) duelAnswer(false); return; }
     if (inside(BTN_BACK2, x, y)) { netLeave(true); return; }
-    if (net && lb.target && !lb.wait && inside(BTN_DUEL, x, y)) { duelInvite(lb.target); return; }
+    if (net && lb.target && !lb.wait && inside(BTN_DUEL, x, y)) { duelInvite(lb.target, 'push'); return; }
+    if (net && lb.target && !lb.wait && inside(BTN_DUEL2, x, y)) { duelInvite(lb.target, 'mole'); return; }
     if (net) {
       var hit = -1, hi;
       for (hi = 0; hi < lb.players.length; hi++) {
@@ -2127,8 +2133,8 @@ function drawLobby(t) {
     if (tq) {
       R(P.gold, 8, 172, 164, 60); R('#241238', 9, 173, 162, 58);
       T('DÉFIER ' + (tq.name || nm(ROSTER[tq.ci])).slice(0, 10), 90, 180, P.cream, 8, 'center');
-      T('AU POUSSE EN 1 CONTRE 1', 90, 192, P.goldDim, 8, 'center');
-      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 215, P.gold, 8, 'center'); else btn(BTN_DUEL, 'INVITER', '#b3202e');
+      T('CHOISIS LE JEU', 90, 192, P.goldDim, 8, 'center');
+      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 215, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'POUSSE', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); }
     }
   }
   if (!demo && lb.invite) {
@@ -2136,7 +2142,7 @@ function drawLobby(t) {
     R(P.gold, 14, 90, 152, 100); R('#241238', 15, 91, 150, 98);
     drawChar(ROSTER[lb.invite.ci], 90, 150, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
     T((lb.invite.name || 'QUELQU\'UN').slice(0, 12), 90, 95, P.gold, 8, 'center');
-    T('TE DÉFIE AU POUSSE !', 90, 106, P.cream, 8, 'center');
+    T(lb.invite.g === 'mole' ? 'TE DÉFIE AUX TAUPES !' : 'TE DÉFIE AU POUSSE !', 90, 106, P.cream, 8, 'center');
     btn(BTN_YES, 'OUI', '#2e8b57'); btn(BTN_NO, 'NON', '#b3202e');
   }
   if (demo) T('(JOUEURS SIMULÉS)', 90, 272, '#8d84b8', 8, 'center');
@@ -2248,6 +2254,7 @@ function moleHud(st, el, label) {
 function moleStartSolo() { mini = moleNew(Math.floor(Math.random() * 1e9), sel, performance.now() + 3000); mini.id = 'mole'; }
 function moleSoloTap(x, y) {
   var m = mini;
+  if (m.net && m.over) { if (inside(BTN_BACK, x, y) || inside(BTN_E2, x, y)) mgLeave(); return; }
   if (m.over) { if (inside(BTN_E1, x, y)) { blip(); moleStartSolo(); } else if (inside(BTN_E2, x, y)) mgLeave(); return; }
   if (inside(BTN_X, x, y)) { mgLeave(); return; }
   moleTapAt(m, x, y, performance.now() - m.t0);
@@ -2267,6 +2274,26 @@ function drawMoleSolo(t) {
     T(m.rec ? 'NOUVEAU RECORD !' : 'RECORD ' + (m.best || 0), 90, 154, m.rec ? P.mint : P.goldDim, 8, 'center', P.ink);
     T(m.hits + ' TOUCHÉS / ' + m.bad + ' ERREURS', 90, 170, '#8d84b8', 8, 'center');
     btn(BTN_E1, 'REJOUER', '#2e8b57'); btn(BTN_E2, 'MENU', '#b3202e');
+  }
+}
+function drawMoleDuel(t) {
+  var m = mini, el = t - m.t0, left = Math.max(0, Math.ceil((MOLE_TIME - el) / 1000));
+  if (!m.fin) {
+    if (el >= MOLE_TIME) { m.fin = true; m.finT = t; m.myFin = m.score; duelFinish(m); }
+    else if (m.score !== m.lastSent && t - m.wt > 200) { m.wt = t; m.lastSent = m.score; duelSend(m, m.score); }
+  } else if (!m.over && (m.of !== null || t - m.finT > 6000)) {
+    var of = m.of === null ? m.oc : m.of;
+    m.over = true; jingle(); m.win = of <= -9000 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); m.fo = of;
+  }
+  moleDraw(m, Math.min(el, MOLE_TIME)); moleHud(m, Math.min(el, MOLE_TIME), 'RIVAL ' + m.oc);
+  T(left + ' S', 90, 24, left <= 5 ? '#ff9b9b' : P.cream, 8, 'center', P.ink);
+  if (el < 0) { R('rgba(10,6,16,0.55)', 0, 90, W, 80); Tout(String(Math.max(1, Math.ceil(-el / 1000))), 90, 112, P.gold, 16, '#2a0712', P.red); T('TAPE LES AUTRES', 90, 148, P.cream, 8, 'center', P.ink); T('PAS TA TÊTE !', 90, 159, P.cream, 8, 'center', P.ink); }
+  if (m.fin && !m.over) { R('rgba(10,6,16,0.7)', 0, 100, W, 40); T('ON ATTEND LE RIVAL...', 90, 116, P.cream, 8, 'center', P.ink); }
+  if (m.over) {
+    R('rgba(10,6,16,0.84)', 0, 90, W, 130);
+    Tout(m.win === 0 ? 'ÉGALITÉ !' : (m.win === 1 ? 'GAGNÉ !' : 'PERDU'), 90, 100, P.gold, 16, '#2a0712', P.red);
+    T('TOI ' + m.myFin + ' - ' + (m.fo <= -9000 ? 'ABANDON' : m.fo) + ' RIVAL', 90, 140, P.cream, 8, 'center', P.ink);
+    btn(BTN_BACK, 'SALLE', '#b3202e');
   }
 }
 /* online round: everyone plays the same schedule, best score wins */
@@ -2344,7 +2371,7 @@ function mgStart(id) {
   if (id === 'online') { mode = 'multi'; scene = 'stage'; mini = null; lobbyStart(); lbMsg('INVITE UN JOUEUR DE LA SALLE', 6000); }
   else if (id === 'brick') brickStart(); else if (id === 'mole') moleStartSolo(); else pushStart(id);
 }
-function mgLeave() { if (mini && mini.net && !mini.fin && net) { mini.myFin = -1; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
+function mgLeave() { if (mini && mini.net && !mini.fin && net) { mini.myFin = mini.id === 'molenet' ? -9999 : -1; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
 function drawGameMenu(t) {
   drawHall(t); R('rgba(10,6,16,0.55)', 0, 0, W, H);
   T(mode === 'versus' ? 'VERSUS' : 'ARCADE', 90, 8, P.gold, 8, 'center', P.velvet);
@@ -2363,10 +2390,10 @@ function mgTap(x, y) {
     for (i = 0; i < L.length; i++) if (inside(mgBtn(i), x, y)) { if (L[i].off) boop(); else { blip(); mgStart(L[i].id); } return; }
     return;
   }
-  if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole') moleSoloTap(x, y); else pushTap(x, y);
+  if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
 }
 function drawMini(t) {
-  if (mini.id === 'brick') drawBrick(t); else if (mini.id === 'mole') drawMoleSolo(t); else drawPush(t);
+  if (mini.id === 'brick') drawBrick(t); else if (mini.id === 'mole') drawMoleSolo(t); else if (mini.id === 'molenet') drawMoleDuel(t); else drawPush(t);
   muteIcon();
 }
 
@@ -2378,7 +2405,7 @@ function brickLevel(lv, rowsN) {
   return bricks;
 }
 function brickStart() {
-  mini = { id: 'brick', bricks: brickLevel(1), px: 90, pw: 38, bx: 90, by: 262, vx: 0, vy: 0, stuck: true, go: false, lives: 3, score: 0, lv: 1, speed: 125, last: performance.now(), over: false, won: false, hits: 0 };
+  mini = { id: 'brick', bricks: brickLevel(1), px: 90, pw: 38, bx: 90, by: 262, vx: 0, vy: 0, stuck: true, go: false, lives: 3, score: 0, lv: 1, speed: 125, last: performance.now(), over: false, won: false, hits: 0, extra: [], items: [], shots: [], miss: [], fastUntil: 0, stickyUntil: 0, laserUntil: 0, lastShot: 0, msg: null };
 }
 function brickTap(x, y) {
   if (mini.over) {
@@ -2393,7 +2420,7 @@ function brickWin(m) {
   var left = 0, i; for (i = 0; i < m.bricks.length; i++) if (m.bricks[i].hp > 0) left++;
   if (!left && !m.over) {
     if (m.lv >= (m.maxLv || 3)) { m.over = true; m.won = true; if (!m.online) jingle(); }
-    else { m.lv++; m.bricks = brickLevel(m.lv); m.speed *= 1.12; m.stuck = true; m.go = false; jingle(); }
+    else { m.lv++; m.bricks = brickLevel(m.lv); m.speed *= 1.12; m.stuck = true; m.go = false; m.extra = []; m.items = []; m.shots = []; m.miss = []; m.stkY = 0; m.fastUntil = m.stickyUntil = m.laserUntil = 0; jingle(); }
   }
 }
 function brickUpdate(t) {
@@ -2404,39 +2431,102 @@ function brickUpdate(t) {
   brickWin(m);
   if (m.hold || m.freeze) { if (m.stuck) { m.bx = m.px; m.by = 262; } m.go = false; return; }
   if (m.over) return;
+  brickBonusUpdate(m, t, dt);
+  var dtB = dt * (t < m.fastUntil ? 1.4 : 1), lost = false, pb;
   if (m.stuck) {
-    m.bx = m.px; m.by = 262;
-    if (m.go) { var a = (-90 + (Math.random() * 50 - 25)) * Math.PI / 180; m.vx = Math.cos(a) * m.speed; m.vy = Math.sin(a) * m.speed; m.stuck = false; blip(); }
-    m.go = false; return;
+    m.bx = m.px; m.by = m.stkY || 262;
+    if (m.go) { var a = (-90 + (Math.random() * 50 - 25)) * Math.PI / 180; m.vx = Math.cos(a) * m.speed; m.vy = Math.sin(a) * m.speed; m.stuck = false; m.stkY = 0; blip(); }
+    m.go = false;
+  } else {
+    pb = { x: m.bx, y: m.by, vx: m.vx, vy: m.vy }; lost = ballStep(m, pb, dtB, true, t);
+    m.bx = pb.x; m.by = pb.y; m.vx = pb.vx; m.vy = pb.vy;
   }
+  var k, eb;
+  for (k = m.extra.length - 1; k >= 0; k--) { eb = m.extra[k]; if (ballStep(m, eb, dtB, false, t)) m.extra.splice(k, 1); }
+  if (lost) {
+    if (m.extra.length) { eb = m.extra.shift(); m.bx = eb.x; m.by = eb.y; m.vx = eb.vx; m.vy = eb.vy; }
+    else {
+      m.lives--; boop(); m.items = []; m.shots = []; m.miss = []; m.stkY = 0;
+      if (m.lives <= 0) { m.over = true; m.won = false; } else { m.stuck = true; m.go = false; }
+    }
+  }
+  brickWin(m);
+}
+/* one ball (primary or extra) moving through the walls, the paddle and the bricks; true = fell out */
+function ballStep(m, b, dt, primary, t) {
+  var step, i, k;
   for (step = 0; step < 3; step++) {
-    m.bx += m.vx * dt / 3; m.by += m.vy * dt / 3;
-    if (m.bx < 3) { m.bx = 3; m.vx = Math.abs(m.vx); }
-    if (m.bx > W - 3) { m.bx = W - 3; m.vx = -Math.abs(m.vx); }
-    if (m.by < 22) { m.by = 22; m.vy = Math.abs(m.vy); }
-    if (m.vy > 0 && m.by >= 293 && m.by <= 301 && Math.abs(m.bx - m.px) <= m.pw / 2 + 2) {
-      var off = Math.max(-1, Math.min(1, (m.bx - m.px) / (m.pw / 2))), ang = off * 62 * Math.PI / 180;
-      m.vx = Math.sin(ang) * m.speed; m.vy = -Math.cos(ang) * m.speed; m.by = 292; blip();
+    b.x += b.vx * dt / 3; b.y += b.vy * dt / 3;
+    if (b.x < 3) { b.x = 3; b.vx = Math.abs(b.vx); }
+    if (b.x > W - 3) { b.x = W - 3; b.vx = -Math.abs(b.vx); }
+    if (b.y < 22) { b.y = 22; b.vy = Math.abs(b.vy); }
+    if (b.vy > 0 && b.y >= 293 && b.y <= 301 && Math.abs(b.x - m.px) <= m.pw / 2 + 2) {
+      var off = Math.max(-1, Math.min(1, (b.x - m.px) / (m.pw / 2))), ang = off * 62 * Math.PI / 180;
+      b.vx = Math.sin(ang) * m.speed; b.vy = -Math.cos(ang) * m.speed; b.y = 292; blip();
+      if (primary && t < m.stickyUntil) { m.stuck = true; m.go = false; m.stkY = 292; return false; }
     }
     for (i = 0; i < m.bricks.length; i++) {
-      b = m.bricks[i];
-      if (b.hp <= 0) continue;
-      if (m.bx + 2 > b.x && m.bx - 2 < b.x + b.w && m.by + 2 > b.y && m.by - 2 < b.y + b.h) {
-        var ox = Math.min(m.bx + 2 - b.x, b.x + b.w - (m.bx - 2)), oy = Math.min(m.by + 2 - b.y, b.y + b.h - (m.by - 2));
-        if (ox < oy) m.vx = -m.vx; else m.vy = -m.vy;
-        b.hp--; m.hits++; m.score += b.hp > 0 ? 5 : 10;
-        if (b.hp > 0) b.col = '#c9c9d9'; 
-        boop();
-        if (m.hits % 6 === 0) { var sp = Math.hypot(m.vx, m.vy) * 1.04; var an = Math.atan2(m.vy, m.vx); m.vx = Math.cos(an) * sp; m.vy = Math.sin(an) * sp; }
+      k = m.bricks[i];
+      if (k.hp <= 0) continue;
+      if (b.x + 2 > k.x && b.x - 2 < k.x + k.w && b.y + 2 > k.y && b.y - 2 < k.y + k.h) {
+        var ox = Math.min(b.x + 2 - k.x, k.x + k.w - (b.x - 2)), oy = Math.min(b.y + 2 - k.y, k.y + k.h - (b.y - 2));
+        if (ox < oy) b.vx = -b.vx; else b.vy = -b.vy;
+        brickHit(m, k, t);
+        if (m.hits % 6 === 0) { var sp = Math.hypot(b.vx, b.vy) * 1.04, an = Math.atan2(b.vy, b.vx); b.vx = Math.cos(an) * sp; b.vy = Math.sin(an) * sp; }
         break;
       }
     }
   }
-  if (m.by > H + 4) {
-    m.lives--; boop();
-    if (m.lives <= 0) { m.over = true; m.won = false; } else { m.stuck = true; m.go = false; }
+  return b.y > H + 4;
+}
+function brickHit(m, k, t) {
+  k.hp--; m.hits++; m.score += k.hp > 0 ? 5 : 10;
+  if (k.hp > 0) k.col = '#c9c9d9'; else if (Math.random() < 0.2) m.items.push({ x: k.x + k.w / 2, y: k.y + k.h, kind: Math.floor(Math.random() * 4), bonus: Math.floor(Math.random() * 5) });
+  boop();
+}
+var BONUS_NAME = ['3 BILLES !', 'VITESSE !', 'TÊTES CHERCHEUSES !', 'BOULE COLLANTE !', 'RAYON LASER !'];
+function brickBonus(m, bo, t) {
+  var k, a, sp = m.speed;
+  if (bo === 0) {
+    if (m.extra.length < 6) for (k = -1; k <= 1; k += 2) { a = (-90 + k * 24) * Math.PI / 180; m.extra.push({ x: m.px, y: 290, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp }); }
+  } else if (bo === 1) m.fastUntil = t + 8000;
+  else if (bo === 2) { for (k = -1; k <= 1; k++) m.miss.push({ x: m.px + k * 9, y: 288, vx: k * 40, vy: -90, t0: t }); }
+  else if (bo === 3) m.stickyUntil = t + 12000;
+  else m.laserUntil = t + 8000;
+  m.msg = { s: BONUS_NAME[bo], t: t }; jingle();
+}
+function brickBonusUpdate(m, t, dt) {
+  var i, it, s2, b, best, bd, d, dx, dy, n;
+  for (i = m.items.length - 1; i >= 0; i--) {
+    it = m.items[i]; it.y += 62 * dt;
+    if (it.y >= 284 && it.y <= 304 && Math.abs(it.x - m.px) <= m.pw / 2 + 8) { brickBonus(m, it.bonus, t); m.items.splice(i, 1); }
+    else if (it.y > H + 8) m.items.splice(i, 1);
   }
-  brickWin(m);
+  if (t < m.laserUntil && t - m.lastShot > 300) { m.lastShot = t; m.shots.push({ x: m.px - 10, y: 292 }, { x: m.px + 10, y: 292 }); blip(); }
+  for (i = m.shots.length - 1; i >= 0; i--) {
+    s2 = m.shots[i]; s2.y -= 230 * dt; var gone = s2.y < 22;
+    for (n = 0; n < m.bricks.length && !gone; n++) { b = m.bricks[n]; if (b.hp > 0 && s2.x >= b.x && s2.x <= b.x + b.w && s2.y <= b.y + b.h && s2.y >= b.y - 4) { brickHit(m, b, t); gone = true; } }
+    if (gone) m.shots.splice(i, 1);
+  }
+  for (i = m.miss.length - 1; i >= 0; i--) {
+    s2 = m.miss[i]; best = null; bd = 1e9;
+    for (n = 0; n < m.bricks.length; n++) { b = m.bricks[n]; if (b.hp <= 0) continue; dx = b.x + b.w / 2 - s2.x; dy = b.y + b.h / 2 - s2.y; d = dx * dx + dy * dy; if (d < bd) { bd = d; best = b; } }
+    if (!best || t - s2.t0 > 5000) { m.miss.splice(i, 1); continue; }
+    dx = best.x + best.w / 2 - s2.x; dy = best.y + best.h / 2 - s2.y; d = Math.hypot(dx, dy) || 1;
+    s2.vx += (dx / d * 170 - s2.vx) * Math.min(1, dt * 6); s2.vy += (dy / d * 170 - s2.vy) * Math.min(1, dt * 6);
+    s2.x += s2.vx * dt; s2.y += s2.vy * dt;
+    if (s2.x > best.x - 2 && s2.x < best.x + best.w + 2 && s2.y > best.y - 2 && s2.y < best.y + best.h + 2) { brickHit(m, best, t); m.miss.splice(i, 1); }
+  }
+}
+var ICON = {
+  0: { p: { k: '#333a4a', c: '#9aa0b0', d: '#6b7080', s: '#d4d8e6' }, r: ['...kk.....', '..cccccc..', '.dddddddd.', 'dsddddddd.', 'dsddddddd.', '.dddddddd.', '..dddddd..'] },
+  1: { p: { w: '#bfe9ff', p: '#ffb3d9', y: '#ffe14a' }, r: ['..w....w..', '.www..www.', '.wwwppwww.', '..wwppww..', '....pp.y..', '....pp.y..', '...p..p...'] },
+  2: { p: { m: '#8a5a2b', r: '#e8202a', w: '#ffffff' }, r: ['mrrrrrrrr.', 'mrrrwwrrr.', 'mrrrwwrrr.', 'mrwwwwwwr.', 'mrwwwwwwr.', 'mrrrwwrrr.', 'mrrrwwrrr.', 'mrrrrrrrr.', 'm.........'] },
+  3: { p: { g: '#c8ccd8', w: '#ffffff', k: '#222222' }, r: ['...ggg....', '..ggwgg...', '..ggggg...', '...ggg....', '....k.....', '....k.....', '....kk....'] }
+};
+function drawIcon(kind, x, y) {
+  var ic = ICON[kind], r = ic.r, i, j, ch;
+  for (i = 0; i < r.length; i++) for (j = 0; j < r[i].length; j++) { ch = r[i].charAt(j); if (ch !== '.') R(ic.p[ch], Math.round(x) - 10 + j * 2, Math.round(y) - 4 + i * 2, 2, 2); }
 }
 function drawBrick(t) {
   var m = mini, i, b, ow = !!m.online, lf = 0;
@@ -2461,9 +2551,16 @@ function drawBrick(t) {
     drawHead(b.ci, b.x + 2, b.y + 1, b.w - 4, b.h - 2);
     if (b.hp > 1) R('rgba(255,255,255,0.28)', b.x, b.y, b.w, b.h);
   }
-  drawChar(ROSTER[ow ? (m.own || 0) : sel], m.px, 296, 1, false, 0);
-  R(P.gold, m.px - m.pw / 2, 296, m.pw, 5); R('#fff2b8', m.px - m.pw / 2, 296, m.pw, 1);
-  disc(Math.round(m.bx), Math.round(m.by), 2, '#e03030'); R('#ffb0b0', Math.round(m.bx) - 1, Math.round(m.by) - 1, 1, 1);
+  var tn = performance.now(), pcol = tn < m.laserUntil ? '#ff5050' : (tn < m.stickyUntil ? '#7ee0a0' : P.gold), ci0 = ow ? (m.own || 0) : sel;
+  drawChar(ROSTER[ci0], m.px, 296, 1, false, 0);
+  R(pcol, m.px - m.pw / 2, 296, m.pw, 5); R('#fff2b8', m.px - m.pw / 2, 296, m.pw, 1);
+  if (tn < m.laserUntil) { R('#ffd0d0', m.px - 11, 293, 3, 3); R('#ffd0d0', m.px + 9, 293, 3, 3); }
+  for (i = 0; i < m.shots.length; i++) { R('#ff3030', Math.round(m.shots[i].x), Math.round(m.shots[i].y), 1, 7); R('#ffd0d0', Math.round(m.shots[i].x), Math.round(m.shots[i].y), 1, 2); }
+  for (i = 0; i < m.items.length; i++) drawIcon(m.items[i].kind, m.items[i].x, m.items[i].y);
+  for (i = 0; i < m.miss.length; i++) drawHead(ci0, Math.round(m.miss[i].x) - 6, Math.round(m.miss[i].y) - 6, 12, 12);
+  disc(Math.round(m.bx), Math.round(m.by), 2, tn < m.fastUntil ? '#ffb030' : '#e03030'); R('#ffb0b0', Math.round(m.bx) - 1, Math.round(m.by) - 1, 1, 1);
+  for (i = 0; i < m.extra.length; i++) { disc(Math.round(m.extra[i].x), Math.round(m.extra[i].y), 2, '#ffd24a'); R('#fff', Math.round(m.extra[i].x) - 1, Math.round(m.extra[i].y) - 1, 1, 1); }
+  if (m.msg && tn - m.msg.t < 1500) T(m.msg.s, 90, 236, P.gold, 8, 'center', P.ink);
   if (m.stuck && !m.over && !m.hold) T(m.lv > 1 ? 'NIVEAU ' + m.lv : 'GLISSE ET TOUCHE', 90, 240, P.cream, 8, 'center', P.ink);
   if (m.over && !ow) {
     R('rgba(10,6,16,0.8)', 0, 90, W, 120);

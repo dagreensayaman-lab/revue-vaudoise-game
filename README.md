@@ -41,3 +41,6 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 
 ## Duel en ligne
 VERSUS → DUEL EN LIGNE ouvre la salle. Dans la salle, touche le perso d un joueur puis INVITER : il reçoit une invitation (OUI/NON) et vous jouez au POUSSE en 1 contre 1, chacun sur son téléphone.
+
+Duel en ligne : au choix POUSSE ou TAUPES (même graine pour les deux joueurs, meilleur score gagne).
+Arkanoid : bonus qui tombent (casserole, fée, drapeau suisse, micro) = 3 billes, vitesse, 3 têtes chercheuses, boule collante, rayon laser.
