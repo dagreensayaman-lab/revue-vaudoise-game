@@ -44,3 +44,6 @@ VERSUS → DUEL EN LIGNE ouvre la salle. Dans la salle, touche le perso d un jou
 
 Duel en ligne : au choix POUSSE ou TAUPES (même graine pour les deux joueurs, meilleur score gagne).
 Arkanoid : bonus qui tombent (casserole, fée, drapeau suisse, micro) = 3 billes, vitesse, 3 têtes chercheuses, boule collante, rayon laser.
+
+## Loup-Garou (en ligne)
+Dans une salle, le maître du jeu appuie sur LOUP-GAROU, règle les rôles (auto selon le nombre de joueurs) et lance. Chacun reçoit son rôle en secret sur son téléphone ; nuits, votes et morts sont gérés automatiquement (loups, villageois, voyante, sorcière, chasseur, Cupidon). Minimum 4 joueurs.
