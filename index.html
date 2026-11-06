@@ -1785,7 +1785,7 @@ function drawFans(t) {
 var FB_URL = 'https://revue-vaudoise-2b13c-default-rtdb.europe-west1.firebasedatabase.app';
 var MAXP = 12, net = null, autoRoom = '', memPid = '';
 var BTN_NEW = { x: 20, y: 92, w: 140, h: 26 }, BTN_JOIN = { x: 20, y: 126, w: 140, h: 26 }, BTN_DEMO = { x: 20, y: 160, w: 140, h: 26 };
-var BTN_DUEL = { x: 14, y: 204, w: 76, h: 24 }, BTN_DUEL2 = { x: 94, y: 204, w: 76, h: 24 }, BTN_YES = { x: 20, y: 160, w: 66, h: 22 }, BTN_NO = { x: 94, y: 160, w: 66, h: 22 };
+var BTN_DUEL = { x: 14, y: 199, w: 76, h: 13 }, BTN_DUEL2 = { x: 94, y: 199, w: 76, h: 13 }, BTN_DUEL3 = { x: 14, y: 214, w: 156, h: 13 }, BTN_YES = { x: 20, y: 160, w: 66, h: 22 }, BTN_NO = { x: 94, y: 160, w: 66, h: 22 };
 var BTN_OK = { x: 30, y: 240, w: 120, h: 26 }, BTN_PG = { x: 40, y: 254, w: 100, h: 18 };
 var CODE_BOX = { x: 40, y: 104, w: 100, h: 26 }, BTN_GAGE = { x: 3, y: 268, w: 86, h: 14 }, BTN_QUEST = { x: 91, y: 268, w: 86, h: 14 }, GAGE_BOX = { x: 10, y: 150, w: 160, h: 28 };
 var BTN_PA = { x: 30, y: 142, w: 120, h: 26 }, BTN_PB = { x: 30, y: 178, w: 120, h: 26 };
@@ -1972,6 +1972,10 @@ function duelBegin(my, d) {
   var role = d.a === my.pid ? 'a' : 'b', op = role === 'a' ? d.b : d.a, p = (my.rm.p || {})[op] || {}, now = performance.now();
   var age = Math.max(0, Math.min(2500, Date.now() - (d.ts2 || Date.now())));
   my.duelId = d.ts; lb.target = '';
+  if (d.g === 'brick') {
+    brickStart(); mini.net = true; mini.role = role; mini.dts = d.ts; mini.t0 = now - age + 3000; mini.oc = 0; mini.of = null; mini.fin = false; mini.done = false; mini.myFin = 0; mini.finT = 0; mini.wt = 0; mini.lastSent = null; mini.win = 0; mini.hold = true; mini.maxLv = 1; mini.bricks = brickLevel(1, 4); mini.own = sel;
+    scene = 'stage'; mode = 'multi'; jingle(); return;
+  }
   if (d.g === 'mole') {
     mini = moleNew(d.sd || 1, sel, now - age + 3000); mini.id = 'molenet';
     mini.net = true; mini.role = role; mini.dts = d.ts; mini.opn = p.n || ''; mini.oc = 0; mini.of = null; mini.fin = false; mini.myFin = 0; mini.finT = 0; mini.wt = 0; mini.lastSent = null; mini.win = 0;
@@ -2006,7 +2010,7 @@ function duelSend(m, val) {
 }
 function duelFinish(m) {
   var my = net; if (!my || m.sent) return; m.sent = true;
-  var u = {}; u[m.role === 'a' ? 'fa' : 'fb'] = m.myFin; u[m.role === 'a' ? 'ca' : 'cb'] = m.id === 'molenet' ? m.myFin : Math.max(0, m.taps[0]);
+  var u = {}; u[m.role === 'a' ? 'fa' : 'fb'] = m.myFin; u[m.role === 'a' ? 'ca' : 'cb'] = m.id === 'pushnet' ? Math.max(0, m.taps[0]) : m.myFin;
   duelWrite(my, u);
 }
 
@@ -2050,6 +2054,7 @@ function lobbyTap(x, y) {
     if (inside(BTN_BACK2, x, y)) { netLeave(true); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL, x, y)) { duelInvite(lb.target, 'push'); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL2, x, y)) { duelInvite(lb.target, 'mole'); return; }
+    if (net && lb.target && !lb.wait && inside(BTN_DUEL3, x, y)) { duelInvite(lb.target, 'brick'); return; }
     if (net) {
       var hit = -1, hi;
       for (hi = 0; hi < lb.players.length; hi++) {
@@ -2133,8 +2138,8 @@ function drawLobby(t) {
     if (tq) {
       R(P.gold, 8, 172, 164, 60); R('#241238', 9, 173, 162, 58);
       T('DÉFIER ' + (tq.name || nm(ROSTER[tq.ci])).slice(0, 10), 90, 180, P.cream, 8, 'center');
-      T('CHOISIS LE JEU', 90, 192, P.goldDim, 8, 'center');
-      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 215, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'POUSSE', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); }
+      T('CHOISIS LE JEU', 90, 188, P.goldDim, 8, 'center');
+      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 212, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'POUSSE', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); btn(BTN_DUEL3, 'ARKANOID', '#3a6fb0'); }
     }
   }
   if (!demo && lb.invite) {
@@ -2142,7 +2147,7 @@ function drawLobby(t) {
     R(P.gold, 14, 90, 152, 100); R('#241238', 15, 91, 150, 98);
     drawChar(ROSTER[lb.invite.ci], 90, 150, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
     T((lb.invite.name || 'QUELQU\'UN').slice(0, 12), 90, 95, P.gold, 8, 'center');
-    T(lb.invite.g === 'mole' ? 'TE DÉFIE AUX TAUPES !' : 'TE DÉFIE AU POUSSE !', 90, 106, P.cream, 8, 'center');
+    T(lb.invite.g === 'mole' ? 'TE DÉFIE AUX TAUPES !' : (lb.invite.g === 'brick' ? 'TE DÉFIE À ARKANOID !' : 'TE DÉFIE AU POUSSE !'), 90, 106, P.cream, 8, 'center');
     btn(BTN_YES, 'OUI', '#2e8b57'); btn(BTN_NO, 'NON', '#b3202e');
   }
   if (demo) T('(JOUEURS SIMULÉS)', 90, 272, '#8d84b8', 8, 'center');
@@ -2371,7 +2376,7 @@ function mgStart(id) {
   if (id === 'online') { mode = 'multi'; scene = 'stage'; mini = null; lobbyStart(); lbMsg('INVITE UN JOUEUR DE LA SALLE', 6000); }
   else if (id === 'brick') brickStart(); else if (id === 'mole') moleStartSolo(); else pushStart(id);
 }
-function mgLeave() { if (mini && mini.net && !mini.fin && net) { mini.myFin = mini.id === 'molenet' ? -9999 : -1; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
+function mgLeave() { if (mini && mini.net && !mini.fin && net) { mini.myFin = mini.id === 'pushnet' ? -1 : -9999; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
 function drawGameMenu(t) {
   drawHall(t); R('rgba(10,6,16,0.55)', 0, 0, W, H);
   T(mode === 'versus' ? 'VERSUS' : 'ARCADE', 90, 8, P.gold, 8, 'center', P.velvet);
@@ -2393,7 +2398,7 @@ function mgTap(x, y) {
   if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
 }
 function drawMini(t) {
-  if (mini.id === 'brick') drawBrick(t); else if (mini.id === 'mole') drawMoleSolo(t); else if (mini.id === 'molenet') drawMoleDuel(t); else drawPush(t);
+  if (mini.id === 'brick') { drawBrick(t); if (mini.net) drawBrickDuel(t); } else if (mini.id === 'mole') drawMoleSolo(t); else if (mini.id === 'molenet') drawMoleDuel(t); else drawPush(t);
   muteIcon();
 }
 
@@ -2408,6 +2413,7 @@ function brickStart() {
   mini = { id: 'brick', bricks: brickLevel(1), px: 90, pw: 38, bx: 90, by: 262, vx: 0, vy: 0, stuck: true, go: false, lives: 3, score: 0, lv: 1, speed: 125, last: performance.now(), over: false, won: false, hits: 0, extra: [], items: [], shots: [], miss: [], fastUntil: 0, stickyUntil: 0, laserUntil: 0, lastShot: 0, msg: null };
 }
 function brickTap(x, y) {
+  if (mini.net && mini.done) { if (inside(BTN_BACK, x, y) || inside(BTN_E2, x, y)) mgLeave(); return; }
   if (mini.over) {
     if (inside(BTN_E1, x, y)) { blip(); brickStart(); }
     else if (inside(BTN_E2, x, y)) mgLeave();
@@ -2562,7 +2568,7 @@ function drawBrick(t) {
   for (i = 0; i < m.extra.length; i++) { disc(Math.round(m.extra[i].x), Math.round(m.extra[i].y), 2, '#ffd24a'); R('#fff', Math.round(m.extra[i].x) - 1, Math.round(m.extra[i].y) - 1, 1, 1); }
   if (m.msg && tn - m.msg.t < 1500) T(m.msg.s, 90, 236, P.gold, 8, 'center', P.ink);
   if (m.stuck && !m.over && !m.hold) T(m.lv > 1 ? 'NIVEAU ' + m.lv : 'GLISSE ET TOUCHE', 90, 240, P.cream, 8, 'center', P.ink);
-  if (m.over && !ow) {
+  if (m.over && !ow && !m.net) {
     R('rgba(10,6,16,0.8)', 0, 90, W, 120);
     Tout(m.won ? 'BRAVO !' : 'PERDU', 90, 110, P.gold, 16, '#2a0712', P.red);
     T('SCORE ' + m.score, 90, 150, P.cream, 8, 'center', P.ink);
@@ -2570,6 +2576,28 @@ function drawBrick(t) {
   }
 }
 
+var BRICK_DUEL_TIME = 60000;
+function drawBrickDuel(t) {
+  var m = mini, el = t - m.t0, left = Math.max(0, Math.ceil((BRICK_DUEL_TIME - el) / 1000));
+  m.hold = el < 0;
+  if (!m.fin) {
+    if (m.over || el >= BRICK_DUEL_TIME) { m.over = true; m.fin = true; m.finT = t; m.myFin = m.score + (m.won ? 200 : 0); duelFinish(m); }
+    else if (m.score !== m.lastSent && t - m.wt > 200) { m.wt = t; m.lastSent = m.score; duelSend(m, m.score); }
+  } else if (!m.done && (m.of !== null || t - m.finT > 6000)) {
+    var of = m.of === null ? m.oc : m.of;
+    m.done = true; jingle(); m.win = of <= -9000 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); m.fo = of;
+  }
+  T('RIVAL ' + m.oc, 90, 24, P.mint, 8, 'center', P.ink);
+  T(left + ' S', 170, 24, left <= 5 ? '#ff9b9b' : P.cream, 8, 'right', P.ink);
+  if (el < 0) { R('rgba(10,6,16,0.55)', 0, 110, W, 70); Tout(String(Math.max(1, Math.ceil(-el / 1000))), 90, 120, P.gold, 16, '#2a0712', P.red); T('FAIS PLUS DE POINTS', 90, 156, P.cream, 8, 'center', P.ink); }
+  if (m.fin && !m.done) { R('rgba(10,6,16,0.7)', 0, 100, W, 40); T('ON ATTEND LE RIVAL...', 90, 116, P.cream, 8, 'center', P.ink); }
+  if (m.done) {
+    R('rgba(10,6,16,0.86)', 0, 90, W, 130);
+    Tout(m.win === 0 ? 'ÉGALITÉ !' : (m.win === 1 ? 'GAGNÉ !' : 'PERDU'), 90, 100, P.gold, 16, '#2a0712', P.red);
+    T('TOI ' + m.myFin + ' - ' + (m.fo <= -9000 ? 'ABANDON' : m.fo) + ' RIVAL', 90, 140, P.cream, 8, 'center', P.ink);
+    btn(BTN_BACK, 'SALLE', '#b3202e');
+  }
+}
 /* --- Pousse: two players tap as fast as they can to push the other off the stage --- */
 var PUSH_STEP = 0.045, PUSH_TIME = 15000;
 function pushStart(id) {
