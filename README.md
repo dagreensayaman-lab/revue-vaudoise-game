@@ -36,3 +36,4 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 - Skins : touche le grand perso pour changer (Virginie, public, techniciens, prod).
 
 - Musique : « Les Sardines » (8 bits, en boucle) par défaut ; la petite note en bas à droite change de morceau (Phase 1 / Les Sardines).
+- Fin de partie : « We Are the Champions » (8 bits) joue pendant l'annonce des gagnants, puis la musique reprend.
