@@ -651,7 +651,7 @@ function tent2(t) {
   });
   // sign
   R('#e0b23a', 71, 130, 38, 14); R('#7a1022', 72, 131, 36, 12);
-  T('REVUE', 90, 134, '#ffe9b0', 8, 'center');
+  T('REVUE', 90, 134, '#ffe9b0', 6, 'center');
   for (x = 72; x < 108; x += 6) R((((x - 72) / 6) + k) % 2 ? '#fff2b8' : '#e0b23a', x, 130, 2, 1);
   // coloured glass band
   R('#4a2610', 58, 148, 64, 10);
@@ -701,7 +701,7 @@ function carpetAndGlow(t) {
   }
 }
 function queue(t) {
-  var q = ['jenny', 'pierre', 'karim', 'catherine', 'keumart', 'lea', 'olivier', 'david', 'veronique', 'sehalia'], i, n = q.length;
+  var q = ['jenny', 'pierre', 'karim', 'catherine', 'keumart', 'lea', 'olivier', 'david', 'veronique'], i, n = q.length;
   for (i = 0; i < n; i++) {
     var dy = (Math.floor(t / 420 + i) % 2) ? -1 : 0, x = 14 + i * (152 / (n - 1)), y = 236 + ((i % 2) ? 6 : 0);
     drawChar(byId(q[i]), Math.round(x), y, 1, x > 90, dy);
