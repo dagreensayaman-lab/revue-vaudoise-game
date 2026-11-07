@@ -2338,7 +2338,7 @@ var BTN_WOLF = { x: 70, y: 292, w: 106, h: 22 }, BTN_BACKR = { x: 4, y: 292, w: 
 function wfOn() { return !!(net && net.rm && net.rm.w && net.rm.w.ph); }
 function wfAuto(n) { return { loups: n <= 6 ? 1 : (n <= 9 ? 2 : 3), voy: n >= 5, sor: n >= 6, chas: n >= 7, cup: n >= 8 }; }
 function wfCnt(c) { return c.loups + (c.voy ? 1 : 0) + (c.sor ? 1 : 0) + (c.chas ? 1 : 0) + (c.cup ? 1 : 0); }
-function wfStartSetup() { wfl.cfg = wfAuto(netActive(net).length); wfl.setup = true; blip(); }
+function wfStartSetup() { var h = netActive(net).length; wfl.bots = h < 6 ? 6 - h : 0; wfl.cfg = wfAuto(h + wfl.bots); wfl.setup = true; blip(); }
 function wnm(pid) { var w = net && net.rm && net.rm.w; return (w && w.pn && w.pn[pid]) || '?'; }
 function wci(pid) { var w = net && net.rm && net.rm.w, id = w && w.pc && w.pc[pid]; return id ? Math.max(0, rosterIdx(id)) : 0; }
 function wfHas(w, role) { var k; for (k in w.r) if (w.r[k] === role) return true; return false; }
@@ -2402,12 +2402,37 @@ function netWolf(my) {
   }
   if (my.host) wfHost(my, w, now);
 }
+function wfBots(my, w, now) {
+  var ids = [], k; for (k in w.r) if (k.indexOf('bot') === 0) ids.push(k);
+  if (!ids.length || now - (my.botT || 0) < 1100) return;
+  var el = now - (my.wT || now), ph = w.ph, ac = w.ac || {}, ak = w.ak || {}, vw = w.vw || {}, vt = w.vt || {}, al = wfAlive(w), lv = wfLovers(w), u = {}, any = false;
+  var rnd = function (a) { return a[Math.floor(Math.random() * a.length)]; };
+  ids.forEach(function (b) {
+    var role = w.r[b], alive = !!(w.al && w.al[b]), oth = al.filter(function (x) { return x !== b; });
+    if (ph === 'role' && !ak[b] && el > 2500) u['ak/' + b] = 1;
+    else if (ph === 'love' && lv.indexOf(b) >= 0 && !ak[b] && el > 2000) u['ak/' + b] = 1;
+    else if (ph === 'cupid' && role === 'cup' && alive && !ac[b] && el > 3000) u['ac/' + b] = rnd(al) + ',' + rnd(al.slice(1));
+    else if (ph === 'wolves' && role === 'loup' && alive && !vw[b] && el > 3000) u['vw/' + b] = rnd(al.filter(function (x) { return w.r[x] !== 'loup'; }));
+    else if (ph === 'seer' && role === 'voy' && alive && !ac[b] && el > 3000) u['ac/' + b] = rnd(oth);
+    else if (ph === 'witch' && role === 'sor' && alive && !ac[b] && el > 3000) u['ac/' + b] = (!(w.wz || {}).h && w.tg && Math.random() < 0.4) ? 'h' : 'n';
+    else if (ph === 'hunter' && w.hp === b && !ac[b] && el > 2000) u['ac/' + b] = rnd(al);
+    else if (ph === 'day' && alive && !ak[b] && el > 10000 + Math.random() * 8000) u['ak/' + b] = 1;
+    else if (ph === 'vote' && alive && !vt[b] && el > 4000 + Math.random() * 6000) u['vt/' + b] = rnd(oth);
+  });
+  for (k in u) { any = true; u['w/' + k] = u[k]; delete u[k]; }
+  if (!any) return;
+  my.botT = now;
+  fbReq('PATCH', '/rooms/' + my.code, u).then(function () { netPoll(); }, function () {});
+}
 function wfHost(my, w, now) {
-  if (my.wacted === w.k || !w.r) return;
+  if (!w.r) return;
+  wfBots(my, w, now);
+  if (my.wacted === w.k) return;
   var el = now - (my.wT || now), ph = w.ph, ac = w.ac || {}, al = wfAlive(w), k, n, a, top, tg, act, lv;
   if (ph === 'role') {
     n = 0; for (k in (w.ak || {})) n++;
-    if (!(n >= netActive(my).length || el > 90000)) return;
+    var nbot = 0; for (k in w.r) if (k.indexOf('bot') === 0) nbot++;
+    if (!(n >= netActive(my).length + nbot || el > 90000)) return;
     wfGo(my, wfHas(w, 'cup') ? 'cupid' : 'wolves', { nt: 1, tg: null });
   } else if (ph === 'cupid') {
     act = wfWho(w, 'cup')[0]; a = act && ac[act] ? String(ac[act]).split(',') : [];
@@ -2465,13 +2490,17 @@ function wfHost(my, w, now) {
   }
 }
 function wfLaunch() {
-  var my = net, cfg = wfl.cfg, ids = netActive(my), n = ids.length, v = n - wfCnt(cfg), ro = [], i, j, t, r = {}, al = {}, pn = {}, pc = {}, p = my.rm.p || {};
+  var my = net, cfg = wfl.cfg, ids = netActive(my), n = ids.length + (wfl.bots || 0), v = n - wfCnt(cfg), ro = [], i, j, t, r = {}, al = {}, pn = {}, pc = {}, p = my.rm.p || {};
   if (n < 4) { lbMsg('IL FAUT 4 JOUEURS'); return; }
   if (v < 0) { lbMsg('TROP DE RÔLES'); return; }
   for (i = 0; i < cfg.loups; i++) ro.push('loup');
   if (cfg.voy) ro.push('voy'); if (cfg.sor) ro.push('sor'); if (cfg.chas) ro.push('chas'); if (cfg.cup) ro.push('cup');
   for (i = 0; i < v; i++) ro.push('vill');
   for (i = ro.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); t = ro[i]; ro[i] = ro[j]; ro[j] = t; }
+  var taken = {}; ids.forEach(function (pid) { taken[(p[pid] || {}).c] = 1; });
+  var pool = ROSTER.filter(function (ch) { return avail(ROSTER.indexOf(ch)) && !ch.ghost && !taken[ch.id]; });
+  for (i = 0; i < pool.length; i++) { j = Math.floor(Math.random() * pool.length); t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  for (i = 0; i < (wfl.bots || 0); i++) { var bq = pool[i % Math.max(1, pool.length)]; ids.push('bot' + (i + 1)); p['bot' + (i + 1)] = { n: nm(bq), c: bq.id }; }
   ids.forEach(function (pid, k) { r[pid] = ro[k]; al[pid] = 1; pn[pid] = String((p[pid] || {}).n || '?').slice(0, 8); pc[pid] = (p[pid] || {}).c || ''; });
   my.wacted = 0; jingle();
   fbReq('PATCH', '/rooms/' + my.code, { w: { ph: 'role', k: Date.now() % 900000000, nt: 0, r: r, al: al, pn: pn, pc: pc }, duel: null })
@@ -2577,9 +2606,9 @@ function wfCard(t, role) {
 }
 
 function drawWfSetup(t) {
-  var my = net, n = netActive(my).length, c = wfl.cfg || (wfl.cfg = wfAuto(n)), v = n - wfCnt(c);
+  var my = net, hum = netActive(my).length, nb = wfl.bots || 0, n = hum + nb, c = wfl.cfg || (wfl.cfg = wfAuto(n)), v = n - wfCnt(c);
   wfBg(t, true);
-  wfHead('LOUP-GAROU', 'JOUEURS : ' + n);
+  wfHead('LOUP-GAROU', 'JOUEURS : ' + n + (nb ? ' (' + nb + ' BOTS)' : ''));
   T('LOUPS', 14, 47, P.cream, 8, 'left', P.ink);
   wb({ x: 92, y: 41, w: 24, h: 20 }, '-', '#b3202e', function () { if (c.loups > 1) { c.loups--; blip(); } });
   T(String(c.loups), 132, 47, P.gold, 8, 'center');
@@ -2592,7 +2621,10 @@ function drawWfSetup(t) {
   if (n < 4) T('IL FAUT 4 JOUEURS', 90, 192, '#e07b7b', 8, 'center', P.ink);
   else if (v < 0) T('TROP DE RÔLES', 90, 192, '#e07b7b', 8, 'center', P.ink);
   else T('PARTIE POUR ' + n, 90, 192, P.mint, 8, 'center', P.ink);
-  wb({ x: 40, y: 208, w: 100, h: 20 }, 'AUTO', '#6a7a3a', function () { wfl.cfg = wfAuto(n); blip(); });
+  T('BOTS', 14, 214, P.cream, 8, 'left', P.ink);
+  wb({ x: 92, y: 208, w: 24, h: 20 }, '-', '#b3202e', function () { if (wfl.bots > 0) { wfl.bots--; wfl.cfg = wfAuto(hum + wfl.bots); blip(); } });
+  T(String(nb), 132, 214, P.gold, 8, 'center');
+  wb({ x: 146, y: 208, w: 24, h: 20 }, '+', '#2e8b57', function () { if (hum + wfl.bots < MAXP) { wfl.bots++; wfl.cfg = wfAuto(hum + wfl.bots); blip(); } });
   wb(BTN_OK, 'LANCER', (n >= 4 && v >= 0) ? '#2e8b57' : '#3a3f55', wfLaunch);
   wb(BTN_BACK2, 'RETOUR', '#3a3f55', function () { wfl.setup = false; boop(); });
   lobbyMsg(t, 270);
