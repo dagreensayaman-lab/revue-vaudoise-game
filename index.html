@@ -1978,7 +1978,6 @@ function myUid() {
   return u;
 }
 function statUpload() {
-  if (STATS.pt <= 0) return Promise.resolve();
   return fbReq('PUT', '/stats/' + myUid(), { c: ROSTER[sel].id, n: nm(ROSTER[sel]), st: statCompact(), ts: Date.now() }).catch(function () {});
 }
 function rankOpen() {
