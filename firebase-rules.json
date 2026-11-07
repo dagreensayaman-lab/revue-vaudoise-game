@@ -8,6 +8,12 @@
         ".write": true,
         ".validate": "$code.matches(/^[A-Z]{4}$/)"
       }
+    },
+    "stats": {
+      ".read": true,
+      "$uid": {
+        ".write": true
+      }
     }
   }
 }

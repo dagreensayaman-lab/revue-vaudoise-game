@@ -50,3 +50,6 @@ Dans une salle, le maître du jeu appuie sur LOUP-GAROU, règle les rôles (auto
 
 ## Cartes de stats
 Chaque joueur a une carte (niveau, points, parties solo / susceptible / loup-garou / duels, titres comme « le plus voté »). Stockée sur l'appareil (localStorage) et partagée dans la salle : touche un joueur → VOIR LA CARTE, ou touche ton propre perso.
+
+## Classement général
+Menu SALLE DE JEU → CLASSEMENT (points, duels, loups, votés). Les stats sont envoyées dans `stats/<id appareil>` : il faut les règles de `firebase-rules.json` (bloc `stats`) dans la console Firebase → Realtime Database → Règles → Publier.
