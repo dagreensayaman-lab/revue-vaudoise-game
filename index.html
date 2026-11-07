@@ -1599,8 +1599,8 @@ function submitVote() {
   var s = buildVote(performance.now()); if (!s) return;
   if (vg.net) netVote(s); else castLocal(s);
 }
-function endPages() { return vg.net ? [0, 1, 2, 3] : [0, 2]; }
-var PG_NAMES = ['SCORE', 'CLASSEMENT', 'TITRES', "QUI T'A VOTÉ"];
+function endPages() { return vg.net ? [0, 4, 1, 2, 3] : [0, 4, 2]; }
+var PG_NAMES = ['PODIUM', 'CLASSEMENT', 'TITRES', "QUI T'A VOTÉ", 'VIBE'];
 function pgLabel() { var p = endPages(); return PG_NAMES[p[((vg.pg || 0) + 1) % p.length]]; }
 
 function voteTap(x, y) { if (!vg) voteStart(); gameTap(x, y); }
@@ -1734,16 +1734,38 @@ function drawVoteEnd(t) {
   if (pg === 1) { drawRanking(t); return; }
   if (pg === 2) { drawTitles(t); return; }
   if (pg === 3) { drawFans(t); return; }
+  if (pg === 4) { drawVibe(t); return; }
   Tout('FIN DU VOTE', 90, 10, P.gold, 8, P.velvet, P.red);
-  T('TON SCORE', 90, 30, P.cream, 8, 'center', P.ink);
-  Tout(String(vg.score), 90, 44, P.gold, 16, '#2a0712', P.red);
-  T('POINTS', 90, 66, '#8d84b8', 8, 'center');
-  R(P.gold, 8, 84, 164, 12); R(P.ink, 9, 85, 162, 10);
-  T('PRIX DU PUBLIC', 90, 87, P.gold, 8, 'center');
+  T('TON SCORE', 90, 28, P.cream, 8, 'center', P.ink);
+  Tout(String(vg.score), 90, 41, P.gold, 16, '#2a0712', P.red);
+  T('POINTS', 90, 62, '#8d84b8', 8, 'center');
+  R(P.gold, 8, 78, 164, 12); R(P.ink, 9, 79, 162, 10);
+  T('PODIUM DES POINTS', 90, 81, P.gold, 8, 'center');
+  var rk = vg.rank && vg.rank.length ? vg.rank : [{ ci: sel, name: '', score: vg.score, me: true }], i;
+  var xs = [90, 30, 150], tops = [150, 162, 172], lab = ['1', '2', '3'];
+  for (i = 0; i < Math.min(3, rk.length); i++) {
+    var rr = rk[i], cx = xs[i], pt = tops[i];
+    drawChar(ROSTER[rr.ci], cx, pt, 1, false, 0);
+    R(i === 0 ? P.gold : '#4a2a1c', cx - 25, pt, 50, 190 - pt); R(rr.me ? '#2a1220' : '#140c18', cx - 24, pt + 1, 48, 190 - pt - 1);
+    T(lab[i], cx, pt + 5, i === 0 ? P.gold : P.cream, 8, 'center', P.ink);
+    T((rr.name || nm(ROSTER[rr.ci])).slice(0, 7), cx, 196, i === 0 ? P.gold : P.cream, 8, 'center', P.ink);
+    T(rr.score + ' PTS', cx, 207, '#8d84b8', 8, 'center');
+  }
+  if (vg.newBoss) {
+    R(P.gold, 8, 224, 164, 26); R(P.ink, 9, 225, 162, 24);
+    if (Math.floor(t / 400) % 2) T('PERSO CACHÉ DÉBLOQUÉ !', 90, 229, P.mint, 8, 'center'); else T('PERSO CACHÉ DÉBLOQUÉ !', 90, 229, P.gold, 8, 'center');
+    T('JEAN-LUC, LE PATRON', 90, 240, P.cream, 8, 'center');
+  }
+  endButtons();
+}
+function drawVibe(t) {
+  Tout('PRIX DU PUBLIC', 90, 10, P.gold, 8, P.velvet, P.red);
+  T('LA VIBE DE LA SALLE', 90, 28, P.cream, 8, 'center', P.ink);
+  T('LES PLUS VOTÉS', 90, 44, '#8d84b8', 8, 'center');
   var order = [], i;
   for (i = 0; i < vg.cand.length; i++) order.push(vg.cand[i]);
   order.sort(function (a, b) { return vg.recv[b] - vg.recv[a] || a - b; });
-  var xs = [90, 30, 150], ys = [116, 132, 132], lab = ['1ER', '2E', '3E'];
+  var xs = [90, 30, 150], ys = [90, 106, 106], lab = ['1ER', '2E', '3E'];
   for (i = 0; i < 3; i++) {
     var ci = order[i], cx = xs[i], ty = ys[i];
     T(lab[i], cx, ty - 10, i === 0 ? P.gold : P.cream, 8, 'center', P.ink);
@@ -1755,13 +1777,8 @@ function drawVoteEnd(t) {
     T(nn, cx, ty + 34, i === 0 ? P.gold : P.cream, 8, 'center', P.ink);
     T(vg.recv[ci] + ' VOIX', cx, ty + 45, '#8d84b8', 8, 'center');
   }
-  T('ÉLU PAR LE PUBLIC :', 90, 200, P.cream, 8, 'center', P.ink);
-  Tout(nm(ROSTER[order[0]]), 90, 214, P.gold, 8, P.velvet, P.red);
-  if (vg.newBoss) {
-    R(P.gold, 8, 224, 164, 26); R(P.ink, 9, 225, 162, 24);
-    if (Math.floor(t / 400) % 2) T('PERSO CACHÉ DÉBLOQUÉ !', 90, 229, P.mint, 8, 'center'); else T('PERSO CACHÉ DÉBLOQUÉ !', 90, 229, P.gold, 8, 'center');
-    T('JEAN-LUC, LE PATRON', 90, 240, P.cream, 8, 'center');
-  }
+  T('ÉLU PAR LE PUBLIC :', 90, 190, P.cream, 8, 'center', P.ink);
+  Tout(nm(ROSTER[order[0]]), 90, 206, P.gold, 8, P.velvet, P.red);
   endButtons();
 }
 function drawRanking(t) {
