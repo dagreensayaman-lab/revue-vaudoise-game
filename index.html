@@ -3131,7 +3131,7 @@ function drawMini(t) {
 /* --- CAR : le rond-point. Tu crois être sur l'autoroute, mais c'est limité à 50 ! --- */
 var CAR_L = 28, CAR_R = 152, CAR_K = 1.25, CAR_LIM = 50, BTN_BRAKE = { x: 40, y: 296, w: 100, h: 22 };
 function carStart() {
-  mini = { id: 'car', x: 90, sx: 90, v: 30, money: 150, dist: 0, off: 0, obs: [], sp: 60, rd: 500, flash: -9999, msg: null, mt: 0, shake: 0, over: false, last: performance.now(), t: 0, fines: 0, ok: 0, brk: 0, bonus: 0 };
+  mini = { id: 'car', x: 90, sx: 90, v: 40, drunk: 0, shroom: 0, money: 150, dist: 0, off: 0, obs: [], sp: 60, rd: 500, flash: -9999, msg: null, mt: 0, shake: 0, over: false, last: performance.now(), t: 0, fines: 0, ok: 0, brk: 0, bonus: 0 };
 }
 function carTap(x, y) {
   if (mini.over) { if (inside(BTN_E1, x, y)) { blip(); carStart(); } else if (inside(BTN_E2, x, y)) mgLeave(); return; }
@@ -3139,22 +3139,26 @@ function carTap(x, y) {
 }
 function carMsg(m, s, col) { m.msg = s; m.mc = col || P.gold; m.mt = performance.now(); }
 function carSpawn(m) {
-  var lane = Math.floor(Math.random() * 4), x = CAR_L + 15.5 + lane * 31, r = Math.random();
-  if (r < 0.28) m.obs.push({ k: 'coin', x: x, y: -10, w: 8, h: 8, ov: 0 });
-  else if (r < 0.58) m.obs.push({ k: 'cone', x: x, y: -10, w: 8, h: 10, ov: 0 });
-  else if (r < 0.88) m.obs.push({ k: 'car', x: x, y: -26, w: 14, h: 22, ov: 25, col: ['#3a8fd9', '#3fbf6f', '#e8d23a', '#8a5ad9', '#eee'][Math.floor(Math.random() * 5)] });
-  else m.obs.push({ k: 'truck', x: x, y: -34, w: 18, h: 34, ov: 18 });
+  var lane = Math.floor(Math.random() * 4), x = CAR_L + 15.5 + lane * 31, r = Math.random(), k;
+  if (r < 0.34) k = 'coin'; else if (r < 0.46) k = 'cone'; else if (r < 0.60) k = 'car'; else if (r < 0.65) k = 'truck';
+  else if (r < 0.74) k = 'snail'; else if (r < 0.80) k = 'fondue'; else if (r < 0.89) k = 'beer'; else k = 'shroom';
+  if (k === 'car') m.obs.push({ k: k, x: x, y: -26, w: 14, h: 22, ov: 25, col: ['#3a8fd9', '#3fbf6f', '#e8d23a', '#8a5ad9', '#eee'][Math.floor(Math.random() * 5)] });
+  else if (k === 'truck') m.obs.push({ k: k, x: x, y: -34, w: 18, h: 34, ov: 18 });
+  else if (k === 'cone') m.obs.push({ k: k, x: x, y: -10, w: 8, h: 10, ov: 0 });
+  else m.obs.push({ k: k, x: x, y: -10, w: 9, h: 10, ov: 0 });
 }
 function carUpdate(t) {
   var m = mini, dt = Math.min(0.04, (t - m.last) / 1000), i, o, pv, dy;
   m.last = t;
   if (m.over) return;
   m.t += dt;
-  if (ptrDown) m.sx = ptrX;
+  m.sx = ptrX;
   m.sx = Math.max(CAR_L + 9, Math.min(CAR_R - 9, m.sx));
-  m.x += (m.sx - m.x) * Math.min(1, dt * 14);
-  var tv = ptrDown ? 8 + Math.max(0, Math.min(1, 1 - (ptrY - 50) / 230)) * 142 : 0;
-  m.v += Math.max(-110 * dt, Math.min(70 * dt, tv - m.v));
+  var tn0 = performance.now(), dr = tn0 < m.drunk;
+  m.x += (m.sx - m.x) * Math.min(1, dt * (dr ? 3 : 14)); if (dr) m.x += Math.sin(m.t * 3.2) * 38 * dt;
+  m.x = Math.max(CAR_L + 9, Math.min(CAR_R - 9, m.x));
+  var base = dr ? 78 : 38 + Math.min(10, m.t * 0.1);
+  m.v += (base - m.v) * Math.min(1, 0.35 * dt);
   dy = m.v * CAR_K * dt; m.dist += dy; m.off = (m.off + dy) % 24;
   m.sp -= dy; m.rd -= dy;
   if (m.sp <= 0) { carSpawn(m); m.sp = Math.max(34, 78 - m.t * 0.5) + Math.random() * 40; }
@@ -3166,7 +3170,11 @@ function carUpdate(t) {
       else { m.ok++; m.bonus += 25; m.money += 10; carMsg(m, 'BIEN ROULÉ ! +10 CHF', P.mint); jingle(); }
     }
     if (o.k !== 'radar' && o.k !== 'sign' && o.y + o.h / 2 > 250 && o.y - o.h / 2 < 272 && Math.abs(o.x - m.x) < (o.w + 14) / 2) {
-      if (o.k === 'coin') { m.money += 10; blip(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'coin') { m.money += 10; m.v = Math.min(160, m.v + 10); blip(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'snail') { m.v = Math.max(5, m.v - 25); carMsg(m, 'ESCARGOT ! RALENTI', P.mint); jingle(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'fondue') { m.v = Math.max(5, m.v - 30); carMsg(m, 'FONDUE ! LOURD', P.mint); jingle(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'beer') { m.drunk = tn0 + 7000; m.v = Math.min(160, m.v + 20); carMsg(m, 'BIÈRE ! BOURRÉ', '#ffb030'); boop(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'shroom') { m.shroom = tn0 + 8000; carMsg(m, 'AMANITE ! TOUT EST FLOU', '#ff7ab0'); boop(); m.obs.splice(i, 1); continue; }
       m.money -= 15; m.v = Math.min(m.v, 20); m.shake = t; boop(); carMsg(m, 'AÏE ! -15 CHF', '#ff6a6a'); m.obs.splice(i, 1); continue;
     }
     if (o.y > H + 40 || o.y < -260) m.obs.splice(i, 1);
@@ -3174,6 +3182,7 @@ function carUpdate(t) {
   m.score = Math.floor(m.dist / 10) + m.bonus;
   if (m.money <= 0) { m.money = 0; m.over = true; m.overT = t; }
 }
+var carGh = null;
 function drawCar(t) {
   var m = mini, i, o, x, y, tn = performance.now(), sh = tn - m.shake < 300 ? Math.round(Math.sin(tn / 20) * 2) : 0;
   carUpdate(t);
@@ -3185,6 +3194,10 @@ function drawCar(t) {
     o = m.obs[i]; x = Math.round(o.x) + sh; y = Math.round(o.y);
     if (o.k === 'coin') { disc(x, y, 4, '#ffd24a'); R('#a67c00', x - 1, y - 2, 2, 4); }
     else if (o.k === 'cone') { R('#ff7a1a', x - 3, y - 2, 6, 7); R('#fff', x - 3, y, 6, 2); R('#ff7a1a', x - 1, y - 5, 2, 3); R('#333', x - 4, y + 5, 8, 1); }
+    else if (o.k === 'snail') { R('#9fbf7a', x - 5, y + 2, 10, 3); R('#9fbf7a', x + 4, y - 2, 2, 5); R('#9fbf7a', x + 4, y - 4, 1, 2); R('#9fbf7a', x + 6, y - 4, 1, 2); disc(x - 1, y - 1, 4, '#b08a4a'); disc(x - 1, y - 1, 2, '#7a5a2a'); }
+    else if (o.k === 'fondue') { R('#333', x - 7, y - 1, 2, 2); R('#333', x + 5, y - 1, 2, 2); R('#c43', x - 5, y - 1, 10, 6); R('#ffd24a', x - 5, y - 3, 10, 3); R('#ff7a1a', x - 2, y + 5, 4, 2); }
+    else if (o.k === 'beer') { R('#6b3d12', x - 2, y - 2, 5, 9); R('#6b3d12', x - 1, y - 6, 3, 5); R('#d0a020', x - 1, y - 7, 3, 1); R('#f2e8c0', x - 2, y + 1, 5, 3); }
+    else if (o.k === 'shroom') { R('#f2e8c8', x - 2, y + 1, 5, 6); disc(x, y - 2, 5, '#d62a2a'); R('#f2e8c8', x - 4, y + 1, 9, 1); R('#fff', x - 3, y - 4, 2, 2); R('#fff', x + 1, y - 3, 2, 2); R('#fff', x - 1, y, 1, 1); }
     else if (o.k === 'car') { R(o.col, x - 7, y - 11, 14, 22); R('#222', x - 5, y - 6, 10, 5); R('#222', x - 5, y + 3, 10, 3); R('#ff4a4a', x - 7, y + 9, 3, 2); R('#ff4a4a', x + 4, y + 9, 3, 2); }
     else if (o.k === 'truck') { R('#e8e8e8', x - 9, y - 17, 18, 34); R('#c43', x - 9, y - 17, 18, 8); R('#999', x - 9, y - 3, 18, 1); R('#ff4a4a', x - 8, y + 15, 3, 2); R('#ff4a4a', x + 5, y + 15, 3, 2); }
     else if (o.k === 'sign') { R('#777', x - 1, y + 10, 2, 14); disc(x, y, 13, '#d62a2a'); disc(x, y, 10, '#fff'); T('50', x, y - 4, '#111', 8, 'center'); }
@@ -3194,6 +3207,13 @@ function drawCar(t) {
   R('#111', x - 8, y - 9, 3, 6); R('#111', x + 5, y - 9, 3, 6); R('#111', x - 8, y + 5, 3, 6); R('#111', x + 5, y + 5, 3, 6);
   R('#d93a3a', x - 7, y - 11, 14, 22); R('#a82424', x - 7, y + 6, 14, 5); R('#9fd6ff', x - 5, y - 8, 10, 4); R('#ffe14a', x - 6, y - 11, 3, 2); R('#ffe14a', x + 3, y - 11, 3, 2);
   drawHead(sel, x - 5, y - 4, 10, 10);
+  if (tn < m.shroom) {
+    if (!carGh) { carGh = document.createElement('canvas'); carGh.width = W; carGh.height = H; }
+    var gx = carGh.getContext('2d'), sw = Math.sin(tn / 330), sw2 = Math.cos(tn / 270);
+    gx.clearRect(0, 0, W, H); gx.drawImage(buf, 0, 0);
+    c.globalAlpha = 0.5; c.drawImage(carGh, Math.round(sw * 22), Math.round(-34 + sw2 * 10)); c.globalAlpha = 0.35; c.drawImage(carGh, Math.round(-sw2 * 18), Math.round(40 + sw * 10)); c.globalAlpha = 1;
+    R('rgba(255,60,160,0.08)', 0, 0, W, H);
+  }
   if (tn - m.flash < 450) { R('rgba(255,255,255,' + (0.95 - (tn - m.flash) / 520).toFixed(2) + ')', 0, 0, W, H); }
   R('#1c1330', 0, 0, W, 22); R(P.gold, 0, 22, W, 1);
   R('#3a3f55', BTN_X.x, BTN_X.y, BTN_X.w, BTN_X.h); T('X', BTN_X.x + 8, BTN_X.y + 3, P.cream, 8, 'center');
@@ -3202,7 +3222,9 @@ function drawCar(t) {
   var ov = m.v > CAR_LIM + 3;
   R('rgba(10,6,16,0.6)', 108, 264, 70, 30); T(Math.round(m.v) + ' KM/H', 143, 266, ov && (Math.floor(tn / 150) % 2) ? '#ff6a6a' : P.cream, 8, 'center'); T('MAX ' + CAR_LIM, 143, 279, P.gold, 8, 'center');
   if (m.msg && tn - m.mt < 1400) T(m.msg, 90, 130, m.mc, 8, 'center', P.ink);
-  if (m.t < 4) { T('DOIGT EN HAUT = VITE', 90, 150, P.cream, 8, 'center', P.ink); T('DOIGT EN BAS = LENT', 90, 164, P.cream, 8, 'center', P.ink); }
+  if (tn < m.drunk) T('BOURRÉ ' + Math.ceil((m.drunk - tn) / 1000), 90, 28, '#ffb030', 8, 'center', P.ink);
+  if (tn < m.shroom) T('FLOU ' + Math.ceil((m.shroom - tn) / 1000), 90, tn < m.drunk ? 40 : 28, '#ff7ab0', 8, 'center', P.ink);
+  if (m.t < 5) { T('GLISSE POUR DIRIGER', 90, 136, P.cream, 8, 'center', P.ink); T('PIÈCE = VITE', 90, 150, P.gold, 8, 'center', P.ink); T('ESCARGOT = LENT', 90, 164, P.mint, 8, 'center', P.ink); T('ÉVITE LA BIÈRE !', 90, 178, '#ffb030', 8, 'center', P.ink); }
   if (m.over) {
     R('rgba(10,6,16,0.82)', 0, 90, W, 120);
     Tout('PLUS DE SOUS', 90, 108, P.gold, 8, '#2a0712', P.red);
