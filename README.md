@@ -25,6 +25,7 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 
 ## Nouveaux tours et mini-jeux
 - **Menteur** : chacun raconte une anecdote sur un thème, l'app désigne un menteur (secret) ; la salle vote pour le démasquer. Il faut au moins 3 joueurs.
+- **Rapidité et pari** (questions « Qui… ? ») : répondre dans les 4 premières secondes rapporte +60 pts, dans les 8 premières +30 (seulement si ta réponse est dans la majorité). Le bouton PARI engage un pourcentage : 50 %+ (+50 / −30), 70 %+ (+100 / −50) ou 100 % (+200 / −80). Le score ne descend jamais sous 0.
 - **Duel de taps** : deux joueurs tapent le plus vite possible pendant 10 s (ou jusqu'à 28 taps d'avance).
 - **Roue des gages** : chaque joueur propose un gage anonyme au salon (bouton « MON GAGE ») ; la roue désigne un joueur et révèle un gage au hasard.
 - **ARCADE** : Arkanoid (3 niveaux) et Pousse ton adversaire (contre un bot) ; **VERSUS** : Pousse à deux sur le même téléphone.
