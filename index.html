@@ -3129,9 +3129,9 @@ function drawMini(t) {
 }
 
 /* --- CAR : le rond-point. Tu crois être sur l'autoroute, mais c'est limité à 50 ! --- */
-var CAR_L = 28, CAR_R = 152, CAR_K = 1.25, CAR_LIM = 50, BTN_BRAKE = { x: 40, y: 296, w: 100, h: 22 };
+var CAR_L = 28, CAR_R = 152, CAR_K = 3, CAR_LIM = 50, BTN_BRAKE = { x: 40, y: 296, w: 100, h: 22 };
 function carStart() {
-  mini = { id: 'car', x: 90, sx: 90, v: 40, drunk: 0, shroom: 0, money: 150, dist: 0, off: 0, obs: [], sp: 60, rd: 500, flash: -9999, msg: null, mt: 0, shake: 0, over: false, last: performance.now(), t: 0, fines: 0, ok: 0, brk: 0, bonus: 0 };
+  mini = { id: 'car', x: 90, sx: 90, v: 45, drunk: 0, shroom: 0, money: 100, dist: 0, off: 0, obs: [], sp: 60, rd: 500, flash: -9999, msg: null, mt: 0, shake: 0, over: false, last: performance.now(), t: 0, fines: 0, ok: 0, brk: 0, bonus: 0 };
 }
 function carTap(x, y) {
   if (mini.over) { if (inside(BTN_E1, x, y)) { blip(); carStart(); } else if (inside(BTN_E2, x, y)) mgLeave(); return; }
@@ -3140,8 +3140,8 @@ function carTap(x, y) {
 function carMsg(m, s, col) { m.msg = s; m.mc = col || P.gold; m.mt = performance.now(); }
 function carSpawn(m) {
   var lane = Math.floor(Math.random() * 4), x = CAR_L + 15.5 + lane * 31, r = Math.random(), k;
-  if (r < 0.34) k = 'coin'; else if (r < 0.46) k = 'cone'; else if (r < 0.60) k = 'car'; else if (r < 0.65) k = 'truck';
-  else if (r < 0.74) k = 'snail'; else if (r < 0.80) k = 'fondue'; else if (r < 0.89) k = 'beer'; else k = 'shroom';
+  if (r < 0.28) k = 'coin'; else if (r < 0.42) k = 'cone'; else if (r < 0.58) k = 'car'; else if (r < 0.64) k = 'truck';
+  else if (r < 0.76) k = 'snail'; else if (r < 0.82) k = 'fondue'; else if (r < 0.89) k = 'beer'; else k = 'shroom';
   if (k === 'car') m.obs.push({ k: k, x: x, y: -26, w: 14, h: 22, ov: 25, col: ['#3a8fd9', '#3fbf6f', '#e8d23a', '#8a5ad9', '#eee'][Math.floor(Math.random() * 5)] });
   else if (k === 'truck') m.obs.push({ k: k, x: x, y: -34, w: 18, h: 34, ov: 18 });
   else if (k === 'cone') m.obs.push({ k: k, x: x, y: -10, w: 8, h: 10, ov: 0 });
@@ -3157,20 +3157,20 @@ function carUpdate(t) {
   var tn0 = performance.now(), dr = tn0 < m.drunk;
   m.x += (m.sx - m.x) * Math.min(1, dt * (dr ? 3 : 14)); if (dr) m.x += Math.sin(m.t * 3.2) * 38 * dt;
   m.x = Math.max(CAR_L + 9, Math.min(CAR_R - 9, m.x));
-  var base = dr ? 78 : 38 + Math.min(10, m.t * 0.1);
+  var base = dr ? 78 : 44 + Math.min(16, m.t * 0.18);
   m.v += (base - m.v) * Math.min(1, 0.35 * dt);
   dy = m.v * CAR_K * dt; m.dist += dy; m.off = (m.off + dy) % 24;
   m.sp -= dy; m.rd -= dy;
-  if (m.sp <= 0) { carSpawn(m); m.sp = Math.max(34, 78 - m.t * 0.5) + Math.random() * 40; }
+  if (m.sp <= 0) { carSpawn(m); m.sp = Math.max(30, 70 - m.t * 0.6) + Math.random() * 36; }
   if (m.rd <= 0) { m.obs.push({ k: 'sign', x: 166, y: -20, w: 14, h: 14, ov: 0 }, { k: 'radar', x: 90, y: -190, w: 124, h: 12, ov: 0 }); m.rd = 560 + Math.random() * 300; }
   for (i = m.obs.length - 1; i >= 0; i--) {
     o = m.obs[i]; pv = o.y; o.y += (m.v - o.ov) * CAR_K * dt;
     if (o.k === 'radar' && pv < 262 && o.y >= 262) {
       if (m.v > CAR_LIM + 3) { var fine = 20 + Math.floor((m.v - CAR_LIM) * 0.6); m.money -= fine; m.fines++; m.flash = t; boop(); carMsg(m, 'FLASH ! -' + fine + ' CHF', '#ff6a6a'); }
-      else { m.ok++; m.bonus += 25; m.money += 10; carMsg(m, 'BIEN ROULÉ ! +10 CHF', P.mint); jingle(); }
+      else { m.ok++; m.bonus += 25; m.money += 3; carMsg(m, 'BIEN ROULÉ ! +3 CHF', P.mint); jingle(); }
     }
     if (o.k !== 'radar' && o.k !== 'sign' && o.y + o.h / 2 > 250 && o.y - o.h / 2 < 272 && Math.abs(o.x - m.x) < (o.w + 14) / 2) {
-      if (o.k === 'coin') { m.money += 10; m.v = Math.min(160, m.v + 10); blip(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'coin') { m.money += 4; m.v = Math.min(160, m.v + 8); blip(); m.obs.splice(i, 1); continue; }
       if (o.k === 'snail') { m.v = Math.max(5, m.v - 25); carMsg(m, 'ESCARGOT ! RALENTI', P.mint); jingle(); m.obs.splice(i, 1); continue; }
       if (o.k === 'fondue') { m.v = Math.max(5, m.v - 30); carMsg(m, 'FONDUE ! LOURD', P.mint); jingle(); m.obs.splice(i, 1); continue; }
       if (o.k === 'beer') { m.drunk = tn0 + 7000; m.v = Math.min(160, m.v + 20); carMsg(m, 'BIÈRE ! BOURRÉ', '#ffb030'); boop(); m.obs.splice(i, 1); continue; }
