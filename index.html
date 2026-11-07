@@ -1665,7 +1665,8 @@ function drawAsk(t, tt, r) {
   R(P.gold, 28, 194, 124, 22); R(P.ink, 29, 195, 122, 20);
   T(pickLabel(r), 90, 201, has || vg.pick >= 0 || vg.tf || vg.picks.length ? P.cream : P.goldDim, 8, 'center');
   var sent = vg.net && vg.voted;
-  btn(BTN_V, sent ? 'VOTE ENVOYÉ' : 'VOTER !', sent ? '#6a7a3a' : (has ? '#2e8b57' : '#3a3f55'));
+  var spb = (ty !== 'who' && ty !== 'liar') ? SPEED_BONUS[voteStage(tt)] : 0;
+  btn(BTN_V, sent ? 'VOTE ENVOYÉ' : 'VOTER !' + (spb ? ' +' + spb : ''), sent ? '#6a7a3a' : (has ? '#2e8b57' : '#3a3f55'));
   T('SCORE ' + vg.score, 8, 278, P.cream, 8, 'left', P.ink);
   if (ty === 'v') btn(BTN_BET, BET_LAB[vg.bet || 0], vg.bet ? ['', '#3a6fb0', '#8a4fb0', '#c43b3b'][vg.bet] : '#3a3f55');
   if (!vg.jokerUsed) btn(BTN_JK, 'JOKER x2', vg.jk ? '#d98a1f' : '#3a3f55');
