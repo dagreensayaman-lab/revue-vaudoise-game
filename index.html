@@ -3176,7 +3176,7 @@ function carUpdate(t) {
       else { m.ok++; m.bonus += 25; m.money += 3; carMsg(m, 'BIEN ROULÉ ! +3 CHF', P.mint); jingle(); }
     }
     if (o.k !== 'radar' && o.k !== 'sign' && o.y + o.h / 2 > 250 && o.y - o.h / 2 < 272 && Math.abs(o.x - m.x) < (o.w + 14) / 2) {
-      if (o.k === 'coin') { m.money += 4; m.v = Math.min(160, m.v + 8); blip(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'coin') { m.money += 4; blip(); m.obs.splice(i, 1); continue; }
       if (o.k === 'snail') { m.v = Math.max(5, m.v - 25); carMsg(m, 'ESCARGOT ! RALENTI', P.mint); jingle(); m.obs.splice(i, 1); continue; }
       if (o.k === 'fondue') { m.v = Math.max(5, m.v - 30); carMsg(m, 'FONDUE ! LOURD', P.mint); jingle(); m.obs.splice(i, 1); continue; }
       if (o.k === 'beer') { m.drunk = tn0 + 7000; m.v = Math.min(160, m.v + 20); carMsg(m, 'BIÈRE ! BOURRÉ', '#ffb030'); boop(); m.obs.splice(i, 1); continue; }
@@ -3251,7 +3251,7 @@ function drawCar(t) {
   if (m.msg && tn - m.mt < 1400) T(m.msg, 90, 130, m.mc, 8, 'center', P.ink);
   if (tn < m.drunk) T('BOURRÉ ' + Math.ceil((m.drunk - tn) / 1000), 90, m.net ? 40 : 28, '#ffb030', 8, 'center', P.ink);
   if (tn < m.shroom) T('FLOU ' + Math.ceil((m.shroom - tn) / 1000), 90, (tn < m.drunk ? 12 : 0) + (m.net ? 40 : 28), '#ff7ab0', 8, 'center', P.ink);
-  if (m.t < 5 && !m.net) { T('GLISSE POUR DIRIGER', 90, 136, P.cream, 8, 'center', P.ink); T('PIÈCE = VITE', 90, 150, P.gold, 8, 'center', P.ink); T('ESCARGOT = LENT', 90, 164, P.mint, 8, 'center', P.ink); T('ÉVITE LA BIÈRE !', 90, 178, '#ffb030', 8, 'center', P.ink); }
+  if (m.t < 5 && !m.net) { T('GLISSE POUR DIRIGER', 90, 136, P.cream, 8, 'center', P.ink); T('PIÈCE = SOUS', 90, 150, P.gold, 8, 'center', P.ink); T('ESCARGOT = LENT', 90, 164, P.mint, 8, 'center', P.ink); T('ÉVITE LA BIÈRE !', 90, 178, '#ffb030', 8, 'center', P.ink); }
   if (m.over && !m.net) {
     R('rgba(10,6,16,0.82)', 0, 90, W, 120);
     Tout('PLUS DE SOUS', 90, 108, P.gold, 8, '#2a0712', P.red);
