@@ -316,7 +316,16 @@ function trackWatch() {
   trackCur = want;
   if (want === null) { if (songSaved) SONG = songSaved; songSaved = null; }
   else SONG = want === 'champ' ? SONG_CHAMP : want === 'tribu' ? SONG_TRIBU : want === 'phase' ? SONG_PHASE : want === 'wolf' ? SONG_WOLF : SONG_TITLE;
-  if (musicOn) { mEv = buildEvents(); mIdx = 0; mT0 = 0; }
+  if (musicOn) { musicBusReset(); mEv = buildEvents(); mIdx = 0; mT0 = 0; }
+}
+/* on a track change, the notes already scheduled for the old song are faded out so two songs never overlap */
+function musicBusReset() {
+  if (!ac || !mg) return;
+  try {
+    var old = mb, tt = ac.currentTime;
+    if (old) { old.gain.cancelScheduledValues(tt); old.gain.setValueAtTime(old.gain.value, tt); old.gain.linearRampToValueAtTime(0, tt + 0.08); setTimeout(function () { try { old.disconnect(); } catch (e) {} }, 400); }
+    mb = ac.createGain(); mb.gain.value = 1; mb.connect(mg);
+  } catch (e) {}
 }
 function trackName() { return SONG === SONG_SARD ? 'LES SARDINES' : 'PHASE 1'; }
 function switchTrack() {
@@ -329,7 +338,7 @@ function switchTrack() {
 }
 
 /* ---------- music: 8-bit transcription of "Phase 1" ---------- */
-var mg = null, musicOn = false, mNext = 0, mIdx = 0, mT0 = 0, mEv = null, mNoise = null, mWaves = {};
+var mb = null, mg = null, musicOn = false, mNext = 0, mIdx = 0, mT0 = 0, mEv = null, mNoise = null, mWaves = {};
 function pulseWave(d) {
   var n = 32, re = new Float32Array(n), im = new Float32Array(n);
   for (var k = 1; k < n; k++) { re[k] = 2 / (k * Math.PI) * Math.sin(k * Math.PI * d); im[k] = 2 / (k * Math.PI) * (1 - Math.cos(k * Math.PI * d)); }
@@ -352,22 +361,22 @@ function playEv(e, t, sd) {
       o = ac.createOscillator(); g = ac.createGain(); o.type = 'sine';
       o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.09);
       g.gain.setValueAtTime(0.30, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
-      o.connect(g); g.connect(mg); o.start(t); o.stop(t + 0.15);
+      o.connect(g); g.connect(mb || mg); o.start(t); o.stop(t + 0.15);
     }
     if (e.d & 2) {
       var s = ac.createBufferSource(), bp = ac.createBiquadFilter(); g = ac.createGain();
       s.buffer = mNoise; bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 0.7;
       g.gain.setValueAtTime(0.16, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
-      s.connect(bp); bp.connect(g); g.connect(mg); s.start(t, Math.random() * 0.5); s.stop(t + 0.15);
+      s.connect(bp); bp.connect(g); g.connect(mb || mg); s.start(t, Math.random() * 0.5); s.stop(t + 0.15);
       o = ac.createOscillator(); var g2 = ac.createGain(); o.type = 'triangle'; o.frequency.value = 190;
       g2.gain.setValueAtTime(0.10, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
-      o.connect(g2); g2.connect(mg); o.start(t); o.stop(t + 0.1);
+      o.connect(g2); g2.connect(mb || mg); o.start(t); o.stop(t + 0.1);
     }
     if (e.d & 4) {
       var s2 = ac.createBufferSource(), hp = ac.createBiquadFilter(); g = ac.createGain();
       s2.buffer = mNoise; hp.type = 'highpass'; hp.frequency.value = 7500;
       g.gain.setValueAtTime(0.07, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
-      s2.connect(hp); hp.connect(g); g.connect(mg); s2.start(t, Math.random() * 0.5); s2.stop(t + 0.06);
+      s2.connect(hp); hp.connect(g); g.connect(mb || mg); s2.start(t, Math.random() * 0.5); s2.stop(t + 0.06);
     }
     return;
   }
@@ -380,7 +389,7 @@ function playEv(e, t, sd) {
   g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(a, t + 0.004);
   g.gain.linearRampToValueAtTime(a * (cfg[1] === 0 ? 0.85 : 0.65), t + dur * 0.9);
   g.gain.linearRampToValueAtTime(0.0001, t + dur);
-  o.connect(g); g.connect(mg); o.start(t); o.stop(t + dur + 0.02);
+  o.connect(g); g.connect(mb || mg); o.start(t); o.stop(t + dur + 0.02);
 }
 function musicTick() {
   if (!ac || !mg) return;
@@ -403,7 +412,7 @@ function startMusic() {
     mg = ac.createGain(); mg.gain.value = muted ? 0 : 0.55; mg.connect(ac.destination);
     var len = ac.sampleRate, b = ac.createBuffer(1, len, ac.sampleRate), ch = b.getChannelData(0);
     for (var i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
-    mNoise = b; mEv = buildEvents(); mIdx = 0; mT0 = 0; musicOn = true;
+    mNoise = b; mb = ac.createGain(); mb.gain.value = 1; mb.connect(mg); mEv = buildEvents(); mIdx = 0; mT0 = 0; musicOn = true;
     setInterval(musicTick, 100);
   } catch (err) { musicOn = false; }
 }
@@ -1048,7 +1057,7 @@ var SPECIAL = {
   ]
 };
 var GAGES = [
-  'IMITE BARBEZA PENDANT 10 SECONDES', "PARLE AVEC L'ACCENT NEUCHÂTELOIS", 'RÂLE 10 SECONDES SUR RIEN',
+  'IMITE BARBEZAT PENDANT 10 SECONDES', "PARLE AVEC L'ACCENT NEUCHÂTELOIS", 'RÂLE 10 SECONDES SUR RIEN',
   'MIME TON PLUS GROS SKETCH', 'FAIS UN COMPLIMENT À TON VOISIN', 'CHANTE UN REFRAIN TOUT FAUX',
   "OFFRE UN CAFÉ À QUELQU'UN", 'DIS "RACLER COMME JAMAIS" EN CHANTANT', 'FAIS TA PLUS BELLE RÉVÉRENCE',
   'RACONTE UNE ANECDOTE DE LOGE', 'FAIS TA POSE DE POMPIER', 'FAIS UN DISCOURS SUR LE CAFÉ'
@@ -1760,14 +1769,14 @@ function drawTitles(t) {
   var n = Math.min(5, vg.titles.length), k, i;
   if (!n) T('PAS ENCORE DE TITRE', 90, 100, P.cream, 8, 'center', P.ink);
   for (k = 0; k < n; k++) {
-    var ti = vg.titles[k], y = 22 + k * 46, ql = wrapText(ti.q.replace(/^QUI /, '').replace(/ \?$/, ''), 15);
+    var ti = vg.titles[k], y = 22 + k * 46, ql = wrapText(ti.q.replace(/^QUI /, '').replace(/ \?$/, ''), 16), qs = ql.length > 3 ? 8 : 10, qy = ql.length > 3 ? 11 : 14;
     R(k === 0 ? P.gold : '#4a2a1c', 8, y, 164, 44); R('#140c18', 9, y + 1, 162, 42);
     c.save(); c.beginPath(); c.rect(10, y + 2, 28, 40); c.clip();
     drawChar(ROSTER[ti.ci], 24, y + 41, 1, false, 0);
     c.restore();
-    T(nm(ROSTER[ti.ci]), 42, y + 4, P.gold, 8, 'left', P.ink);
-    T(ti.n + ' VOIX', 168, y + 4, '#8d84b8', 8, 'right');
-    for (i = 0; i < ql.length && i < 3; i++) T(ql[i], 42, y + 14 + i * 10, P.cream, 8, 'left', P.ink);
+    T(nm(ROSTER[ti.ci]), 42, y + (qs === 8 ? 2 : 4), P.gold, 8, 'left', P.ink);
+    T(ti.n + ' VOIX', 168, y + (qs === 8 ? 2 : 4), '#8d84b8', 8, 'right');
+    for (i = 0; i < ql.length && i < 4; i++) T(ql[i], 42, y + qy + i * qs, P.cream, 8, 'left', P.ink);
   }
   endButtons();
 }
