@@ -706,6 +706,7 @@ function queue(t) {
 }
 function muteIcon() {
   var x = 164, y = 306;
+  statToastDraw();
   if (performance.now() - trackMsgT < 1800) { R('#0b0817', 30, 0, 120, 25); R(P.gold, 30, 25, 120, 1); T('MUSIQUE', 90, 1, P.cream, 8, 'center', '#2a0712'); T(trackName(), 90, 15, P.gold, 8, 'center', '#2a0712'); }
   R(P.cream, x, y + 2, 3, 4); R(P.cream, x + 3, y + 1, 1, 6); R(P.cream, x + 4, y, 1, 8);
   if (muted) { R('#e03030', x + 6, y + 1, 1, 1); R('#e03030', x + 7, y + 2, 1, 1); R('#e03030', x + 8, y + 3, 1, 2); R('#e03030', x + 7, y + 5, 1, 1); R('#e03030', x + 6, y + 6, 1, 1); R('#e03030', x + 8, y + 1, 1, 1); R('#e03030', x + 8, y + 6, 1, 1); }
@@ -1339,7 +1340,7 @@ function netSync(my) {
       if (!p[k] || !p[k].c) continue;
       if (k !== my.pid && !(my.seen[k] && now - my.seen[k].t < 12000)) continue;
       if (!my.first[k]) my.first[k] = now;
-      list.push({ pid: k, j: p[k].j || 0, ci: Math.max(0, rosterIdx(p[k].c)), ready: k === rm.h || !!p[k].r, me: k === my.pid, joinT: my.first[k], name: p[k].n || '' });
+      list.push({ pid: k, j: p[k].j || 0, ci: Math.max(0, rosterIdx(p[k].c)), ready: k === rm.h || !!p[k].r, me: k === my.pid, joinT: my.first[k], name: p[k].n || '', st: p[k].st || null });
     }
     list.sort(function (a, b) { return a.j - b.j; });
     lb.players = list.slice(0, MAXP);
@@ -1697,6 +1698,7 @@ function endButtons() {
   else { btn(BTN_E1, 'REJOUER', '#2e8b57'); btn(BTN_E2, 'MENU', '#b3202e'); }
 }
 function drawVoteEnd(t) {
+  if (!vg.statDone) { vg.statDone = true; if (vg.net && vg.recv) { var mi = ownCharIdx(), mx = 0, kk; for (kk = 0; kk < vg.cand.length; kk++) mx = Math.max(mx, vg.recv[vg.cand[kk]] || 0); statVote(mx > 0 && (vg.recv[mi] || 0) === mx); } }
   var pg = endPages()[vg.pg || 0];
   if (pg === 1) { drawRanking(t); return; }
   if (pg === 2) { drawTitles(t); return; }
@@ -1832,7 +1834,7 @@ function fbReq(method, path, body) {
 }
 function lbMsg(m, ms) { if (lb) { lb.msg = m; lb.msgT = performance.now() + (ms || 3500); } }
 function randCode() { var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ', s = '', i; for (i = 0; i < 4; i++) s += a.charAt(Math.floor(Math.random() * a.length)); return s; }
-function meRec(r) { return { c: ROSTER[sel].id, n: nm(ROSTER[sel]), r: r || 0, j: Date.now(), b: Date.now() }; }
+function meRec(r) { return { c: ROSTER[sel].id, n: nm(ROSTER[sel]), r: r || 0, j: Date.now(), b: Date.now(), st: statCompact() }; }
 
 function netCreate() {
   var L = lb; if (!L || L.busy) return;
@@ -1944,6 +1946,84 @@ function netVote(s) {
 }
 
 
+
+/* ---------- stats par joueur (stockées sur l'appareil, partagées dans la salle) ---------- */
+var STATS = { pt: 0, so: 0, su: 0, lg: 0, lw: 0, dl: 0, dw: 0, tv: 0 };
+try { var svs = JSON.parse(localStorage.getItem('rv_stats') || '{}') || {}; Object.keys(STATS).forEach(function (k) { if (typeof svs[k] === 'number') STATS[k] = svs[k]; }); } catch (e) {}
+var statToast = { txt: '', t: -1e9 };
+var STAT_LV = [[0, 'NOUVEAU'], [10, 'HABITUÉ'], [30, 'ARTISTE'], [70, 'VEDETTE'], [150, 'STAR'], [300, 'LÉGENDE']];
+function statCompact() { var o = {}; Object.keys(STATS).forEach(function (k) { o[k] = STATS[k]; }); return o; }
+function statG(st, k) { return (st && +st[k]) || 0; }
+function statLevel(st) {
+  var pt = statG(st, 'pt'), i = 0, j;
+  for (j = 0; j < STAT_LV.length; j++) if (pt >= STAT_LV[j][0]) i = j;
+  return { n: i + 1, name: STAT_LV[i][1], from: STAT_LV[i][0], to: i + 1 < STAT_LV.length ? STAT_LV[i + 1][0] : STAT_LV[i][0] };
+}
+function statBadges(st) {
+  var b = [];
+  if (statG(st, 'tv') >= 1) b.push(['LE PLUS VOTÉ', '#f2c14e']);
+  if (statG(st, 'dw') >= 3) b.push(['ROI DES DUELS', '#b3202e']);
+  if (statG(st, 'lw') >= 3) b.push(['MAÎTRE LOUP', '#8d84b8']);
+  if (statG(st, 'so') >= 10) b.push(['SOLITAIRE', '#3a8fd9']);
+  if (statG(st, 'so') + statG(st, 'su') + statG(st, 'lg') + statG(st, 'dl') >= 20) b.push(['ACCRO', '#2e8b57']);
+  return b;
+}
+function statTitle(st) { var b = statBadges(st); return b.length ? b[0][0] : statLevel(st).name; }
+function statPush() {
+  try { localStorage.setItem('rv_stats', JSON.stringify(STATS)); } catch (e) {}
+  if (net && net.rm) fbReq('PATCH', '/rooms/' + net.code + '/p/' + net.pid, { st: statCompact() }).catch(function () {});
+}
+function statAdd(k, pts, msg) {
+  var before = statLevel(STATS).n;
+  if (k) STATS[k] += 1;
+  STATS.pt += pts;
+  var after = statLevel(STATS);
+  statToast = { txt: after.n > before ? 'NIVEAU ' + after.n + ' : ' + after.name : '+' + pts + ' PTS ' + (msg || ''), t: performance.now() };
+  statPush();
+}
+function statSolo() { statAdd('so', 1, 'SOLO'); }
+function statDuel(win) {
+  var m = mini; if (!m || m.stat) return; m.stat = true;
+  if (win === 1) { STATS.dw += 1; statAdd('dl', 4, 'DUEL GAGNÉ'); } else statAdd('dl', 1, 'DUEL');
+}
+function statVote(top) { if (top) STATS.tv += 1; statAdd('su', top ? 4 : 2, top ? 'LE PLUS VOTÉ' : 'VOTE'); }
+function wfStat(my, w) {
+  var role = w.r && w.r[my.pid]; if (!role || my.wstat === w.k) return; my.wstat = w.k;
+  var lv = wfLovers(w), win = (w.win === 'loups' && role === 'loup') || (w.win === 'village' && role !== 'loup') || (w.win === 'amour' && lv.indexOf(my.pid) >= 0);
+  if (win) { STATS.lw += 1; statAdd('lg', 5, 'LOUP-GAROU GAGNÉ'); } else statAdd('lg', 2, 'LOUP-GAROU');
+}
+function statToastDraw() {
+  var el = performance.now() - statToast.t;
+  if (el > 3200) return;
+  var tx = statToast.txt, wd = Math.min(176, tx.length * 8 + 8), y = el < 200 ? -9 + el / 200 * 9 : 0;
+  R(P.gold, 90 - wd / 2 - 1, y - 1, wd + 2, 11); R('#241238', 90 - wd / 2, y, wd, 10);
+  T(tx, 90, y + 1, P.gold, 8, 'center');
+}
+function drawStatCard(t) {
+  var q = null; lb.players.forEach(function (x) { if (x.pid === lb.card) q = x; });
+  if (!q) { lb.card = null; return; }
+  var st = q.me ? STATS : (q.st || {}), lv = statLevel(st), bd = statBadges(st), nmx = (q.name || nm(ROSTER[q.ci])).slice(0, 10);
+  R('rgba(10,6,16,0.9)', 0, 0, W, H);
+  R(P.gold, 8, 8, 164, 288); R('#1d1530', 9, 9, 162, 286);
+  drawChar(ROSTER[q.ci], 90, 78, 2, false, (Math.floor(t / 380) % 2) ? -1 : 0);
+  Tout(nmx, 90, 86, P.gold, 8, P.velvet, P.red);
+  T(statTitle(st), 90, 100, P.cream, 8, 'center', P.ink);
+  T('NIVEAU ' + lv.n + ' - ' + statG(st, 'pt') + ' PTS', 90, 112, '#8d84b8', 8, 'center');
+  var fr = lv.to > lv.from ? Math.min(1, (statG(st, 'pt') - lv.from) / (lv.to - lv.from)) : 1;
+  R(P.gold, 20, 124, 140, 8); R('#0e0914', 21, 125, 138, 6); R(P.mint, 21, 125, Math.round(138 * fr), 6);
+  var rows = [['SOLO', String(statG(st, 'so'))], ['SUSCEPTIBLE', String(statG(st, 'su'))], ['LOUP-GAROU', statG(st, 'lg') + ' (' + statG(st, 'lw') + ' V)'], ['DUELS', statG(st, 'dl') + ' (' + statG(st, 'dw') + ' V)'], ['PLUS VOTÉ', String(statG(st, 'tv'))]];
+  rows.forEach(function (r, i) {
+    var y = 142 + i * 15;
+    R(i % 2 ? '#241238' : '#2a1a40', 14, y - 2, 152, 14);
+    T(r[0], 18, y + 1, P.cream, 8, 'left'); T(r[1], 162, y + 1, P.gold, 8, 'right');
+  });
+  T('TITRES', 90, 222, P.goldDim, 8, 'center');
+  if (!bd.length) T('PAS ENCORE...', 90, 238, '#8d84b8', 8, 'center');
+  bd.slice(0, 3).forEach(function (b, i) { R(b[1], 30, 234 + i * 13, 120, 11); R('#140c18', 31, 235 + i * 13, 118, 9); T(b[0], 90, 235 + i * 13, b[1], 8, 'center'); });
+  T('TOUCHE POUR FERMER', 90, 280, '#8d84b8', 8, 'center');
+  muteIcon();
+}
+
 /* ---------- online duel (1 vs 1 "POUSSE") inside a room ---------- */
 function duelWrite(my, upd) { return fbReq('PATCH', '/rooms/' + my.code + '/duel', upd).catch(function () {}); }
 function duelInvite(pid, g) {
@@ -2048,6 +2128,7 @@ function lobbyTap(x, y) {
     else if (inside(BTN_OK, x, y)) tryJoin();
   } else if (v === 'room') {
     if (net && (wfOn() || wfl.setup)) { wfTap(x, y); return; }
+    if (lb.card) { lb.card = null; boop(); return; }
     if (net && lb.gm) {
       if (inside(GM1, x, y)) { lb.gm = false; netStart(); }
       else if (inside(GM2, x, y)) { lb.gm = false; wfStartSetup(); }
@@ -2057,6 +2138,8 @@ function lobbyTap(x, y) {
     }
     if (lb.invite) { if (inside(BTN_YES, x, y)) duelAnswer(true); else if (inside(BTN_NO, x, y)) duelAnswer(false); return; }
     if (inside(BTN_BACK2, x, y)) { netLeave(true); return; }
+    if (lb.card) { lb.card = null; boop(); return; }
+    if (net && lb.target && !lb.wait && inside(BTN_CARD, x, y)) { lb.card = lb.target; blip(); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL, x, y)) { duelInvite(lb.target, 'push'); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL2, x, y)) { duelInvite(lb.target, 'mole'); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL3, x, y)) { duelInvite(lb.target, 'brick'); return; }
@@ -2064,8 +2147,9 @@ function lobbyTap(x, y) {
       var hit = -1, hi;
       for (hi = 0; hi < lb.players.length; hi++) {
         var hp = lb.players[hi], hfx = 22 + (hi % 6) * 27, hfy = 124 + Math.floor(hi / 6) * 26;
-        if (!hp.me && x >= hfx - 12 && x <= hfx + 12 && y >= hfy - 34 && y <= hfy + 4) hit = hi;
+        if (x >= hfx - 12 && x <= hfx + 12 && y >= hfy - 34 && y <= hfy + 4) hit = hi;
       }
+      if (hit >= 0 && lb.players[hit].me) { lb.card = lb.players[hit].pid; blip(); return; }
       if (hit >= 0) { lb.target = lb.target === lb.players[hit].pid ? '' : lb.players[hit].pid; blip(); return; }
     }
     if (net && inside(BTN_OK, x, y)) { if (net.host) { lb.gm = true; blip(); } else netReady(); }
@@ -2112,6 +2196,7 @@ function drawLobby(t) {
     muteIcon(); return;
   }
   var demo = v === 'demo';
+  if (v === 'room' && lb.card) { drawStatCard(t); return; }
   if (v === 'room' && lb.gm && net && net.host) { drawRoomGames(t); return; }
   if (demo) lobbyUpdate(t);
   R(P.gold, 30, 14, 120, 38); R(P.ink, 31, 15, 118, 36);
@@ -2128,6 +2213,7 @@ function drawLobby(t) {
     if (p.ready) { rdy++; R(P.mint, fx - 3, my + 3, 1, 1); R(P.mint, fx - 2, my + 4, 1, 1); R(P.mint, fx - 1, my + 3, 1, 1); R(P.mint, fx, my + 2, 1, 1); R(P.mint, fx + 1, my + 1, 1, 1); R(P.mint, fx + 2, my, 1, 1); }
     else if (Math.floor(t / 300) % 2) R(P.gold, fx - 1, my + 2, 3, 2);
     if (p.me) { R(P.gold, fx - 2, fy + 1, 5, 1); me = p; }
+    if (n <= 6 && !demo) T('N' + statLevel(p.me ? STATS : p.st).n, fx, fy + 3, P.goldDim, 8, 'center', P.ink);
   }
   R(P.gold, 8, 172, 164, 60); R(P.ink, 9, 173, 162, 58);
   T('JOUEURS ' + n + '/' + MAXP, 90, 178, P.cream, 8, 'center');
@@ -2144,8 +2230,8 @@ function drawLobby(t) {
     var tq = null; lb.players.forEach(function (q) { if (q.pid === lb.target) tq = q; });
     if (tq) {
       R(P.gold, 8, 172, 164, 60); R('#241238', 9, 173, 162, 58);
-      T('DÉFIER ' + (tq.name || nm(ROSTER[tq.ci])).slice(0, 10), 90, 180, P.cream, 8, 'center');
-      T('CHOISIS LE JEU', 90, 188, P.goldDim, 8, 'center');
+      T('DÉFIER ' + (tq.name || nm(ROSTER[tq.ci])).slice(0, 10), 90, 175, P.cream, 8, 'center');
+      R(P.gold, 35, 187, 110, 10); R('#6a2a8a', 36, 188, 108, 8); T('VOIR LA CARTE', 90, 188, P.cream, 8, 'center');
       if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 212, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'POUSSE', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); btn(BTN_DUEL3, 'ARKANOID', '#3a6fb0'); }
     }
   }
@@ -2245,7 +2331,7 @@ function netWolf(my) {
   wfl.setup = false;
   if (my.wk !== w.k) {
     my.wk = w.k; my.wT = now; my.wacted = 0; wfl.sel = []; wfl.wpick = false;
-    if (w.ph === 'end') jingle(); else boop();
+    if (w.ph === 'end') { jingle(); wfStat(my, w); } else boop();
   }
   if (my.host) wfHost(my, w, now);
 }
@@ -2367,6 +2453,7 @@ function wfSleep(t, w, l1, l2, dead) {
 }
 
 
+var BTN_CARD = { x: 35, y: 186, w: 110, h: 12 };
 var GM1 = { x: 10, y: 34, w: 160, h: 30 }, GM2 = { x: 10, y: 90, w: 160, h: 30 }, GM3 = { x: 10, y: 146, w: 160, h: 30 };
 function drawRoomGames(t) {
   R('rgba(10,6,16,0.85)', 0, 0, W, H);
@@ -2737,7 +2824,7 @@ function drawMoleDuel(t) {
     else if (m.score !== m.lastSent && t - m.wt > 200) { m.wt = t; m.lastSent = m.score; duelSend(m, m.score); }
   } else if (!m.over && (m.of !== null || t - m.finT > 6000)) {
     var of = m.of === null ? m.oc : m.of;
-    m.over = true; jingle(); m.win = of <= -9000 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); m.fo = of;
+    m.over = true; jingle(); m.win = of <= -9000 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); m.fo = of; statDuel(m.win);
   }
   moleDraw(m, Math.min(el, MOLE_TIME)); moleHud(m, Math.min(el, MOLE_TIME), 'RIVAL ' + m.oc);
   T(left + ' S', 90, 24, left <= 5 ? '#ff9b9b' : P.cream, 8, 'center', P.ink);
@@ -2823,7 +2910,7 @@ function pickOpp() {
 }
 function mgStart(id) {
   if (id === 'online') { mode = 'multi'; scene = 'stage'; mini = null; lobbyStart(); lbMsg('INVITE UN JOUEUR DE LA SALLE', 6000); }
-  else if (id === 'brick') brickStart(); else if (id === 'mole') moleStartSolo(); else pushStart(id);
+  else { statSolo(); if (id === 'brick') brickStart(); else if (id === 'mole') moleStartSolo(); else pushStart(id); }
 }
 function mgLeave() { if (mini && mini.net && !mini.fin && net) { mini.myFin = mini.id === 'pushnet' ? -1 : -9999; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
 function drawGameMenu(t) {
@@ -3034,7 +3121,7 @@ function drawBrickDuel(t) {
     else if (m.score !== m.lastSent && t - m.wt > 200) { m.wt = t; m.lastSent = m.score; duelSend(m, m.score); }
   } else if (!m.done && (m.of !== null || t - m.finT > 6000)) {
     var of = m.of === null ? m.oc : m.of;
-    m.done = true; jingle(); m.win = of <= -9000 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); m.fo = of;
+    m.done = true; jingle(); m.win = of <= -9000 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); m.fo = of; statDuel(m.win);
   }
   T('RIVAL ' + m.oc, 90, 24, P.mint, 8, 'center', P.ink);
   T(left + ' S', 170, 24, left <= 5 ? '#ff9b9b' : P.cream, 8, 'right', P.ink);
@@ -3082,7 +3169,7 @@ function pushUpdate(t) {
       m.taps[1] = Math.max(m.oc, m.of === null ? 0 : m.of);
       if (m.of !== null || t - m.finT > 6000) {
         var of = m.of === null ? m.oc : m.of;
-        m.over = true; m.overT = t; m.win = of < 0 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0));
+        m.over = true; m.overT = t; m.win = of < 0 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); statDuel(m.win);
         m.pos = m.win === 1 ? 1 : (m.win === 2 ? -1 : 0); jingle();
       }
     }

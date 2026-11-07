@@ -47,3 +47,6 @@ Arkanoid : bonus qui tombent (casserole, fée, drapeau suisse, micro) = 3 billes
 
 ## Loup-Garou (en ligne)
 Dans une salle, le maître du jeu appuie sur LOUP-GAROU, règle les rôles (auto selon le nombre de joueurs) et lance. Chacun reçoit son rôle en secret sur son téléphone ; nuits, votes et morts sont gérés automatiquement (loups, villageois, voyante, sorcière, chasseur, Cupidon). Minimum 4 joueurs.
+
+## Cartes de stats
+Chaque joueur a une carte (niveau, points, parties solo / susceptible / loup-garou / duels, titres comme « le plus voté »). Stockée sur l'appareil (localStorage) et partagée dans la salle : touche un joueur → VOIR LA CARTE, ou touche ton propre perso.
