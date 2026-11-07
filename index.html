@@ -3130,9 +3130,21 @@ function drawMini(t) {
 
 /* --- Arkanoid --- */
 var BRICK_COL = ['#d93a3a', '#e8a23a', '#e8d23a', '#3fbf6f', '#3a8fd9', '#8a5ad9'];
+var BRICK_SHAPES = {
+  3: [0.6, 1.5, 2.5, 3.5, 2.5, 1.5, 0.6],
+  5: [0.6, 1.5, 2.5, 3.5, 3.5, 3.5]
+};
 function brickLevel(lv, rowsN) {
-  var bricks = [], r, k, rows = rowsN || Math.min(6, 4 + lv);
-  for (r = 0; r < rows; r++) for (k = 0; k < 8; k++) bricks.push({ x: 10 + k * 20, y: 30 + r * 14, w: 19, h: 13, col: BRICK_COL[r], hp: r < 2 && lv > 1 ? 2 : 1, ci: Math.max(0, rosterIdx(MOLE_POOL[(r * 3 + k * 7) % 10])) });
+  var bricks = [], r, k, rows, on, hp, sh;
+  if (rowsN || lv <= 2) rows = rowsN || Math.min(6, 4 + lv);
+  else rows = 6;
+  for (r = 0; r < rows; r++) for (k = 0; k < 8; k++) {
+    on = true; hp = r < 2 && lv > 1 ? 2 : 1;
+    if (false && lv === 3) { sh = BRICK_SHAPES[3][r]; on = Math.abs(k - 3.5) <= sh; hp = Math.abs(k - 3.5) < 1 && r > 1 && r < 5 ? 2 : 1; }
+    else if (false && lv === 4) { on = !(k % 3 === 2 && r >= 1 && r <= 4); hp = (r === 0 || r === 5) ? 2 : 1; }
+    else if (false && lv >= 5) { sh = BRICK_SHAPES[5][r]; on = Math.abs(k - 3.5) <= sh; hp = r >= 4 ? 2 : 1; }
+    if (on) bricks.push({ x: 10 + k * 20, y: 30 + r * 14, w: 19, h: 13, col: BRICK_COL[r % 6], hp: hp, ci: Math.max(0, rosterIdx(MOLE_POOL[(r * 3 + k * 7) % 10])) });
+  }
   return bricks;
 }
 function brickStart() {
@@ -3152,7 +3164,7 @@ function brickWin(m) {
   var left = 0, i; for (i = 0; i < m.bricks.length; i++) if (m.bricks[i].hp > 0) left++;
   if (!left && !m.over) {
     if (m.lv >= (m.maxLv || 3)) { m.over = true; m.won = true; if (!m.online) jingle(); }
-    else { m.lv++; m.bricks = brickLevel(m.lv); m.speed *= 1.12; m.stuck = true; m.go = false; m.extra = []; m.items = []; m.shots = []; m.miss = []; m.stkY = 0; m.fastUntil = m.stickyUntil = m.laserUntil = 0; jingle(); }
+    else { m.lv++; m.bricks = brickLevel(m.lv); m.speed *= 1.12; m.frag = false; m.stuck = true; m.go = false; m.extra = []; m.items = []; m.shots = []; m.miss = []; m.stkY = 0; m.fastUntil = m.stickyUntil = m.laserUntil = 0; jingle(); }
   }
 }
 function brickUpdate(t) {
@@ -3178,7 +3190,7 @@ function brickUpdate(t) {
   if (lost) {
     if (m.extra.length) { eb = m.extra.shift(); m.bx = eb.x; m.by = eb.y; m.vx = eb.vx; m.vy = eb.vy; }
     else {
-      m.lives--; boop(); m.items = []; m.shots = []; m.miss = []; m.stkY = 0;
+      m.lives--; boop(); m.items = []; m.shots = []; m.miss = []; m.stkY = 0; m.frag = false;
       if (m.lives <= 0) { m.over = true; m.won = false; } else { m.stuck = true; m.go = false; }
     }
   }
@@ -3204,6 +3216,7 @@ function ballStep(m, b, dt, primary, t) {
         var ox = Math.min(b.x + 2 - k.x, k.x + k.w - (b.x - 2)), oy = Math.min(b.y + 2 - k.y, k.y + k.h - (b.y - 2));
         if (ox < oy) b.vx = -b.vx; else b.vy = -b.vy;
         brickHit(m, k, t);
+        if (m.frag && m.extra.length < 14) { m.frag = false; var fa, fsp = Math.hypot(b.vx, b.vy) || m.speed; for (fa = 0; fa < 6; fa++) { var fr = (fa * 60 + 30) * Math.PI / 180; m.extra.push({ x: b.x, y: b.y, vx: Math.cos(fr) * fsp, vy: Math.sin(fr) * fsp }); } jingle(); }
         if (m.hits % 6 === 0) { var sp = Math.hypot(b.vx, b.vy) * 1.04, an = Math.atan2(b.vy, b.vx); b.vx = Math.cos(an) * sp; b.vy = Math.sin(an) * sp; }
         break;
       }
@@ -3213,10 +3226,10 @@ function ballStep(m, b, dt, primary, t) {
 }
 function brickHit(m, k, t) {
   k.hp--; m.hits++; m.score += k.hp > 0 ? 5 : 10;
-  if (k.hp > 0) k.col = '#c9c9d9'; else if (Math.random() < 0.2) m.items.push({ x: k.x + k.w / 2, y: k.y + k.h, kind: Math.floor(Math.random() * 4), bonus: Math.floor(Math.random() * 5) });
+  if (k.hp > 0) k.col = '#c9c9d9'; else if (Math.random() < 0.2) m.items.push({ x: k.x + k.w / 2, y: k.y + k.h, kind: Math.floor(Math.random() * 4), bonus: Math.floor(Math.random() * 6) });
   boop();
 }
-var BONUS_NAME = ['3 BILLES !', 'VITESSE !', 'TÊTES CHERCHEUSES !', 'BOULE COLLANTE !', 'RAYON LASER !'];
+var BONUS_NAME = ['3 BILLES !', 'VITESSE !', 'TÊTES CHERCHEUSES !', 'BOULE COLLANTE !', 'RAYON LASER !', 'BOULE FRAGMENTÉE !'];
 function brickBonus(m, bo, t) {
   var k, a, sp = m.speed;
   if (bo === 0) {
@@ -3224,7 +3237,8 @@ function brickBonus(m, bo, t) {
   } else if (bo === 1) m.fastUntil = t + 8000;
   else if (bo === 2) { for (k = -1; k <= 1; k++) m.miss.push({ x: m.px + k * 9, y: 288, vx: k * 40, vy: -90, t0: t }); }
   else if (bo === 3) m.stickyUntil = t + 12000;
-  else m.laserUntil = t + 8000;
+  else if (bo === 4) m.laserUntil = t + 8000;
+  else m.frag = true;
   m.msg = { s: BONUS_NAME[bo], t: t }; jingle();
 }
 function brickBonusUpdate(m, t, dt) {
@@ -3290,7 +3304,8 @@ function drawBrick(t) {
   for (i = 0; i < m.shots.length; i++) { R('#ff3030', Math.round(m.shots[i].x), Math.round(m.shots[i].y), 1, 7); R('#ffd0d0', Math.round(m.shots[i].x), Math.round(m.shots[i].y), 1, 2); }
   for (i = 0; i < m.items.length; i++) drawIcon(m.items[i].kind, m.items[i].x, m.items[i].y);
   for (i = 0; i < m.miss.length; i++) drawHead(ci0, Math.round(m.miss[i].x) - 6, Math.round(m.miss[i].y) - 6, 12, 12);
-  disc(Math.round(m.bx), Math.round(m.by), 2, tn < m.fastUntil ? '#ffb030' : '#e03030'); R('#ffb0b0', Math.round(m.bx) - 1, Math.round(m.by) - 1, 1, 1);
+  if (m.frag) disc(Math.round(m.bx), Math.round(m.by), 4, (Math.floor(tn / 120) % 2) ? '#ff7a1a' : '#9a3cff');
+  disc(Math.round(m.bx), Math.round(m.by), 2, m.frag ? '#ffe14a' : (tn < m.fastUntil ? '#ffb030' : '#e03030')); R('#ffb0b0', Math.round(m.bx) - 1, Math.round(m.by) - 1, 1, 1);
   for (i = 0; i < m.extra.length; i++) { disc(Math.round(m.extra[i].x), Math.round(m.extra[i].y), 2, '#ffd24a'); R('#fff', Math.round(m.extra[i].x) - 1, Math.round(m.extra[i].y) - 1, 1, 1); }
   if (m.msg && tn - m.msg.t < 1500) T(m.msg.s, 90, 236, P.gold, 8, 'center', P.ink);
   if (m.stuck && !m.over && !m.hold) T(m.lv > 1 ? 'NIVEAU ' + m.lv : 'GLISSE ET TOUCHE', 90, 240, P.cream, 8, 'center', P.ink);
