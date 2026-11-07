@@ -2072,7 +2072,7 @@ function drawStatCard(t) {
   T('NIVEAU ' + lv.n + ' - ' + statG(st, 'pt') + ' PTS', 90, 112, '#8d84b8', 8, 'center');
   var fr = lv.to > lv.from ? Math.min(1, (statG(st, 'pt') - lv.from) / (lv.to - lv.from)) : 1;
   R(P.gold, 20, 124, 140, 8); R('#0e0914', 21, 125, 138, 6); R(P.mint, 21, 125, Math.round(138 * fr), 6);
-  var rows = [['SOLO', String(statG(st, 'so'))], ['SUSCEPTIBLE', String(statG(st, 'su'))], ['LOUP-GAROU', statG(st, 'lg') + ' (' + statG(st, 'lw') + ' V)'], ['DUELS', statG(st, 'dl') + ' (' + statG(st, 'dw') + ' V)'], ['PLUS VOTÉ', String(statG(st, 'tv'))]];
+  var rows = [['SOLO', String(statG(st, 'so'))], ['C\'EST QUI ?', String(statG(st, 'su'))], ['LOUP-GAROU', statG(st, 'lg') + ' (' + statG(st, 'lw') + ' V)'], ['DUELS', statG(st, 'dl') + ' (' + statG(st, 'dw') + ' V)'], ['PLUS VOTÉ', String(statG(st, 'tv'))]];
   rows.forEach(function (r, i) {
     var y = 142 + i * 15;
     R(i % 2 ? '#241238' : '#2a1a40', 14, y - 2, 152, 14);
@@ -2527,7 +2527,7 @@ function drawRoomGames(t) {
   R('rgba(10,6,16,0.85)', 0, 0, W, H);
   T('CHOISIS UN JEU', 90, 10, P.gold, 8, 'center', P.velvet);
   T('POUR TOUTE LA SALLE', 90, 21, P.cream, 8, 'center', P.ink);
-  btn(GM1, 'LE PLUS SUSCEPTIBLE', '#b3202e'); T('VOTE ENTRE JOUEURS', 90, GM1.y + 34, '#8d84b8', 8, 'center');
+  btn(GM1, 'C\'EST QUI ?', '#b3202e'); T('VOTE ENTRE JOUEURS', 90, GM1.y + 34, '#8d84b8', 8, 'center');
   btn(GM2, 'LOUP-GAROU', '#6a2a8a'); T('MIN. 4 JOUEURS', 90, GM2.y + 34, '#8d84b8', 8, 'center');
   btn(GM3, 'DUEL 1 CONTRE 1', '#3a6fb0'); T('POUSSE TAUPES ARKANOID', 90, GM3.y + 34, '#8d84b8', 8, 'center');
   T('JOUEURS : ' + lb.players.length, 90, 210, P.gold, 8, 'center', P.ink);
