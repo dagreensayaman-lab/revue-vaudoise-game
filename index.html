@@ -3538,6 +3538,16 @@ function pushUpdate(t) {
     m.pos = Math.max(-1, Math.min(1, m.pos)); jingle();
   }
 }
+/* a fighter drawn from the real sprite: lean forward on a punch, raise the lower half (the leg) on a kick, tilt back when hit */
+function fightDraw(ci, x, y, flip, bobv, d, atk, kind, hit) {
+  var rad = Math.PI / 180;
+  c.save(); c.translate(x, y); c.rotate(d * (atk * (kind === 'k' ? -5 : 16) - hit * 12) * rad);
+  if (atk && kind === 'k') {
+    c.save(); c.beginPath(); c.rect(-45, -120, 90, 94); c.clip(); drawChar(ROSTER[ci], 0, 0, 2, flip, bobv); c.restore();
+    c.save(); c.translate(0, -26); c.rotate(-d * atk * 95 * rad); c.beginPath(); c.rect(-45, 0, 90, 40); c.clip(); c.translate(0, 26); drawChar(ROSTER[ci], 0, 0, 2, flip, bobv); c.restore();
+  } else drawChar(ROSTER[ci], 0, 0, 2, flip, bobv);
+  c.restore();
+}
 function drawPush(t) {
   var m = mini, ph = pushPhase(t), bob = (Math.floor(t / 150) % 2) ? -1 : 0;
   pushUpdate(t);
@@ -3553,18 +3563,14 @@ function drawPush(t) {
   if (over && m.win === 1) { fb = fall; pb += fall * 40; yb += fall * fall * 130; }
   if (over && m.win === 2) { fa = fall; pa -= fall * 40; ya += fall * fall * 130; }
   c.save(); c.beginPath(); c.rect(0, 40, W, 175); c.clip();
-  if (!(la && !over && Math.floor(t / 40) % 2 === 0 && false)) drawChar(ROSTER[m.a], pa, ya, 2, false, ph === 1 && !over ? (lb2 && Math.floor(t / 50) % 2 ? 0 : bob) : 0);
-  drawChar(ROSTER[m.b], pb, yb, 2, true, ph === 1 && !over ? (la && Math.floor(t / 50) % 2 ? 0 : -bob) : 0);
-  if (!over) [[0, la, pa, 1], [1, lb2, pb, -1]].forEach(function (a) {
+  var ea = !over && la ? Math.sin(Math.min(1, (t - m.flash[0]) / 160) * Math.PI) : 0, eb = !over && lb2 ? Math.sin(Math.min(1, (t - m.flash[1]) / 160) * Math.PI) : 0, bb = ph === 1 && !over;
+  fightDraw(m.a, pa, ya, false, bb ? bob : 0, 1, ea, m.kind[0], eb);
+  fightDraw(m.b, pb, yb, true, bb ? -bob : 0, -1, eb, m.kind[1], ea);
+  if (!over) [[0, la, 1], [1, lb2, -1]].forEach(function (a) {
     if (!a[1]) return;
-    var kk = m.kind[a[0]] === 'k', d = a[3], sx = a[2] + d * 8, ly = kk ? 156 : 138, th = kk ? 9 : 7, len = 30, ex = d > 0 ? sx + len : sx - len;
-    R(P.ink, Math.min(sx, ex) - 1, ly - 1, len + 2, th + 2);
-    R(kk ? '#2a2a3a' : '#f2c9a0', Math.min(sx, ex), ly, len, th);
-    if (kk) { R('#d93a3a', d > 0 ? ex - 11 : ex, ly - 2, 11, th + 4); R('#fff', d > 0 ? ex - 11 : ex, ly + th, 11, 2); }
-    else { R('#d93a3a', d > 0 ? ex - 9 : ex, ly - 3, 9, th + 6); R('#ffb0b0', d > 0 ? ex - 7 : ex + 2, ly - 1, 3, 3); }
-    var ix = Math.round(ex + d * 3), iy = ly + 4, pu = 1 + Math.floor((t - m.flash[a[0]]) / 50) % 2;
+    var kk = m.kind[a[0]] === 'k', ix = Math.round((pa + pb) / 2), iy = kk ? 140 : 128, pu = 1 + Math.floor((t - m.flash[a[0]]) / 50) % 2;
     R('#ffe14a', ix - 2, iy - 10 - pu, 5, 21 + pu * 2); R('#ffe14a', ix - 10 - pu, iy - 2, 21 + pu * 2, 5); R('#fff', ix - 1, iy - 6, 3, 13); R('#fff', ix - 6, iy - 1, 13, 3); R('#ff7a1a', ix - 5, iy - 5, 11, 11); R('#ffe14a', ix - 3, iy - 3, 7, 7);
-    Tout(kk ? 'PAF !' : 'POW !', 90, kk ? 118 : 106, kk ? '#ff7a1a' : '#ffe14a', 8, P.ink, P.ink);
+    Tout(kk ? 'PAF !' : 'POW !', 90, 104, kk ? '#ff7a1a' : '#ffe14a', 8, P.ink, P.ink);
   });
   c.restore();
   // balance meter
