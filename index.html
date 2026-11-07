@@ -2048,9 +2048,15 @@ function lobbyTap(x, y) {
     else if (inside(BTN_OK, x, y)) tryJoin();
   } else if (v === 'room') {
     if (net && (wfOn() || wfl.setup)) { wfTap(x, y); return; }
-    if (net && net.host && inside(BTN_WOLF, x, y)) { wfStartSetup(); return; }
+    if (net && lb.gm) {
+      if (inside(GM1, x, y)) { lb.gm = false; netStart(); }
+      else if (inside(GM2, x, y)) { lb.gm = false; wfStartSetup(); }
+      else if (inside(GM3, x, y)) { lb.gm = false; lbMsg('TOUCHE UN JOUEUR POUR LE DÉFIER', 6000); blip(); }
+      else if (inside(BTN_BACK2, x, y)) { lb.gm = false; boop(); }
+      return;
+    }
     if (lb.invite) { if (inside(BTN_YES, x, y)) duelAnswer(true); else if (inside(BTN_NO, x, y)) duelAnswer(false); return; }
-    if (inside(net && net.host ? BTN_BACKR : BTN_BACK2, x, y)) { netLeave(true); return; }
+    if (inside(BTN_BACK2, x, y)) { netLeave(true); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL, x, y)) { duelInvite(lb.target, 'push'); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL2, x, y)) { duelInvite(lb.target, 'mole'); return; }
     if (net && lb.target && !lb.wait && inside(BTN_DUEL3, x, y)) { duelInvite(lb.target, 'brick'); return; }
@@ -2062,7 +2068,7 @@ function lobbyTap(x, y) {
       }
       if (hit >= 0) { lb.target = lb.target === lb.players[hit].pid ? '' : lb.players[hit].pid; blip(); return; }
     }
-    if (net && inside(BTN_OK, x, y)) { if (net.host) netStart(); else netReady(); }
+    if (net && inside(BTN_OK, x, y)) { if (net.host) { lb.gm = true; blip(); } else netReady(); }
     else if (net && inside(BTN_GAGE, x, y)) openGageInput();
     else if (net && inside(BTN_QUEST, x, y)) openQuestInput();
   } else {
@@ -2106,6 +2112,7 @@ function drawLobby(t) {
     muteIcon(); return;
   }
   var demo = v === 'demo';
+  if (v === 'room' && lb.gm && net && net.host) { drawRoomGames(t); return; }
   if (demo) lobbyUpdate(t);
   R(P.gold, 30, 14, 120, 38); R(P.ink, 31, 15, 118, 36);
   T('CODE DE LA SALLE', 90, 19, P.goldDim, 8, 'center');
@@ -2130,7 +2137,7 @@ function drawLobby(t) {
   else T(host ? 'MAÎTRE DU JEU : TOI' : 'MAÎTRE : ' + (lb.hostName || '?').slice(0, 10), 90, 204, P.goldDim, 8, 'center');
   if (host) T(rdy === n ? 'TOUS PRÊTS !' : 'ON ATTEND LES AUTRES', 90, 217, rdy === n ? P.mint : P.cream, 8, 'center');
   else T(me && me.ready ? 'ATTENDS LE MAÎTRE' : 'APPUIE SUR PRÊT', 90, 217, P.cream, 8, 'center');
-  if (host) btn(BTN_OK, 'OK', rdy === n ? '#2e8b57' : '#6a7a3a');
+  if (host) btn(BTN_OK, demo ? 'OK' : 'CHOISIR UN JEU', rdy === n ? '#2e8b57' : '#6a7a3a');
   else btn(BTN_OK, me && me.ready ? 'PAS PRÊT' : 'JE SUIS PRÊT', me && me.ready ? '#6a7a3a' : '#2e8b57');
   if (!demo && net && lb.target && !lb.players.some(function (q) { return q.pid === lb.target; })) lb.target = '';
   if (!demo && lb.target) {
@@ -2157,8 +2164,7 @@ function drawLobby(t) {
     if (net && net.err >= 3) T('CONNEXION PERDUE...', 90, 284, '#e07b7b', 8, 'center', P.ink);
     else lobbyMsg(t, 284);
   }
-  if (!demo && net && net.host) { btn(BTN_BACKR, 'RETOUR', '#3a3f55'); btn(BTN_WOLF, 'LOUP-GAROU', '#6a2a8a'); }
-  else btn(BTN_BACK2, 'RETOUR', '#3a3f55');
+  btn(BTN_BACK2, 'RETOUR', '#3a3f55');
   muteIcon();
 }
 
@@ -2360,6 +2366,61 @@ function wfSleep(t, w, l1, l2, dead) {
   T(dead ? 'TU NE JOUES PLUS' : 'LE VILLAGE DORT', 90, 170, dead ? '#e07b7b' : '#8d84b8', 8, 'center');
 }
 
+
+var GM1 = { x: 10, y: 34, w: 160, h: 30 }, GM2 = { x: 10, y: 90, w: 160, h: 30 }, GM3 = { x: 10, y: 146, w: 160, h: 30 };
+function drawRoomGames(t) {
+  R('rgba(10,6,16,0.85)', 0, 0, W, H);
+  T('CHOISIS UN JEU', 90, 10, P.gold, 8, 'center', P.velvet);
+  T('POUR TOUTE LA SALLE', 90, 21, P.cream, 8, 'center', P.ink);
+  btn(GM1, 'LE PLUS SUSCEPTIBLE', '#b3202e'); T('VOTE ENTRE JOUEURS', 90, GM1.y + 34, '#8d84b8', 8, 'center');
+  btn(GM2, 'LOUP-GAROU', '#6a2a8a'); T('MIN. 4 JOUEURS', 90, GM2.y + 34, '#8d84b8', 8, 'center');
+  btn(GM3, 'DUEL 1 CONTRE 1', '#3a6fb0'); T('POUSSE TAUPES ARKANOID', 90, GM3.y + 34, '#8d84b8', 8, 'center');
+  T('JOUEURS : ' + lb.players.length, 90, 210, P.gold, 8, 'center', P.ink);
+  lobbyMsg(t, 230);
+  btn(BTN_BACK2, 'RETOUR', '#3a3f55');
+  muteIcon();
+}
+/* role costumes drawn over a character's head (top = y of the sprite's top, cx = centre, u = pixel unit) */
+function wfCostume(role, cx, top, u) {
+  var K = function (col, x, y, w, h) { R(col, cx + x * u, top + y * u, Math.max(1, w * u), Math.max(1, h * u)); };
+  if (role === 'loup') {
+    K('#5d5d6e', -5, -1, 10, 10); K('#5d5d6e', -5, -3, 3, 3); K('#5d5d6e', 2, -3, 3, 3); K('#d98a9a', -4, -2, 1, 2); K('#d98a9a', 3, -2, 1, 2);
+    K('#9a9aae', -3, 5, 6, 4); K('#111', -1, 5, 2, 1); K('#f2c14e', -4, 2, 2, 1); K('#f2c14e', 2, 2, 2, 1); K('#b3202e', -3, 2, 1, 1); K('#b3202e', 3, 2, 1, 1);
+    K('#fff', -2, 8, 1, 1); K('#fff', 1, 8, 1, 1);
+  } else if (role === 'vill') {
+    K('#c9a063', -6, -1, 12, 1); K('#a67c3c', -4, -3, 8, 2); K('#6b4a1f', -4, -1, 8, 1);
+  } else if (role === 'voy') {
+    K('#8a4fb0', -5, -1, 10, 3); K('#8a4fb0', -5, 2, 2, 4); K('#8a4fb0', 3, 2, 2, 4); K('#f2c14e', -1, 0, 2, 2); K('#c9a8e8', -6, 9, 4, 4); K('#e8d8ff', -5, 10, 1, 1);
+  } else if (role === 'sor') {
+    K('#1a1226', -7, -1, 14, 2); K('#1a1226', -4, -4, 8, 3); K('#1a1226', -2, -7, 5, 3); K('#2e8b57', -4, -2, 8, 1); K('#f2c14e', -1, -2, 2, 1);
+  } else if (role === 'chas') {
+    K('#3f6f3a', -6, -1, 12, 2); K('#3f6f3a', -4, -4, 8, 3); K('#b3202e', 4, -6, 1, 4); K('#d9588a', 5, -5, 1, 2); K('#6b4a1f', 6, 10, 1, 12);
+  } else if (role === 'cup') {
+    K('#f2c14e', -4, -4, 8, 1); K('#f2c14e', -5, -3, 1, 1); K('#f2c14e', 4, -3, 1, 1); K('#ffd0e4', -11, 8, 5, 6); K('#ffd0e4', 6, 8, 5, 6); K('#fff', -9, 9, 2, 3); K('#fff', 7, 9, 2, 3); K('#d9588a', -1, 10, 3, 2);
+  }
+}
+function wfHeadR(pid, x, y, w, h, role) {
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip();
+  drawCharTop(ROSTER[wci(pid)], x + w / 2, y - 1, 1, false);
+  if (role) wfCostume(role, x + w / 2, y - 1, 1);
+  c.restore();
+}
+function wfCard(t, role) {
+  var my = net, ci = wci(my.pid), ch = ROSTER[ci], held = ptrDown && wfl.peekHold, B = { x: 3, y: 281, w: 36, h: 36 };
+  if (!ptrDown) wfl.peekHold = false;
+  R(held ? WR[role][1] : P.gold, B.x, B.y, B.w, B.h); R('#1d1530', B.x + 1, B.y + 1, B.w - 2, B.h - 2);
+  c.save(); c.beginPath(); c.rect(B.x + 1, B.y + 1, B.w - 2, B.h - 2); c.clip();
+  drawCharTop(ch, B.x + B.w / 2, B.y + 4, 1, false);
+  if (held) wfCostume(role, B.x + B.w / 2, B.y + 4, 1);
+  c.restore();
+  if (held) {
+    R('rgba(10,6,16,0.92)', 42, 281, 134, 36); R(WR[role][1], 42, 281, 134, 1);
+    T(WR[role][0], 109, 286, WR[role][1] === '#6a7a3a' ? '#a8c060' : WR[role][1], 8, 'center', P.ink);
+    T('RELÂCHE = CACHÉ', 109, 301, '#8d84b8', 8, 'center');
+  } else { T('MAINTIENS :', 42, 286, '#8d84b8', 8, 'left'); T('TON RÔLE', 42, 297, '#8d84b8', 8, 'left'); }
+  wfl.btns.push({ b: B, fn: function () { wfl.peekHold = true; blip(); } });
+}
+
 function drawWfSetup(t) {
   var my = net, n = netActive(my).length, c = wfl.cfg || (wfl.cfg = wfAuto(n)), v = n - wfCnt(c);
   wfBg(t, true);
@@ -2384,6 +2445,11 @@ function drawWfSetup(t) {
 }
 
 function drawWolf(t) {
+  drawWolfMain(t);
+  var my = net, w = my && my.rm && my.rm.w, role = w && w.r && w.r[my.pid];
+  if (role && w.ph !== 'end' && w.ph !== 'role') wfCard(t, role);
+}
+function drawWolfMain(t) {
   var my = net, w = my && my.rm && my.rm.w, i, k;
   wfl.hit = []; wfl.btns = []; wfl.onTile = null;
   if (!w || !w.ph) { drawWfSetup(t); return; }
@@ -2394,14 +2460,16 @@ function drawWolf(t) {
     wfBg(t, true);
     T('TON RÔLE', 90, 8, P.gold, 8, 'center', P.velvet);
     Tout(WR[role][0], 90, 22, WR[role][1], 16, '#1a0a1f', P.ink);
-    drawChar(ROSTER[wci(me)], 90, 112, 2, false, (Math.floor(t / 380) % 2) ? -1 : 0);
+    var rd = spriteDims(ROSTER[wci(me)], 2);
+    drawChar(ROSTER[wci(me)], 90, 112, 2, false, 0); wfCostume(role, 90, 112 - rd.h + rd.off, rd.h > 0 && ROSTER[wci(me)] ? 2 : 2);
     wfLines(WTXT[role], 126, P.cream, 11);
     if (role === 'loup') {
       var mates = []; for (k in w.r) if (w.r[k] === 'loup' && k !== me) mates.push(wnm(k));
       T(mates.length ? 'AVEC : ' + mates.join(' ').slice(0, 14) : 'TU ES SEUL(E)...', 90, 178, '#e07b7b', 8, 'center', P.ink);
       if (mates.join(' ').length > 14) T(mates.join(' ').slice(14, 36), 90, 189, '#e07b7b', 8, 'center', P.ink);
     }
-    T('CACHE TON ÉCRAN !', 90, 212, '#e07b7b', 8, 'center', P.ink);
+    T('CACHE TON ÉCRAN !', 90, 206, '#e07b7b', 8, 'center', P.ink);
+    T('PUIS MAINTIENS TON', 90, 220, '#8d84b8', 8, 'center'); T('PERSO POUR REVOIR', 90, 231, '#8d84b8', 8, 'center'); T('TON RÔLE', 90, 242, '#8d84b8', 8, 'center');
     var nk = 0; for (k in ak) nk++;
     if (ak[me]) T('ATTENTE ' + nk + '/' + netActive(my).length + wfDots(t), 90, 280, P.gold, 8, 'center', P.ink);
     else wb(WBTN, 'J\'AI COMPRIS', '#2e8b57', function () { wfSend('ak/' + me, 1); });
@@ -2483,7 +2551,7 @@ function drawWolf(t) {
     ds.forEach(function (pid, j) {
       var yy = 44 + j * 52;
       R('#1d1530', 8, yy, 164, 46); R('#4a3f6a', 8, yy, 164, 1);
-      drawHead(wci(pid), 14, yy + 8, 30, 30);
+      wfHeadR(pid, 14, yy + 8, 30, 30, w.r[pid]);
       T(wnm(pid), 52, yy + 10, P.gold, 8, 'left', P.ink);
       T('ÉTAIT', 52, yy + 22, P.cream, 8, 'left');
       T(WR[w.r[pid]][0], 52, yy + 33, WR[w.r[pid]][1] === '#6a7a3a' ? '#a8c060' : WR[w.r[pid]][1], 8, 'left', P.ink);
@@ -2529,7 +2597,7 @@ function drawWolf(t) {
     ids.forEach(function (pid, j) {
       var yy = 26 + j * 17, dead = !(w.al && w.al[pid]);
       R(dead ? '#2a2038' : '#1d1530', 6, yy, 168, 16);
-      drawHead(wci(pid), 8, yy + 1, 14, 14);
+      wfHeadR(pid, 8, yy + 1, 14, 14, w.r[pid]);
       T(wnm(pid).slice(0, 7), 26, yy + 4, dead ? '#8d84b8' : P.cream, 8, 'left');
       T(WR[w.r[pid]][0], 170, yy + 4, WR[w.r[pid]][1] === '#6a7a3a' ? '#a8c060' : WR[w.r[pid]][1], 8, 'right');
       if (dead) R('#8d84b8', 26, yy + 8, Math.min(56, wnm(pid).length * 8), 1);
@@ -3225,6 +3293,8 @@ cv.addEventListener('pointerdown', function (e) {
 });
 cv.addEventListener('pointermove', function (e) { var r = cv.getBoundingClientRect(); ptrX = (e.clientX - r.left) / r.width * W; });
 cv.addEventListener('pointerup', function () { ptrDown = false; });
+cv.addEventListener('pointercancel', function () { ptrDown = false; });
+cv.addEventListener('pointerleave', function () { ptrDown = false; });
 window.addEventListener('keydown', function (e) {
   unlock();
   if (scene === 'title' && (e.key === 'Enter' || e.key === ' ')) { startEnter(); e.preventDefault(); }
