@@ -2352,7 +2352,7 @@ function drawLobby(t) {
       R(P.gold, 8, 172, 164, 60); R('#241238', 9, 173, 162, 58);
       T('DÉFIER ' + (tq.name || nm(ROSTER[tq.ci])).slice(0, 10), 90, 175, P.cream, 8, 'center');
       R(P.gold, 35, 187, 110, 10); R('#6a2a8a', 36, 188, 108, 8); T('VOIR LA CARTE', 90, 188, P.cream, 8, 'center');
-      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 212, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'ARGENTIN', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); btn(BTN_DUEL3, 'ARKANOID', '#3a6fb0'); btn(BTN_DUEL4, 'LA NEUF', '#c47a1a'); }
+      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 212, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'ARGENTIN', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); btn(BTN_DUEL3, 'ARKANOID', '#3a6fb0'); btn(BTN_DUEL4, "L'A9", '#c47a1a'); }
     }
   }
   if (!demo && lb.invite) {
@@ -2360,7 +2360,7 @@ function drawLobby(t) {
     R(P.gold, 14, 90, 152, 100); R('#241238', 15, 91, 150, 98);
     drawChar(ROSTER[lb.invite.ci], 90, 150, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
     T((lb.invite.name || 'QUELQU\'UN').slice(0, 12), 90, 95, P.gold, 8, 'center');
-    T(lb.invite.g === 'mole' ? 'TE DÉFIE AUX TAUPES !' : (lb.invite.g === 'brick' ? 'TE DÉFIE À ARKANOID !' : (lb.invite.g === 'car' ? 'TE DÉFIE À LA NEUF !' : 'DÉFI FOOT ARGENTIN !')), 90, 106, P.cream, 8, 'center');
+    T(lb.invite.g === 'mole' ? 'TE DÉFIE AUX TAUPES !' : (lb.invite.g === 'brick' ? 'TE DÉFIE À ARKANOID !' : (lb.invite.g === 'car' ? "TE DÉFIE À L'A9 !" : 'DÉFI FOOT ARGENTIN !')), 90, 106, P.cream, 8, 'center');
     btn(BTN_YES, 'OUI', '#2e8b57'); btn(BTN_NO, 'NON', '#b3202e');
   }
   if (demo) T('(JOUEURS SIMULÉS)', 90, 272, '#8d84b8', 8, 'center');
@@ -3199,7 +3199,7 @@ function drawBrickRound(t, tt, r) {
 /* ---------- mini-games (each one playable on its own): ARKANOID and POUSSE (tap battle) ---------- */
 
 /* ---------- records par jeu (classement mondial par joueur : /hs/<jeu>/<appareil>) ---------- */
-var HS_G = [['brick', 'ARKA'], ['mole', 'TAUP'], ['push', 'ARGE'], ['neuf', 'NEUF']];
+var HS_G = [['brick', 'ARKA'], ['mole', 'TAUP'], ['push', 'ARGE'], ['neuf', 'A9']];
 var hsBest = {}, hsLine = null;
 try { hsBest = JSON.parse(localStorage.getItem('rv_hs') || '{}') || {}; } catch (e) { hsBest = {}; }
 function hsSave() { try { localStorage.setItem('rv_hs', JSON.stringify(hsBest)); } catch (e) {} }
@@ -3257,7 +3257,7 @@ function drawHs(t) {
     R(on ? P.gold : '#4a3f6a', 6 + i2 * 43, 22, 40, 14); R(on ? '#6a4a1a' : '#1d1530', 7 + i2 * 43, 23, 38, 12);
     T(tb[1], 26 + i2 * 43, 26, on ? P.gold : P.cream, 8, 'center');
   });
-  T(m.tab === 3 ? CAR_LV[m.lv].n + ' (TOUCHE NEUF)' : ['POINTS ARKANOID', 'POINTS TAUPES', 'VICTOIRES VS BOT'][m.tab], 90, 41, '#8d84b8', 8, 'center');
+  T(m.tab === 3 ? CAR_LV[m.lv].n + ' (TOUCHE A9)' : ['POINTS ARKANOID', 'POINTS TAUPES', 'VICTOIRES VS BOT'][m.tab], 90, 41, '#8d84b8', 8, 'center');
   if (rows === 'err') T('CONNEXION IMPOSSIBLE', 90, 120, '#e07b7b', 8, 'center', P.ink);
   else if (!rows || rows === 'load') T('CHARGEMENT...', 90, 120, P.cream, 8, 'center', P.ink);
   else if (!rows.length) T('PERSONNE ENCORE...', 90, 120, P.cream, 8, 'center', P.ink);
@@ -3276,7 +3276,7 @@ function drawHs(t) {
 
 var mini = null, ptrX = 90, ptrY = 0, ptrDown = false;
 var MG_LIST = {
-  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: 'LA NEUF' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'BEATBOX BIENTÔT', off: true }],
+  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: "JEU DE L'A9" }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'BEATBOX BIENTÔT', off: true }],
   versus: [{ id: 'online', name: 'DUEL EN LIGNE' }, { id: 'push2', name: 'ARGENTIN À DEUX' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }]
 };
 var BTN_X = { x: 2, y: 2, w: 16, h: 14 }, BTN_MB = { x: 6, y: 276, w: 80, h: 22 }, BTN_REC = { x: 94, y: 276, w: 80, h: 22 };
@@ -3475,7 +3475,7 @@ function drawCarMenu(t) {
   var i, tn = performance.now();
   R('#1f2a44', 0, 0, W, H);
   for (i = 0; i < 12; i++) R('#2b3a5e', (i * 37) % 170, (i * 53 + Math.floor(tn / 60)) % 300, 6, 6);
-  Tout('LA NEUF', 90, 14, P.gold, 16, '#2a0712', P.red);
+  Tout("L'A9", 90, 14, P.gold, 16, '#2a0712', P.red);
   T('CHOISIS TON NIVEAU', 90, 36, P.cream, 8, 'center', P.ink);
   for (i = 0; i < 3; i++) {
     var b = CAR_LB[i], L = CAR_LV[i];
