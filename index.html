@@ -2352,7 +2352,7 @@ function drawLobby(t) {
       R(P.gold, 8, 172, 164, 60); R('#241238', 9, 173, 162, 58);
       T('DÉFIER ' + (tq.name || nm(ROSTER[tq.ci])).slice(0, 10), 90, 175, P.cream, 8, 'center');
       R(P.gold, 35, 187, 110, 10); R('#6a2a8a', 36, 188, 108, 8); T('VOIR LA CARTE', 90, 188, P.cream, 8, 'center');
-      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 212, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'ARGENTIN', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); btn(BTN_DUEL3, 'ARKANOID', '#3a6fb0'); btn(BTN_DUEL4, 'VOITURE', '#c47a1a'); }
+      if (lb.wait) T('ATTENTE DE RÉPONSE...', 90, 212, P.gold, 8, 'center'); else { btn(BTN_DUEL, 'ARGENTIN', '#b3202e'); btn(BTN_DUEL2, 'TAUPES', '#2e8b57'); btn(BTN_DUEL3, 'ARKANOID', '#3a6fb0'); btn(BTN_DUEL4, 'LA NEUF', '#c47a1a'); }
     }
   }
   if (!demo && lb.invite) {
@@ -2360,7 +2360,7 @@ function drawLobby(t) {
     R(P.gold, 14, 90, 152, 100); R('#241238', 15, 91, 150, 98);
     drawChar(ROSTER[lb.invite.ci], 90, 150, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
     T((lb.invite.name || 'QUELQU\'UN').slice(0, 12), 90, 95, P.gold, 8, 'center');
-    T(lb.invite.g === 'mole' ? 'TE DÉFIE AUX TAUPES !' : (lb.invite.g === 'brick' ? 'TE DÉFIE À ARKANOID !' : (lb.invite.g === 'car' ? 'TE DÉFIE EN VOITURE !' : 'DÉFI FOOT ARGENTIN !')), 90, 106, P.cream, 8, 'center');
+    T(lb.invite.g === 'mole' ? 'TE DÉFIE AUX TAUPES !' : (lb.invite.g === 'brick' ? 'TE DÉFIE À ARKANOID !' : (lb.invite.g === 'car' ? 'TE DÉFIE À LA NEUF !' : 'DÉFI FOOT ARGENTIN !')), 90, 106, P.cream, 8, 'center');
     btn(BTN_YES, 'OUI', '#2e8b57'); btn(BTN_NO, 'NON', '#b3202e');
   }
   if (demo) T('(JOUEURS SIMULÉS)', 90, 272, '#8d84b8', 8, 'center');
@@ -2431,7 +2431,7 @@ function mkSong(bpm, bars, fn) {
   fn(function (v, st, len, m, vol) { if (st >= 0 && st < n) S[v].push([st, len, m, vol]); }, function (st, d) { if (st >= 0 && st < n) S.dr[st] |= d; });
   return S;
 }
-/* LE ROND-POINT : autoroute de nuit, synthwave */
+/* LA NEUF : autoroute de nuit, synthwave */
 var SONG_CAR = mkSong(148, 16, function (add, dr) {
   var roots = [45, 41, 48, 43, 45, 41, 43, 48], ch = [[69, 72, 76], [65, 69, 72], [72, 76, 79], [67, 71, 74]], b, k, st, r, c;
   for (b = 0; b < 16; b++) {
@@ -3197,12 +3197,89 @@ function drawBrickRound(t, tt, r) {
 }
 
 /* ---------- mini-games (each one playable on its own): ARKANOID and POUSSE (tap battle) ---------- */
+
+/* ---------- records par jeu (classement mondial par joueur : /hs/<jeu>/<appareil>) ---------- */
+var HS_G = [['brick', 'ARKA'], ['mole', 'TAUP'], ['push', 'ARGE'], ['neuf', 'NEUF']];
+var hsBest = {}, hsLine = null;
+try { hsBest = JSON.parse(localStorage.getItem('rv_hs') || '{}') || {}; } catch (e) { hsBest = {}; }
+function hsSave() { try { localStorage.setItem('rv_hs', JSON.stringify(hsBest)); } catch (e) {} }
+function hsRows(o) { var a = []; o = o || {}; Object.keys(o).forEach(function (k) { var r = o[k]; if (r && typeof r.s === 'number' && r.c) { r.uid = k; a.push(r); } }); a.sort(function (x, y) { return y.s - x.s; }); return a; }
+function hsSubmit(g, s) {
+  var prev = hsBest[g] || 0, rec = s > prev, line, p;
+  if (rec) { hsBest[g] = s; hsSave(); }
+  line = hsLine = { g: g, s: s, best: Math.max(prev, s), rec: rec, rank: 0, n: 0 };
+  p = rec ? fbReq('PUT', '/hs/' + g + '/' + myUid(), { c: ROSTER[sel].id, n: nm(ROSTER[sel]), s: s, ts: Date.now() }).catch(function () {}) : Promise.resolve();
+  p.then(function () { return fbReq('GET', '/hs/' + g); }).then(function (o) {
+    var a = hsRows(o), me = myUid(), i; line.n = a.length;
+    for (i = 0; i < a.length; i++) if (a[i].uid === me) line.rank = i + 1;
+  }).catch(function () {});
+}
+function hsGid(m) {
+  if (!m || m.net) return null;
+  if (m.id === 'car') return m.won ? 'neuf' + m.lv : null;
+  if (m.id === 'brick') return m.online ? null : 'brick';
+  if (m.id === 'mole') return 'mole';
+  if (m.id === 'pushbot') return m.win === 1 ? 'push' : null;
+  return null;
+}
+function hsWatch() {
+  var m = mini, g;
+  if (!m || !m.over || m.hsDone) return;
+  m.hsDone = true; g = hsGid(m); if (!g) return;
+  m.hsOn = g;
+  if (g === 'push') hsSubmit(g, (hsBest.push || 0) + 1);
+  else hsSubmit(g, g === 'brick' ? m.score + (m.won ? 200 : 0) : m.score);
+}
+function hsDraw() {
+  var m = mini;
+  if (!m || !m.hsOn || !hsLine || hsLine.g !== m.hsOn) return;
+  R('rgba(10,6,16,0.9)', 0, 242, W, 30);
+  T(hsLine.rec ? 'NOUVEAU RECORD !' : 'TON RECORD ' + hsLine.best, 90, 245, hsLine.rec && Math.floor(performance.now() / 300) % 2 ? P.cream : P.gold, 8, 'center', P.ink);
+  T(hsLine.rank ? 'RANG ' + hsLine.rank + ' SUR ' + hsLine.n : 'RANG...', 90, 258, '#8d84b8', 8, 'center');
+}
+function hsKey(m) { return HS_G[m.tab][0] + (m.tab === 3 ? m.lv : ''); }
+function hsLoad(m) {
+  var g = hsKey(m); if (m.rows[g]) return; m.rows[g] = 'load';
+  fbReq('GET', '/hs/' + g).then(function (o) { m.rows[g] = hsRows(o); }, function () { m.rows[g] = 'err'; });
+}
+function hsOpen() { mini = { id: 'hs', tab: 0, lv: 0, rows: {} }; hsLoad(mini); }
+function hsTap(x, y) {
+  var m = mini, i;
+  if (inside(BTN_BACK2, x, y)) { mini = null; boop(); return; }
+  for (i = 0; i < HS_G.length; i++) if (x >= 6 + i * 43 && x <= 46 + i * 43 && y >= 22 && y <= 36) { if (m.tab === i && i === 3) m.lv = (m.lv + 1) % 3; m.tab = i; blip(); hsLoad(m); return; }
+}
+function drawHs(t) {
+  var m = mini, g = hsKey(m), rows = m.rows[g], me = myUid();
+  R('#140c18', 0, 0, W, H);
+  T('RECORDS', 90, 8, P.gold, 8, 'center', P.velvet);
+  HS_G.forEach(function (tb, i2) {
+    var on = m.tab === i2;
+    R(on ? P.gold : '#4a3f6a', 6 + i2 * 43, 22, 40, 14); R(on ? '#6a4a1a' : '#1d1530', 7 + i2 * 43, 23, 38, 12);
+    T(tb[1], 26 + i2 * 43, 26, on ? P.gold : P.cream, 8, 'center');
+  });
+  T(m.tab === 3 ? CAR_LV[m.lv].n + ' (TOUCHE NEUF)' : ['POINTS ARKANOID', 'POINTS TAUPES', 'VICTOIRES VS BOT'][m.tab], 90, 41, '#8d84b8', 8, 'center');
+  if (rows === 'err') T('CONNEXION IMPOSSIBLE', 90, 120, '#e07b7b', 8, 'center', P.ink);
+  else if (!rows || rows === 'load') T('CHARGEMENT...', 90, 120, P.cream, 8, 'center', P.ink);
+  else if (!rows.length) T('PERSONNE ENCORE...', 90, 120, P.cream, 8, 'center', P.ink);
+  else rows.slice(0, 8).forEach(function (r, i2) {
+    var y = 54 + i2 * 26, mine = r.uid === me;
+    R(mine ? P.gold : '#4a2a1c', 6, y, 168, 24); R(mine ? '#2a1220' : '#140c18', 7, y + 1, 166, 22);
+    T(String(i2 + 1), 12, y + 8, i2 === 0 ? P.gold : P.cream, 8, 'left', P.ink);
+    drawHead(Math.max(0, rosterIdx(r.c)), 26, y + 1, 22, 22);
+    T(String(r.n || '?').slice(0, 9), 52, y + 8, i2 === 0 ? P.gold : P.cream, 8, 'left', P.ink);
+    T(String(r.s), 168, y + 8, P.gold, 8, 'right', P.ink);
+  });
+  T('TON RECORD ' + (hsBest[g] || 0), 90, 272, P.cream, 8, 'center', P.ink);
+  btn(BTN_BACK2, 'RETOUR', '#3a3f55');
+  muteIcon();
+}
+
 var mini = null, ptrX = 90, ptrY = 0, ptrDown = false;
 var MG_LIST = {
-  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: 'LE ROND-POINT' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'BEATBOX BIENTÔT', off: true }],
+  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: 'LA NEUF' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'BEATBOX BIENTÔT', off: true }],
   versus: [{ id: 'online', name: 'DUEL EN LIGNE' }, { id: 'push2', name: 'ARGENTIN À DEUX' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }]
 };
-var BTN_X = { x: 2, y: 2, w: 16, h: 14 };
+var BTN_X = { x: 2, y: 2, w: 16, h: 14 }, BTN_MB = { x: 6, y: 276, w: 80, h: 22 }, BTN_REC = { x: 94, y: 276, w: 80, h: 22 };
 function mgBtn(i) { return { x: 20, y: 56 + i * 34, w: 140, h: 26 }; }
 function pickOpp() {
   var o, n = 0;
@@ -3222,31 +3299,35 @@ function drawGameMenu(t) {
   for (i = 0; i < L.length; i++) btn(mgBtn(i), L[i].name, L[i].off ? '#3a3f55' : (i % 2 ? '#2e8b57' : '#b3202e'));
   drawChar(ROSTER[sel], 90, 250, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
   T(nm(ROSTER[sel]), 90, 256, P.gold, 8, 'center', P.ink);
-  btn(BTN_BACK, 'RETOUR', '#3a3f55');
+  btn(BTN_MB, 'RETOUR', '#3a3f55'); btn(BTN_REC, 'RECORDS', '#b0734f');
   muteIcon();
 }
 function mgTap(x, y) {
   if (!mini) {
     var L = MG_LIST[mode] || [], i;
-    if (inside(BTN_BACK, x, y)) { scene = 'select'; fadeT = performance.now(); boop(); return; }
+    if (inside(BTN_MB, x, y)) { scene = 'select'; fadeT = performance.now(); boop(); return; }
+    if (inside(BTN_REC, x, y)) { blip(); hsOpen(); return; }
     for (i = 0; i < L.length; i++) if (inside(mgBtn(i), x, y)) { if (L[i].off) boop(); else { blip(); mgStart(L[i].id); } return; }
     return;
   }
+  if (mini.id === 'hs') { hsTap(x, y); return; }
   if (mini.id === 'car') carTap(x, y); else if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
 }
 function drawMini(t) {
+  if (mini.id === 'hs') { drawHs(t); return; }
   if (mini.id === 'car') { drawCar(t); if (mini.net) drawCarDuel(t); } else if (mini.id === 'brick') { drawBrick(t); if (mini.net) drawBrickDuel(t); } else if (mini.id === 'mole') drawMoleSolo(t); else if (mini.id === 'molenet') drawMoleDuel(t); else drawPush(t);
+  hsWatch(); hsDraw();
   muteIcon();
 }
 
-/* --- CAR : le rond-point. 3 niveaux (Montreux, Lausanne, Genève), ligne d'arrivée, pièces bleues, rampes --- */
+/* --- CAR : LA NEUF. 3 niveaux (Montreux, Lausanne, Genève), ligne d'arrivée, pièces bleues, rampes --- */
 var CAR_L = 28, CAR_R = 152, CAR_K = 3, CAR_LIM = 50, BTN_BRAKE = { x: 40, y: 296, w: 100, h: 22 }, CAR_DUEL_TIME = 110000;
 var CAR_LV = [
-  { n: 'MONTREUX', sub: 'NIVEAU 1  FACILE', len: 7000, gap: [100, 50], rad: [650, 400], works: 0, pol: 0, bg: '#1f5a2e', bg2: '#2f7a3e', road: '#3b3d49',
+  { n: 'MONTREUX', sub: 'NIVEAU 1  FACILE', par: 60, len: 7000, gap: [100, 50], rad: [650, 400], works: 0, pol: 0, bg: '#1f5a2e', bg2: '#2f7a3e', road: '#3b3d49',
     w: { coin: 30, cone: 8, car: 13, truck: 4, ramp: 7, snail: 9, fondue: 8, beer: 10, shroom: 10 } },
-  { n: 'LAUSANNE', sub: 'NIVEAU 2  TRAVAUX', len: 8500, gap: [76, 44], rad: [520, 350], works: [950, 350], pol: 0, bg: '#4b473d', bg2: '#5d5849', road: '#403f46',
+  { n: 'LAUSANNE', sub: 'NIVEAU 2  TRAVAUX', par: 75, len: 8500, gap: [76, 44], rad: [520, 350], works: [950, 350], pol: 0, bg: '#4b473d', bg2: '#5d5849', road: '#403f46',
     w: { coin: 22, cone: 10, car: 22, truck: 6, ramp: 8, snail: 8, fondue: 6, beer: 8, shroom: 8 } },
-  { n: 'GENÈVE', sub: 'NIVEAU 3  DUR', len: 10000, gap: [60, 36], rad: [300, 190], works: 0, pol: [8, 4], bg: '#27334a', bg2: '#364764', road: '#30333f',
+  { n: 'GENÈVE', sub: 'NIVEAU 3  DUR', par: 90, len: 10000, gap: [60, 36], rad: [300, 190], works: 0, pol: [8, 4], bg: '#27334a', bg2: '#364764', road: '#30333f',
     w: { coin: 16, cone: 8, car: 30, truck: 8, ramp: 8, snail: 7, fondue: 5, beer: 9, shroom: 9 } }
 ];
 var CAR_LB = [{ x: 14, y: 50, w: 152, h: 52 }, { x: 14, y: 112, w: 152, h: 52 }, { x: 14, y: 174, w: 152, h: 52 }];
@@ -3339,7 +3420,7 @@ function carUpdate(t) {
       if (!o.hit && !air && o.y + 5 > 250 && o.y - 5 < 272 && Math.abs(m.x - o.gx) > (o.gw - 14) / 2) { o.hit = true; carCrash(m, o, t, 15, 'BARRIÈRE ! -15 CHF'); }
       if (!o.hit && !air && o.y + 5 > 250 && o.y - 5 < 272) { o.hit = true; m.bonus += 15; carMsg(m, 'BIEN PASSÉ !', P.mint); }
     } else if (o.k !== 'radar' && o.k !== 'sign' && o.k !== 'siren' && !air && o.y + o.h / 2 > 250 && o.y - o.h / 2 < 272 && Math.abs(o.x - m.x) < (o.w + 14) / 2) {
-      if (o.k === 'coin') { m.money += 4; blip(); m.obs.splice(i, 1); continue; }
+      if (o.k === 'coin') { m.money += 4; m.bonus += 5; blip(); m.obs.splice(i, 1); continue; }
       if (o.k === 'blue') {
         m.blue++; m.obs.splice(i, 1); m.bonus += 10;
         if (m.blue >= 8) { m.cruise = tn0 + 15000; carMsg(m, 'RÉGULATEUR ! 50 KM/H', '#6ab4ff'); jingle(); } else { carMsg(m, 'PIÈCE BLEUE ' + m.blue + '/8', '#6ab4ff'); blip(); }
@@ -3359,27 +3440,28 @@ function carUpdate(t) {
   m.prog = Math.floor(Math.min(m.dist, L.len) / 10);
   m.score = m.prog + m.bonus;
   if (m.dist >= L.len) {
-    m.won = true; m.over = true; m.overT = t; m.fdone = true; m.finMs = m.net ? t - m.t0 : m.t * 1000; m.bonus += 100; m.score = m.prog + m.bonus; jingle(); return;
+    m.won = true; m.over = true; m.overT = t; m.fdone = true; m.finMs = m.net ? t - m.t0 : m.t * 1000;
+    m.tsec = m.finMs / 1000; m.tb = Math.max(0, Math.round((L.par - m.tsec) * 25)); m.mb = Math.round(Math.max(0, m.money)) * 3; m.fp = m.fines * 60;
+    m.total = Math.max(0, 500 + m.bonus + m.tb + m.mb - m.fp); m.score = m.total; jingle(); return;
   }
   if (m.money <= 0) { m.money = 0; m.over = true; m.overT = t; }
 }
 var carGh = null;
-function carFmt(f) { return f >= 100000 ? ((200000 - f) / 100).toFixed(1) + ' S' : (f <= -9000 ? 'ABANDON' : 'PAS ARRIVÉ'); }
+function carFmt(f) { return f >= 100000 ? (f - 100000) + ' PTS' : (f <= -9000 ? 'ABANDON' : 'PAS ARRIVÉ'); }
 function drawCarDuel(t) {
   var m = mini, el = t - m.t0, left = Math.max(0, Math.ceil((CAR_DUEL_TIME - el) / 1000)), L = m.L;
   m.hold = el < 0;
-  if (!m.fin && m.of !== null) { m.over = true; }
   if (!m.fin) {
-    if (m.over || el >= CAR_DUEL_TIME) { m.over = true; m.fin = true; m.finT = t; m.myFin = m.fdone ? 200000 - Math.round(m.finMs / 10) : m.prog; duelFinish(m); }
+    if (m.over || el >= CAR_DUEL_TIME) { m.over = true; m.fin = true; m.finT = t; m.myFin = m.fdone ? 100000 + m.total : m.prog; duelFinish(m); }
     else if (m.prog !== m.lastSent && t - m.wt > 200) { m.wt = t; m.lastSent = m.prog; duelSend(m, m.prog); }
-  } else if (!m.done && (m.of !== null || t - m.finT > 6000)) {
+  } else if (!m.done && (m.of !== null || t - m.t0 > CAR_DUEL_TIME + 5000)) {
     var of = m.of === null ? m.oc : m.of;
     m.done = true; jingle(); m.win = of <= -9000 ? 1 : (m.myFin > of ? 1 : (m.myFin < of ? 2 : 0)); m.fo = of; statDuel(m.win);
   }
   var rp = m.oc >= 100000 ? 100 : Math.min(100, Math.round((m.oc || 0) / (L.len / 10) * 100));
   T('RIVAL ' + rp + '%', 4, 27, P.mint, 8, 'left', P.ink);
   T(left + ' S', 176, 27, left <= 5 ? '#ff9b9b' : P.cream, 8, 'right', P.ink);
-  if (el < 0) { R('rgba(10,6,16,0.55)', 0, 110, W, 80); Tout(String(Math.max(1, Math.ceil(-el / 1000))), 90, 120, P.gold, 16, '#2a0712', P.red); T('PREMIER ARRIVÉ GAGNE', 90, 150, P.cream, 8, 'center', P.ink); T('8 PIÈCES BLEUES = RÉGUL.', 90, 164, '#6ab4ff', 8, 'center', P.ink); }
+  if (el < 0) { R('rgba(10,6,16,0.55)', 0, 110, W, 80); Tout(String(Math.max(1, Math.ceil(-el / 1000))), 90, 120, P.gold, 16, '#2a0712', P.red); T('LE + DE POINTS GAGNE', 90, 150, P.cream, 8, 'center', P.ink); T('VITE ET SANS AMENDES', 90, 164, '#6ab4ff', 8, 'center', P.ink); }
   if (m.fin && !m.done) { R('rgba(10,6,16,0.7)', 0, 100, W, 40); T(m.money <= 0 ? 'PLUS DE SOUS...' : (m.fdone ? 'ARRIVÉ ! ON ATTEND...' : 'ON ATTEND LE RIVAL...'), 90, 116, P.cream, 8, 'center', P.ink); }
   if (m.done) {
     R('rgba(10,6,16,0.86)', 0, 90, W, 130);
@@ -3393,7 +3475,7 @@ function drawCarMenu(t) {
   var i, tn = performance.now();
   R('#1f2a44', 0, 0, W, H);
   for (i = 0; i < 12; i++) R('#2b3a5e', (i * 37) % 170, (i * 53 + Math.floor(tn / 60)) % 300, 6, 6);
-  Tout('ROND-POINT', 90, 14, P.gold, 16, '#2a0712', P.red);
+  Tout('LA NEUF', 90, 14, P.gold, 16, '#2a0712', P.red);
   T('CHOISIS TON NIVEAU', 90, 36, P.cream, 8, 'center', P.ink);
   for (i = 0; i < 3; i++) {
     var b = CAR_LB[i], L = CAR_LV[i];
@@ -3402,8 +3484,9 @@ function drawCarMenu(t) {
     T(L.sub, b.x + b.w / 2, b.y + 26, P.gold, 8, 'center', P.ink);
     T(['PEU DE VOITURES', 'PASSE LA FENTE !', 'POLICE + FLASHS'][i], b.x + b.w / 2, b.y + 38, '#c9c3e8', 8, 'center');
   }
-  T('8 PIÈCES BLEUES = 50 KM/H', 90, 236, '#6ab4ff', 8, 'center', P.ink);
-  T('RAMPE DE CAMION = SAUT', 90, 250, '#ffd24a', 8, 'center', P.ink);
+  T('8 PIÈCES BLEUES = 50 KM/H', 90, 234, '#6ab4ff', 8, 'center', P.ink);
+  T('VITE ET SANS AMENDES !', 90, 262, P.cream, 8, 'center', P.ink);
+  T('RAMPE DE CAMION = SAUT', 90, 248, '#ffd24a', 8, 'center', P.ink);
   btn(BTN_BACK, 'RETOUR', '#3a3f55');
 }
 function drawCar(t) {
@@ -3469,25 +3552,27 @@ function drawCar(t) {
   R('#3a3f55', BTN_X.x, BTN_X.y, BTN_X.w, BTN_X.h); T('X', BTN_X.x + 8, BTN_X.y + 3, P.cream, 8, 'center');
   T(Math.round(m.money) + ' CHF', 22, 7, m.money < 40 ? '#ff9b9b' : P.mint, 8, 'left');
   disc(98, 11, 4, '#3aa0ff'); T(m.blue + '/8', 106, 7, '#6ab4ff', 8, 'left');
-  T(m.score + ' M', 176, 7, P.cream, 8, 'right');
+  T(m.bonus + ' PTS', 176, 7, P.cream, 8, 'right');
   var ov = m.v > CAR_LIM + 3 && tn >= m.cruise;
   R('rgba(10,6,16,0.6)', 108, 264, 70, 30); T(Math.round(m.v) + ' KM/H', 143, 266, ov && (Math.floor(tn / 150) % 2) ? '#ff6a6a' : (tn < m.cruise ? '#6ab4ff' : P.cream), 8, 'center');
   if (tn < m.cruise) T('RÉGUL ' + Math.ceil((m.cruise - tn) / 1000), 143, 279, '#6ab4ff', 8, 'center'); else T('MAX ' + CAR_LIM, 143, 279, P.gold, 8, 'center');
   if (m.msg && tn - m.mt < 1400) T(m.msg, 90, 130, m.mc, 8, 'center', P.ink);
   if (tn < m.drunk) T('BOURRÉ ' + Math.ceil((m.drunk - tn) / 1000), 90, m.net ? 40 : 28, '#ffb030', 8, 'center', P.ink);
   if (tn < m.shroom) T('FLOU ' + Math.ceil((m.shroom - tn) / 1000), 90, (tn < m.drunk ? 12 : 0) + (m.net ? 40 : 28), '#ff7ab0', 8, 'center', P.ink);
-  if (m.t < 4) { Tout(L.n, 90, 66, P.gold, 16, '#2a0712', P.red); T(L.sub, 90, 90, P.cream, 8, 'center', P.ink); }
-  if (m.t < 5 && !m.net) { T('GLISSE POUR DIRIGER', 90, 140, P.cream, 8, 'center', P.ink); T('PIÈCES BLEUES : 8', 90, 154, '#6ab4ff', 8, 'center', P.ink); T('= RÉGULATEUR 50', 90, 168, '#6ab4ff', 8, 'center', P.ink); T('RAMPE = SAUT !', 90, 182, '#ffd24a', 8, 'center', P.ink); }
+  if (m.t < 4 && !m.over) { Tout(L.n, 90, 66, P.gold, 16, '#2a0712', P.red); T(L.sub, 90, 90, P.cream, 8, 'center', P.ink); }
+  if (m.t < 5 && !m.net && !m.over) { T('GLISSE POUR DIRIGER', 90, 140, P.cream, 8, 'center', P.ink); T('PIÈCES BLEUES : 8', 90, 154, '#6ab4ff', 8, 'center', P.ink); T('= RÉGULATEUR 50', 90, 168, '#6ab4ff', 8, 'center', P.ink); T('RAMPE = SAUT !', 90, 182, '#ffd24a', 8, 'center', P.ink); }
   if (m.over && !m.net) {
     R('rgba(10,6,16,0.86)', 0, 70, W, 170);
     if (m.won) {
       Tout('ARRIVÉ !', 90, 80, P.gold, 16, '#2a0712', P.red);
-      T(L.n + ' RÉUSSI', 90, 108, P.mint, 8, 'center', P.ink);
-      T('TEMPS ' + m.t.toFixed(1) + ' S', 90, 128, P.cream, 8, 'center', P.ink);
-      T(Math.round(m.money) + ' CHF', 90, 142, P.cream, 8, 'center', P.ink);
-      T('BLEUES ' + m.blue + '/8', 90, 156, '#6ab4ff', 8, 'center', P.ink);
-      T(m.fines + ' AMENDES', 90, 170, '#ff9b9b', 8, 'center', P.ink);
-      T('SCORE ' + m.score, 90, 190, P.gold, 8, 'center', P.ink);
+      T(L.n + ' RÉUSSI', 90, 106, P.mint, 8, 'center', P.ink);
+      T('ARRIVÉE +500', 90, 120, P.cream, 8, 'center', P.ink);
+      T('TEMPS ' + m.tsec.toFixed(1) + ' S +' + m.tb, 90, 132, P.cream, 8, 'center', P.ink);
+      T('POINTS +' + m.bonus, 90, 144, P.cream, 8, 'center', P.ink);
+      T('ARGENT ' + Math.round(m.money) + ' CHF +' + m.mb, 90, 156, P.cream, 8, 'center', P.ink);
+      T('AMENDES ' + m.fines + ' -' + m.fp, 90, 168, m.fines ? '#ff9b9b' : P.mint, 8, 'center', P.ink);
+      T('TOTAL', 90, 184, P.gold, 8, 'center', P.ink);
+      Tout(String(m.total), 90, 196, P.gold, 16, '#2a0712', P.red);
     } else {
       Tout('PLUS DE SOUS', 90, 88, P.gold, 8, '#2a0712', P.red);
       T(L.n + ' ' + Math.round(m.dist / L.len * 100) + '%', 90, 120, P.cream, 8, 'center', P.ink);

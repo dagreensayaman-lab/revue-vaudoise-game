@@ -25,7 +25,7 @@ Plusieurs costumes pour un meme perso : une liste, par exemple `{ jenny: ['sprit
 
 ## Nouveaux tours et mini-jeux
 - **Menteur** : chacun raconte une anecdote sur un thème, l'app désigne un menteur (secret) ; la salle vote pour le démasquer. Il faut au moins 3 joueurs.
-- **Rond-point** : 3 niveaux (Montreux facile, Lausanne avec travaux et une petite fente, Genève avec plus de flashs et la police qui arrive par derrière). Ligne d’arrivée à atteindre ; 8 pièces bleues par niveau = régulateur à 50 km/h pendant 15 s ; les camions à rampe permettent de sauter par-dessus voitures et barrières ; en duel, le premier arrivé gagne.
+- **La Neuf** (ex rond-point) : 3 niveaux (Montreux facile, Lausanne avec travaux et une petite fente, Genève avec plus de flashs et la police qui arrive par derrière). Ligne d’arrivée à atteindre ; 8 pièces bleues par niveau = régulateur à 50 km/h pendant 15 s ; les camions à rampe permettent de sauter par-dessus voitures et barrières ; en duel, le premier arrivé gagne.
 - **Rapidité et pari** (questions « Qui… ? ») : répondre dans les 4 premières secondes rapporte +60 pts, dans les 8 premières +30 (seulement si ta réponse est dans la majorité). Le bouton PARI engage un pourcentage : 50 %+ (+50 / −30), 70 %+ (+100 / −50) ou 100 % (+200 / −80). Le score ne descend jamais sous 0.
 - **Duel de taps** : deux joueurs tapent le plus vite possible pendant 10 s (ou jusqu'à 28 taps d'avance).
 - **Roue des gages** : chaque joueur propose un gage anonyme au salon (bouton « MON GAGE ») ; la roue désigne un joueur et révèle un gage au hasard.
@@ -56,3 +56,9 @@ Chaque joueur a une carte (niveau, points, parties solo / susceptible / loup-gar
 
 ## Classement général
 Menu SALLE DE JEU → CLASSEMENT (points, duels, loups, votés). Les stats sont envoyées dans `stats/<id appareil>` : il faut les règles de `firebase-rules.json` (bloc `stats`) dans la console Firebase → Realtime Database → Règles → Publier.
+
+
+## Records par jeu
+Menu ARCADE → RECORDS : classement mondial par jeu (Arkanoid, Taupes, Foot Argentin = victoires contre le bot, La Neuf = un classement par niveau), avec le personnage et le nom du joueur. Les scores sont envoyés dans `hs/<jeu>/<id appareil>` : il faut republier `firebase-rules.json` (bloc `hs`) dans la console Firebase → Realtime Database → Règles.
+
+**La Neuf : score final** = 500 (arrivée) + points ramassés + bonus de temps (25 pts par seconde sous le temps de référence 60 / 75 / 90 s) + 3 × l’argent restant − 60 par amende. En duel, le plus haut score gagne.
