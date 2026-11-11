@@ -65,4 +65,4 @@ Menu ARCADE → RECORDS : classement mondial par jeu (Arkanoid, Taupes, Foot Arg
 
 ## Le Concert (jeu de rythme beatbox)
 Arcade → LE CONCERT. Les morceaux de Marc jouent SANS batterie : le joueur fait la batterie en beatbox. Trois colonnes : B (grosse caisse), PF (caisse claire), TS (charley), tirées de la vraie batterie du morceau. Léa (guitare) à gauche, Keumart (micro) à droite, décor de la salle.
-Niveaux : 1 Les Sardines (facile, B + PF), 2 La Tribu de Dana (moyen, + TS), 3 Ces soirées-là (dur). À la fin, « We Are the Champions » joue. PARFAIT/BIEN/OK, combo jusqu'à x4, note S-A-B-C, records par niveau (onglet BEAT). Clavier : A S D. Les bruits de beatbox sont synthétisés (à remplacer par les vrais échantillons de Marc).
+Niveaux : 1 Les Sardines (facile, B + PF), 2 La Tribu de Dana (moyen, + TS), 3 Ces soirées-là (dur). À la fin, « We Are the Champions » joue. PARFAIT/BIEN/OK, combo jusqu'à x4, note S-A-B-C, records par niveau (onglet BEAT). Clavier : A S D. Les sons sont les vrais échantillons de beatbox de Marc (kick, pf, charley, tirés de Beatbox Hero).
