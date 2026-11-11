@@ -3332,8 +3332,8 @@ var BEAT_LV = [
 ];
 var BEAT_LB = [{ x: 14, y: 38, w: 152, h: 36 }, { x: 14, y: 80, w: 152, h: 36 }, { x: 14, y: 122, w: 152, h: 36 }];
 var BEAT_MB = [{ x: 14, y: 166, w: 74, h: 20 }, { x: 92, y: 166, w: 74, h: 20 }], BEAT_LATB = [{ x: 28, y: 200, w: 16, h: 14 }, { x: 136, y: 200, w: 16, h: 14 }];
-var BB_MODE = 'pad', BB_LAT = 60, bbMic = null;
-try { BB_MODE = localStorage.getItem('rv_beat_mode') === 'mic' ? 'mic' : 'pad'; var bl0 = localStorage.getItem('rv_beat_lat'); if (bl0 !== null && +bl0 >= 0 && +bl0 <= 300) BB_LAT = +bl0; } catch (e) {}
+var BB_MODE = 'pad', BB_LAT = 60, BB_SENS = 5, bbMic = null, BB_RECAL = { x: 30, y: 170, w: 120, h: 22 }, BB_SB = [{ x: 28, y: 142, w: 16, h: 14 }, { x: 136, y: 142, w: 16, h: 14 }];
+try { BB_MODE = localStorage.getItem('rv_beat_mode') === 'mic' ? 'mic' : 'pad'; var bl0 = localStorage.getItem('rv_beat_lat'); if (bl0 !== null && +bl0 >= 0 && +bl0 <= 300) BB_LAT = +bl0; var bs0 = localStorage.getItem('rv_beat_sens'); if (bs0 !== null && +bs0 >= 1 && +bs0 <= 9) BB_SENS = +bs0; } catch (e) {}
 function beatCh(id) { var i = rosterIdx(id); return i < 0 ? null : ROSTER[i]; }
 /* vrais sons de beatbox de Marc (Beatbox Hero) : kick, pf, charley */
 /* vrais sons de beatbox de Marc (Beatbox Hero) : kick, pf, charley */
@@ -3376,10 +3376,11 @@ function BBDet(sr) {
   this.ring = new Float32Array(1 << 17); this.mask = (1 << 17) - 1; this.n = 0; this.f = 0; this.pk = 0; this.vu = 0; this.tEnd = 0;
   this.prev = new Float32Array(this.N / 2); this.cur = new Float32Array(this.N / 2);
   this.fl = new Float32Array(64); this.who = new Uint8Array(64); this.rms = new Float32Array(64);
-  this.cf = Math.round(0.8 * sr / this.H); this.cal = [[], [], []]; this.calR = []; this.ready = false; this.q = [1, 1, 1]; this.gate = 0.004;
+  this.cf = Math.round(0.8 * sr / this.H); this.cal = [[], [], []]; this.calR = []; this.calN = 0; this.ready = false; this.q = [1, 1, 1]; this.gate = 0.002; this.sm = Math.pow(1.4, BB_SENS - 5);
   this.W = Math.max(3, Math.round(0.15 * sr / this.H)); this.pend = []; this.recent = []; this.onOnset = null; this.w2 = bbHann(2048);
 }
 BBDet.prototype.reset = function () { this.pend = []; this.recent = []; };
+BBDet.prototype.recal = function () { this.cal = [[], [], []]; this.calR = []; this.calN = 0; this.ready = false; this.pend = []; this.recent = []; };
 BBDet.prototype.feed = function (d, tNow) {
   var i, v, a;
   for (i = 0; i < d.length; i++) { v = d[i]; this.ring[(this.n + i) & this.mask] = v; a = v < 0 ? -v : v; if (a > this.pk) this.pk = a; }
@@ -3395,18 +3396,18 @@ BBDet.prototype._frame = function (f) {
   this.cur = prev; this.prev = cur;
   if (!this.ready) {
     for (b = 0; b < 3; b++) this.cal[b].push(fb[b]); this.calR.push(rms);
-    if (f >= this.cf) { for (b = 0; b < 3; b++) this.q[b] = Math.max(bbPct(this.cal[b], 0.95) * 1.5, 1); this.gate = Math.max(bbPct(this.calR, 0.95) * 2.5, 0.004); this.ready = true; this.cal = null; }
+    if (++this.calN >= this.cf) { for (b = 0; b < 3; b++) this.q[b] = Math.max(bbPct(this.cal[b], 0.9) * 1.5, 1); this.gate = Math.max(bbPct(this.calR, 0.9) * 2.5, 0.002); this.ready = true; this.cal = null; }
     return;
   }
   var best = 0, wb = 0, ix = f & 63, ip, i0, i2, p, loc = [], j, thr;
-  for (b = 0; b < 3; b++) { var vv = fb[b] / this.q[b]; if (vv > best) { best = vv; wb = b; } }
+  for (b = 0; b < 3; b++) { var vv = fb[b] * this.sm / this.q[b]; if (vv > best) { best = vv; wb = b; } }
   this.fl[ix] = best; this.who[ix] = wb; this.rms[ix] = rms;
   p = f - 1; if (p < 2) return;
   ip = p & 63; i0 = (p - 1) & 63; i2 = f & 63;
   if (this.fl[ip] < this.fl[i0] || this.fl[ip] <= this.fl[i2]) return;
   for (j = Math.max(0, p - this.W); j <= f; j++) loc.push(this.fl[j & 63]);
   thr = bbMed(loc) * 1.4 + 0.5;
-  if (this.fl[ip] > thr && this.fl[ip] > 1.2 && Math.max(this.rms[ip], this.rms[i2]) > this.gate) this._peak(p, this.fl[ip]);
+  if (this.fl[ip] > thr && this.fl[ip] > 1.2 && Math.max(this.rms[ip], this.rms[i2]) * this.sm > this.gate) this._peak(p, this.fl[ip]);
 };
 BBDet.prototype._peak = function (p, v) {
   var sr = this.sr, H = this.H, N = this.N, m1 = Math.max(1, Math.round(0.001 * sr)), lag = Math.max(1, Math.round(0.002 * sr)), s0 = Math.max(lag, p * H - H), s1 = Math.min(this.n - m1 - 1, p * H + N);
@@ -3445,12 +3446,13 @@ function bbOpen(cb) {
 }
 function bbClose() { if (!bbMic) return; try { bbMic.pr.onaudioprocess = null; bbMic.src.disconnect(); bbMic.pr.disconnect(); bbMic.st.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} bbMic = null; }
 function beatKill(m) { if (m && m.bus && ac) { try { m.bus.gain.cancelScheduledValues(ac.currentTime); m.bus.gain.setValueAtTime(0, ac.currentTime); } catch (e) {} } }
-function beatStart(lv, mic) {
+function beatStart(lv, mic, test) {
   beatLoad(); beatKill(mini);
   if (lv === undefined) { bbClose(); mini = { id: 'beat', sel: true }; return; }
   if (mic) {
-    if (bbMic && bbMic.det && bbMic.det.ready) { beatBegin(lv, true); return; }
-    var w = mini = { id: 'beat', wait: true, lv: lv, state: 'ask', err: '' };
+    if (bbMic && bbMic.det && bbMic.det.ready && !test) { beatBegin(lv, true); return; }
+    var w = mini = { id: 'beat', wait: true, lv: lv, state: 'ask', err: '', lit: [0, 0, 0], last: null };
+    if (bbMic && bbMic.det) { w.state = bbMic.det.ready ? 'test' : 'cal'; return; }
     bbOpen(function (err) { if (mini !== w) { if (!err && !mini) bbClose(); return; } if (err) { w.state = 'err'; w.err = err; } else w.state = 'cal'; });
     return;
   }
@@ -3506,13 +3508,18 @@ function beatTap(x, y) {
   var m = mini, i;
   if (m.sel) {
     if (inside(BTN_BACK, x, y)) { mgLeave(); return; }
-    for (i = 0; i < 3; i++) if (inside(BEAT_LB[i], x, y)) { blip(); beatStart(i, BB_MODE === 'mic'); return; }
+    for (i = 0; i < 3; i++) if (inside(BEAT_LB[i], x, y)) { blip(); beatStart(i, BB_MODE === 'mic', true); return; }
     for (i = 0; i < 2; i++) if (inside(BEAT_MB[i], x, y)) { BB_MODE = i ? 'mic' : 'pad'; try { localStorage.setItem('rv_beat_mode', BB_MODE); } catch (e) {} blip(); return; }
     if (BB_MODE === 'mic') for (i = 0; i < 2; i++) if (inside(BEAT_LATB[i], x, y)) { BB_LAT = Math.max(0, Math.min(300, BB_LAT + (i ? 10 : -10))); try { localStorage.setItem('rv_beat_lat', String(BB_LAT)); } catch (e) {} blip(); return; }
     return;
   }
   if (m.wait) {
     if (m.state === 'err' && inside(BTN_E1, x, y)) { BB_MODE = 'pad'; blip(); beatBegin(m.lv, false); return; }
+    if (m.state === 'test') {
+      if (inside(BTN_E1, x, y)) { blip(); bbMic.det.onOnset = null; beatBegin(m.lv, true); return; }
+      if (inside(BB_RECAL, x, y)) { blip(); bbMic.det.recal(); m.state = 'cal'; return; }
+      for (i = 0; i < 2; i++) if (inside(BB_SB[i], x, y)) { BB_SENS = Math.max(1, Math.min(9, BB_SENS + (i ? 1 : -1))); bbMic.det.sm = Math.pow(1.4, BB_SENS - 5); try { localStorage.setItem('rv_beat_sens', String(BB_SENS)); } catch (e) {} blip(); return; }
+    }
     if (inside(BTN_BACK, x, y) || inside(BTN_E2, x, y)) { boop(); beatStart(); }
     return;
   }
@@ -3545,14 +3552,28 @@ function drawBeat(t) {
   }
   if (m.wait) {
     beatStage(t, 0.6);
-    T('MODE MICRO', 90, 40, P.gold, 8, 'center', P.velvet);
+    if (m.state !== 'test') T('MODE MICRO', 90, 40, P.gold, 8, 'center', P.velvet);
     if (m.state === 'err') {
       T(m.err, 90, 110, '#e07b7b', 8, 'center', P.ink); T('(SUR GITHUB PAGES', 90, 130, '#8d84b8', 8, 'center'); T('ET AVEC AUTORISATION)', 90, 142, '#8d84b8', 8, 'center');
       btn(BTN_E1, 'MODE PAD', '#2e8b57'); btn(BTN_E2, 'RETOUR', '#3a3f55');
-    } else {
+    } else if (m.state !== 'test') {
       T(m.state === 'ask' ? 'AUTORISE LE MICRO' : 'SILENCE 1 SECONDE', 90, 110, P.cream, 8, 'center', P.ink); T(m.state === 'ask' ? 'ET METS TON CASQUE' : 'CALIBRAGE...', 90, 126, '#8d84b8', 8, 'center');
       btn(BTN_BACK, 'RETOUR', '#3a3f55');
-      if (m.state === 'cal' && bbMic && bbMic.det.ready) beatBegin(m.lv, true);
+      if (m.state === 'cal' && bbMic && bbMic.det.ready) { m.state = 'test'; bbMic.det.onOnset = function (z) { m.lit[z.lane] = performance.now(); m.last = z; }; }
+    }
+    if (m.state === 'test' && bbMic) {
+      var det = bbMic.det;
+      det.sm = Math.pow(1.4, BB_SENS - 5);
+      if (!det.onOnset) det.onOnset = function (z) { m.lit[z.lane] = performance.now(); m.last = z; };
+      T('TEST MICRO', 90, 8, P.gold, 8, 'center', P.velvet); T('FAIS B  PF  TS', 90, 24, P.cream, 8, 'center', P.ink);
+      for (i = 0; i < 3; i++) { var lit = now - m.lit[i] < 220; R(P.ink, 7 + i * 58, 43, 50, 38); R(lit ? '#fff6dc' : BEAT_COL[i], 8 + i * 58, 44, 48, 36); T(BEAT_NAME[i], 32 + i * 58, 57, P.ink, 8, 'center'); }
+      R(P.ink, 19, 99, 142, 10); R('#2e8b57', 20, 100, Math.round(Math.min(1, det.vu * 3) * 140), 8); T('NIVEAU', 90, 113, '#8d84b8', 8, 'center');
+      if (m.last) T('LO ' + m.last.lo.toFixed(2) + ' HI ' + m.last.hi4.toFixed(2), 90, 126, '#8d84b8', 8, 'center');
+      btn(BB_SB[0], '-', '#3a3f55'); btn(BB_SB[1], '+', '#3a3f55'); T('SENS ' + BB_SENS, 90, 145, P.cream, 8, 'center', P.ink);
+      btn(BB_RECAL, 'RECALIBRER', '#3a3f55');
+      T('RIEN NE BOUGE ?', 90, 206, '#e07b7b', 8, 'center', P.ink); T('MONTE SENS OU', 90, 218, '#8d84b8', 8, 'center'); T('RECALIBRE EN SILENCE', 90, 230, '#8d84b8', 8, 'center');
+      btn(BTN_E1, 'JOUER', '#2e8b57'); btn(BTN_E2, 'RETOUR', '#b3202e');
+      return;
     }
     return;
   }
