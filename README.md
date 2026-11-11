@@ -63,5 +63,6 @@ Menu ARCADE → RECORDS : classement mondial par jeu (Arkanoid, Taupes, Foot Arg
 
 **Jeu de l'A9 : score final** = 500 (arrivée) + points ramassés + bonus de temps (25 pts par seconde sous le temps de référence 60 / 75 / 90 s) + 3 × l’argent restant − 60 par amende. En duel, le plus haut score gagne.
 
-## Le Concert (jeu de rythme)
-Arcade → LE CONCERT. Léa (guitare) à gauche, Keumart (micro) à droite, batterie au centre, devant le décor de la salle. Des notes tombent dans 3 colonnes (guitare / batterie / voix) : touche la colonne au bon moment (ou A-S-D au clavier). 3 niveaux (facile 90, moyen 100, difficile 110 bpm), PARFAIT/BIEN/OK, combo jusqu'à x4, note S-A-B-C. Records par niveau (onglet BEAT). Les sons sont synthétisés (à remplacer par des échantillons de Marc).
+## Le Concert (jeu de rythme beatbox)
+Arcade → LE CONCERT. Les morceaux de Marc jouent SANS batterie : le joueur fait la batterie en beatbox. Trois colonnes : B (grosse caisse), PF (caisse claire), TS (charley), tirées de la vraie batterie du morceau. Léa (guitare) à gauche, Keumart (micro) à droite, décor de la salle.
+Niveaux : 1 Les Sardines (facile, B + PF), 2 La Tribu de Dana (moyen, + TS), 3 Ces soirées-là (dur). À la fin, « We Are the Champions » joue. PARFAIT/BIEN/OK, combo jusqu'à x4, note S-A-B-C, records par niveau (onglet BEAT). Clavier : A S D. Les bruits de beatbox sont synthétisés (à remplacer par les vrais échantillons de Marc).
