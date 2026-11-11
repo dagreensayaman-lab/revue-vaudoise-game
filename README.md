@@ -62,3 +62,6 @@ Menu SALLE DE JEU → CLASSEMENT (points, duels, loups, votés). Les stats sont 
 Menu ARCADE → RECORDS : classement mondial par jeu (Arkanoid, Taupes, Foot Argentin = victoires contre le bot, L'A9 = un classement par niveau), avec le personnage et le nom du joueur. Les scores sont envoyés dans `hs/<jeu>/<id appareil>` : il faut republier `firebase-rules.json` (bloc `hs`) dans la console Firebase → Realtime Database → Règles.
 
 **Jeu de l'A9 : score final** = 500 (arrivée) + points ramassés + bonus de temps (25 pts par seconde sous le temps de référence 60 / 75 / 90 s) + 3 × l’argent restant − 60 par amende. En duel, le plus haut score gagne.
+
+## Le Concert (jeu de rythme)
+Arcade → LE CONCERT. Léa (guitare) à gauche, Keumart (micro) à droite, batterie au centre, devant le décor de la salle. Des notes tombent dans 3 colonnes (guitare / batterie / voix) : touche la colonne au bon moment (ou A-S-D au clavier). 3 niveaux (facile 90, moyen 100, difficile 110 bpm), PARFAIT/BIEN/OK, combo jusqu'à x4, note S-A-B-C. Records par niveau (onglet BEAT). Les sons sont synthétisés (à remplacer par des échantillons de Marc).

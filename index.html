@@ -395,7 +395,7 @@ function playEv(e, t, sd) {
 function musicTick() {
   if (!ac || !mg) return;
   trackWatch();
-  mg.gain.value = muted ? 0 : 0.55;
+  mg.gain.value = (muted || (mini && mini.id === 'beat' && !mini.sel)) ? 0 : 0.55;
   if (ac.state !== 'running') return;
   var sd = 60 / SONG.bpm / 4, now = ac.currentTime;
   if (mT0 === 0) mT0 = now + 0.15;
@@ -3199,7 +3199,7 @@ function drawBrickRound(t, tt, r) {
 /* ---------- mini-games (each one playable on its own): ARKANOID and POUSSE (tap battle) ---------- */
 
 /* ---------- records par jeu (classement mondial par joueur : /hs/<jeu>/<appareil>) ---------- */
-var HS_G = [['brick', 'ARKA'], ['mole', 'TAUP'], ['push', 'ARGE'], ['neuf', 'A9']];
+var HS_G = [['brick', 'ARKA'], ['mole', 'TAUP'], ['push', 'ARGE'], ['neuf', 'A9'], ['beat', 'BEAT']];
 var hsBest = {}, hsLine = null;
 try { hsBest = JSON.parse(localStorage.getItem('rv_hs') || '{}') || {}; } catch (e) { hsBest = {}; }
 function hsSave() { try { localStorage.setItem('rv_hs', JSON.stringify(hsBest)); } catch (e) {} }
@@ -3219,6 +3219,7 @@ function hsGid(m) {
   if (m.id === 'car') return m.won ? 'neuf' + m.lv : null;
   if (m.id === 'brick') return m.online ? null : 'brick';
   if (m.id === 'mole') return 'mole';
+  if (m.id === 'beat') return m.sel ? null : 'beat' + m.lv;
   if (m.id === 'pushbot') return m.win === 1 ? 'push' : null;
   return null;
 }
@@ -3237,7 +3238,7 @@ function hsDraw() {
   T(hsLine.rec ? 'NOUVEAU RECORD !' : 'TON RECORD ' + hsLine.best, 90, 245, hsLine.rec && Math.floor(performance.now() / 300) % 2 ? P.cream : P.gold, 8, 'center', P.ink);
   T(hsLine.rank ? 'RANG ' + hsLine.rank + ' SUR ' + hsLine.n : 'RANG...', 90, 258, '#8d84b8', 8, 'center');
 }
-function hsKey(m) { return HS_G[m.tab][0] + (m.tab === 3 ? m.lv : ''); }
+function hsKey(m) { return HS_G[m.tab][0] + (m.tab >= 3 ? m.lv : ''); }
 function hsLoad(m) {
   var g = hsKey(m); if (m.rows[g]) return; m.rows[g] = 'load';
   fbReq('GET', '/hs/' + g).then(function (o) { m.rows[g] = hsRows(o); }, function () { m.rows[g] = 'err'; });
@@ -3246,7 +3247,7 @@ function hsOpen() { mini = { id: 'hs', tab: 0, lv: 0, rows: {} }; hsLoad(mini); 
 function hsTap(x, y) {
   var m = mini, i;
   if (inside(BTN_BACK2, x, y)) { mini = null; boop(); return; }
-  for (i = 0; i < HS_G.length; i++) if (x >= 6 + i * 43 && x <= 46 + i * 43 && y >= 22 && y <= 36) { if (m.tab === i && i === 3) m.lv = (m.lv + 1) % 3; m.tab = i; blip(); hsLoad(m); return; }
+  for (i = 0; i < HS_G.length; i++) if (x >= 3 + i * 35 && x <= 37 + i * 35 && y >= 22 && y <= 36) { if (m.tab === i && i >= 3) m.lv = (m.lv + 1) % 3; m.tab = i; blip(); hsLoad(m); return; }
 }
 function drawHs(t) {
   var m = mini, g = hsKey(m), rows = m.rows[g], me = myUid();
@@ -3254,10 +3255,10 @@ function drawHs(t) {
   T('RECORDS', 90, 8, P.gold, 8, 'center', P.velvet);
   HS_G.forEach(function (tb, i2) {
     var on = m.tab === i2;
-    R(on ? P.gold : '#4a3f6a', 6 + i2 * 43, 22, 40, 14); R(on ? '#6a4a1a' : '#1d1530', 7 + i2 * 43, 23, 38, 12);
-    T(tb[1], 26 + i2 * 43, 26, on ? P.gold : P.cream, 8, 'center');
+    R(on ? P.gold : '#4a3f6a', 3 + i2 * 35, 22, 34, 14); R(on ? '#6a4a1a' : '#1d1530', 4 + i2 * 35, 23, 32, 12);
+    T(tb[1], 20 + i2 * 35, 26, on ? P.gold : P.cream, 8, 'center');
   });
-  T(m.tab === 3 ? CAR_LV[m.lv].n + ' (TOUCHE A9)' : ['POINTS ARKANOID', 'POINTS TAUPES', 'VICTOIRES VS BOT'][m.tab], 90, 41, '#8d84b8', 8, 'center');
+  T(m.tab === 3 ? CAR_LV[m.lv].n + ' (TOUCHE A9)' : m.tab === 4 ? BEAT_LV[m.lv].n + ' (TOUCHE BEAT)' : ['POINTS ARKANOID', 'POINTS TAUPES', 'VICTOIRES VS BOT'][m.tab], 90, 41, '#8d84b8', 8, 'center');
   if (rows === 'err') T('CONNEXION IMPOSSIBLE', 90, 120, '#e07b7b', 8, 'center', P.ink);
   else if (!rows || rows === 'load') T('CHARGEMENT...', 90, 120, P.cream, 8, 'center', P.ink);
   else if (!rows.length) T('PERSONNE ENCORE...', 90, 120, P.cream, 8, 'center', P.ink);
@@ -3276,7 +3277,7 @@ function drawHs(t) {
 
 var mini = null, ptrX = 90, ptrY = 0, ptrDown = false;
 var MG_LIST = {
-  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: "JEU DE L'A9" }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'BEATBOX BIENTÔT', off: true }],
+  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: "JEU DE L'A9" }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'LE CONCERT' }],
   versus: [{ id: 'online', name: 'DUEL EN LIGNE' }, { id: 'push2', name: 'ARGENTIN À DEUX' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }]
 };
 var BTN_X = { x: 2, y: 2, w: 16, h: 14 }, BTN_MB = { x: 6, y: 276, w: 80, h: 22 }, BTN_REC = { x: 94, y: 276, w: 80, h: 22 };
@@ -3288,7 +3289,7 @@ function pickOpp() {
 }
 function mgStart(id) {
   if (id === 'online') { mode = 'multi'; scene = 'stage'; mini = null; lobbyStart(); lbMsg('INVITE UN JOUEUR DE LA SALLE', 6000); }
-  else { statSolo(); if (id === 'brick') brickStart(); else if (id === 'car') carStart(); else if (id === 'mole') moleStartSolo(); else pushStart(id); }
+  else { statSolo(); if (id === 'brick') brickStart(); else if (id === 'car') carStart(); else if (id === 'mole') moleStartSolo(); else if (id === 'beat') beatStart(); else pushStart(id); }
 }
 function mgLeave() { if (mini && mini.net && !mini.fin && net) { mini.myFin = mini.id === 'pushnet' ? -1 : -9999; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
 function drawGameMenu(t) {
@@ -3311,13 +3312,180 @@ function mgTap(x, y) {
     return;
   }
   if (mini.id === 'hs') { hsTap(x, y); return; }
-  if (mini.id === 'car') carTap(x, y); else if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
+  if (mini.id === 'beat') beatTap(x, y); else if (mini.id === 'car') carTap(x, y); else if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
 }
 function drawMini(t) {
   if (mini.id === 'hs') { drawHs(t); return; }
+  if (mini.id === 'beat') { drawBeat(t); hsWatch(); hsDraw(); muteIcon(); return; }
   if (mini.id === 'car') { drawCar(t); if (mini.net) drawCarDuel(t); } else if (mini.id === 'brick') { drawBrick(t); if (mini.net) drawBrickDuel(t); } else if (mini.id === 'mole') drawMoleSolo(t); else if (mini.id === 'molenet') drawMoleDuel(t); else drawPush(t);
   hsWatch(); hsDraw();
   muteIcon();
+}
+
+/* --- LE CONCERT : jeu de rythme. Léa (guitare, gauche), Keumart (micro, droite), batterie au centre --- */
+var BEAT_HIT = 214, BEAT_TOP = 26, BEAT_FALL = 1.6, BEAT_WIN = 0.17, BEAT_COL = ['#d93a7a', '#f2c14e', '#5fb7e8'];
+var BEAT_CH = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]];
+var BEAT_LV = [
+  { n: 'FACILE', sub: 'NIVEAU 1  CALME', bpm: 90, bars: 8, step: function (b, s) { var o = ''; if (s === 0) o += 'B'; if (s === 4 || s === 12) o += 'K'; if (s === 8) o += 'B'; if (s === 2 || s === 10) o = 'G'; if (b % 2 === 1 && s === 6) o = 'V'; if (b === 7 && s >= 12) o = s === 12 ? 'V' : 'G'; return o; } },
+  { n: 'MOYEN', sub: 'NIVEAU 2  ÇA CHAUFFE', bpm: 100, bars: 8, step: function (b, s) { var m = { 0: 'B', 4: 'K', 8: 'B', 10: 'B', 12: 'K' }, g = { 2: 1, 6: 1, 14: 1 }, o = m[s] || ''; if (g[s]) o = 'G'; if (b % 2 === 1 && (s === 3 || s === 11)) o = 'V'; if (b >= 4 && s === 7) o = 'V'; if (b === 7 && s >= 12) o = s === 12 ? 'V' : (s === 14 ? 'G' : ''); return o; } },
+  { n: 'DIFFICILE', sub: 'NIVEAU 3  ROCK', bpm: 110, bars: 8, step: function (b, s) { var m = { 0: 'B', 3: 'B', 4: 'K', 8: 'B', 10: 'B', 12: 'K', 14: 'K' }, o = m[s] || ''; if (s === 2 || s === 6 || s === 9 || s === 13) o = 'G'; if ((s === 7 || s === 15) && b % 2 === 1) o = 'V'; if (b >= 4 && s === 5) o = 'V'; if (b === 7 && s >= 8) o = s % 2 ? 'V' : (s % 4 ? 'G' : 'K'); return o; } }
+];
+var BEAT_LB = [{ x: 14, y: 50, w: 152, h: 44 }, { x: 14, y: 102, w: 152, h: 44 }, { x: 14, y: 154, w: 152, h: 44 }];
+function beatCh(id) { var i = rosterIdx(id); return i < 0 ? null : ROSTER[i]; }
+function beatSnd(k, f, when) {
+  if (!ac || muted) return;
+  var w = when || 0, t0 = ac.currentTime + w, o, g, fl, s, nb;
+  if (k === 'G') { tone(f, 0.32, w, 'sawtooth', 0.05); tone(f * 2, 0.2, w, 'triangle', 0.04); tone(f * 1.5, 0.22, w + 0.012, 'sawtooth', 0.025); }
+  else if (k === 'B') { o = ac.createOscillator(); g = ac.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(170, t0); o.frequency.exponentialRampToValueAtTime(45, t0 + 0.13); g.gain.setValueAtTime(0.5, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.2); o.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0 + 0.22); }
+  else if (k === 'K' || k === 'H') {
+    nb = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.2), ac.sampleRate); var d = nb.getChannelData(0), i; for (i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    s = ac.createBufferSource(); s.buffer = nb; fl = ac.createBiquadFilter(); fl.type = k === 'K' ? 'bandpass' : 'highpass'; fl.frequency.value = k === 'K' ? 1700 : 7000; g = ac.createGain();
+    g.gain.setValueAtTime(k === 'K' ? 0.45 : 0.15, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + (k === 'K' ? 0.15 : 0.05)); s.connect(fl); fl.connect(g); g.connect(ac.destination); s.start(t0); s.stop(t0 + 0.2);
+    if (k === 'K') tone(200, 0.07, w, 'triangle', 0.1);
+  } else if (k === 'V') {
+    o = ac.createOscillator(); g = ac.createGain(); fl = ac.createBiquadFilter(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f * 0.94, t0); o.frequency.linearRampToValueAtTime(f, t0 + 0.05);
+    fl.type = 'bandpass'; fl.frequency.value = 900; fl.Q.value = 3; g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.12, t0 + 0.03); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.34);
+    o.connect(fl); fl.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0 + 0.36);
+  }
+}
+function beatStart(lv) {
+  if (lv === undefined) { mini = { id: 'beat', sel: true }; return; }
+  var L = BEAT_LV[lv], beat = 60 / L.bpm * 1000, st = beat / 4, t0 = performance.now() + 4 * beat + 400, notes = [], b, s, o, k, gi = 0, i, f;
+  for (b = 0; b < L.bars; b++) {
+    gi = 0;
+    for (s = 0; s < 16; s++) {
+      o = L.step(b, s);
+      for (k = 0; k < o.length; k++) {
+        var ch = o.charAt(k), lane = ch === 'G' ? 0 : ch === 'V' ? 2 : 1;
+        f = ch === 'G' ? BEAT_CH[b % 4][gi++ % 3] : ch === 'V' ? [440, 523, 587, 659][(b + s) % 4] : 0;
+        notes.push({ lane: lane, k: ch, f: f, t: t0 + (b * 16 + s) * st, done: 0 });
+      }
+    }
+  }
+  mini = { id: 'beat', lv: lv, L: L, t0: t0, beat: beat, st: st, notes: notes, total: notes.length, end: t0 + L.bars * 16 * st + 1500, score: 0, combo: 0, maxCombo: 0, p: 0, gd: 0, ok: 0, miss: 0, fl: [0, 0, 0], fx: [], msg: '', msgT: 0, msgC: '#fff', over: false, lastTick: -1, bass: false };
+  // backing track: bass on each bar + hat + 4-beat count-in, scheduled with the audio clock
+  var w0 = (t0 - performance.now()) / 1000;
+  for (i = 0; i < 4; i++) tone(i === 0 ? 1400 : 1000, 0.04, w0 - (4 - i) * beat / 1000, 'square', 0.06);
+  for (b = 0; b < L.bars; b++) {
+    var rt = [55, 43.65, 65.4, 49][b % 4];
+    for (s = 0; s < 16; s += 4) tone(rt * (s % 8 ? 1.5 : 1), 0.3, w0 + (b * 16 + s) * st / 1000, 'triangle', 0.1);
+    for (s = 2; s < 16; s += 4) beatSnd('H', 0, w0 + (b * 16 + s) * st / 1000);
+  }
+}
+function beatMult(m) { return Math.min(4, 1 + Math.floor(m.combo / 10)); }
+function beatLane(x) { return x < 60 ? 0 : x < 120 ? 1 : 2; }
+function beatPress(lane) {
+  var m = mini; if (!m || m.id !== 'beat' || m.sel || m.over) return;
+  var now = performance.now(), best = null, bd = 1e9, i, n, d, a, pts, txt, col;
+  m.fl[lane] = now;
+  for (i = 0; i < m.notes.length; i++) { n = m.notes[i]; if (n.done || n.lane !== lane) continue; d = n.t - now; if (Math.abs(d) < BEAT_WIN * 1000 && Math.abs(d) < bd) { bd = Math.abs(d); best = n; } }
+  if (!best) { beatSnd(lane === 0 ? 'G' : lane === 1 ? 'B' : 'V', lane === 0 ? 110 : 330); m.combo = Math.max(0, m.combo - 0); return; }
+  beatSnd(best.k, best.f);
+  a = bd / 1000;
+  if (a < 0.05) { pts = 100; txt = 'PARFAIT !'; col = '#ffd24a'; m.p++; } else if (a < 0.1) { pts = 60; txt = 'BIEN'; col = '#7bd88f'; m.gd++; } else { pts = 30; txt = 'OK'; col = '#9fb4ff'; m.ok++; }
+  best.done = 1; m.combo++; if (m.combo > m.maxCombo) m.maxCombo = m.combo;
+  m.score += pts * beatMult(m); m.msg = txt; m.msgC = col; m.msgT = now;
+  m.fx.push({ lane: lane, t: now, col: col });
+}
+function beatTap(x, y) {
+  var m = mini, i;
+  if (m.sel) {
+    if (inside(BTN_BACK, x, y)) { mgLeave(); return; }
+    for (i = 0; i < 3; i++) if (inside(BEAT_LB[i], x, y)) { blip(); beatStart(i); return; }
+    return;
+  }
+  if (m.over) { if (inside(BTN_E1, x, y)) { blip(); beatStart(m.lv); } else if (inside(BTN_E2, x, y)) { mini = null; boop(); beatStart(); } return; }
+  if (inside(BTN_X, x, y)) { mgLeave(); return; }
+  beatPress(beatLane(x));
+}
+function beatGrade(m) { var acc = m.total ? (m.p + m.gd) / m.total : 0; return acc > 0.95 ? 'S' : acc > 0.85 ? 'A' : acc > 0.7 ? 'B' : 'C'; }
+function beatStage(t, dim) {
+  drawHall(t); R('rgba(10,6,16,' + dim + ')', 0, 0, W, H);
+}
+function beatGuitar(fx, fy, a) {
+  // petite guitare rose devant Léa, penchée
+  var x = Math.round(fx + 4), y = Math.round(fy - 24 + a);
+  R(P.ink, x - 1, y - 1, 12, 12); R('#b5651d', x, y, 10, 10); R('#8a4a12', x + 2, y + 2, 6, 6); R(P.ink, x + 4, y + 4, 2, 2);
+  R(P.ink, x + 9, y - 10, 3, 11); R('#3a2a1c', x + 10, y - 10, 1, 10); R('#c9c2b0', x + 8, y - 12, 5, 3);
+}
+function beatMic(fx, fy) {
+  var x = Math.round(fx - 13);
+  R('#555', x, fy - 38, 1, 38); R('#444', x - 4, fy - 1, 9, 1); R(P.ink, x - 2, fy - 45, 5, 8); R('#9a9a9a', x - 1, fy - 44, 3, 3); R('#222', x - 1, fy - 41, 3, 3);
+}
+function beatKit(t, hit) {
+  var cx = 90, y = 296;
+  R('rgba(0,0,0,0.35)', cx - 26, y + 1, 52, 2);
+  // grosse caisse
+  disc(cx, y - 11, 11, P.ink); disc(cx, y - 11, 10, '#b3202e'); disc(cx, y - 11, 5, '#f6e8c8'); disc(cx, y - 11, 3, '#7d1424');
+  // caisse claire + charleston
+  R(P.ink, cx - 24, y - 20, 14, 7); R('#f6e8c8', cx - 23, y - 19, 12, 3); R('#8a8a95', cx - 23, y - 16, 12, 2); R(P.ink, cx - 18, y - 13, 2, 13);
+  R('#d9b13a', cx + 12, y - 30, 14, 2); R(P.ink, cx + 18, y - 28, 1, 28);
+  if (hit) { R('#fff6dc', cx - 5, y - 31, 10, 1); }
+}
+function drawBeat(t) {
+  var m = mini, now = performance.now(), i, n, ly, x, lea = beatCh('lea'), kem = beatCh('keumart'), a;
+  if (m.sel) {
+    beatStage(t, 0.5);
+    T('LE CONCERT', 90, 8, P.gold, 8, 'center', P.velvet);
+    T('LÉA ET KEUMART JOUENT', 90, 24, P.cream, 8, 'center', P.ink);
+    for (i = 0; i < 3; i++) { btn(BEAT_LB[i], BEAT_LV[i].n, ['#2e8b57', '#c08a1a', '#b3202e'][i]); T(BEAT_LV[i].sub, 90, BEAT_LB[i].y + 30, P.cream, 8, 'center', P.ink); }
+    T('TOUCHE LES NOTES', 90, 214, '#8d84b8', 8, 'center'); T('AU BON MOMENT', 90, 225, '#8d84b8', 8, 'center');
+    if (lea) drawChar(lea, 30, 292 - (Math.floor(t / 380) % 2), 2, false, 0);
+    if (kem) drawChar(kem, 150, 292 - (Math.floor(t / 380 + 1) % 2), 2, true, 0);
+    btn(BTN_BACK, 'RETOUR', '#3a3f55');
+    return;
+  }
+  var el = now - m.t0;
+  beatStage(t, 0.42);
+  // colonnes
+  for (i = 0; i < 3; i++) {
+    R('rgba(10,6,16,0.5)', i * 60 + 2, BEAT_TOP - 4, 56, BEAT_HIT + 14 - BEAT_TOP + 4);
+    R('rgba(255,255,255,0.12)', i * 60, BEAT_TOP - 4, 1, BEAT_HIT + 14 - BEAT_TOP + 4);
+    a = Math.max(0, 1 - (now - m.fl[i]) / 160);
+    if (a > 0) R('rgba(' + (i === 0 ? '217,58,122' : i === 1 ? '242,193,78' : '95,183,232') + ',' + (0.35 * a).toFixed(2) + ')', i * 60 + 2, BEAT_TOP - 4, 56, BEAT_HIT + 14 - BEAT_TOP + 4);
+  }
+  // ligne de frappe
+  for (i = 0; i < 3; i++) { R(BEAT_COL[i], i * 60 + 8, BEAT_HIT + 4, 44, 2); R('rgba(255,255,255,0.25)', i * 60 + 8, BEAT_HIT, 44, 1); }
+  // notes
+  for (i = 0; i < m.notes.length; i++) {
+    n = m.notes[i]; if (n.done) continue;
+    ly = BEAT_HIT - (n.t - now) / 1000 / BEAT_FALL * (BEAT_HIT - BEAT_TOP);
+    if (ly < BEAT_TOP - 8) continue;
+    if (!m.over && n.t < now - BEAT_WIN * 1000) { n.done = 2; m.miss++; m.combo = 0; m.msg = 'RATÉ'; m.msgC = '#e07b7b'; m.msgT = now; continue; }
+    x = n.lane * 60 + 8;
+    var col = n.lane === 1 ? (n.k === 'K' ? '#ffe08a' : '#f2c14e') : BEAT_COL[n.lane];
+    R(P.ink, x - 1, Math.round(ly) - 5, 46, 11); R(col, x, Math.round(ly) - 4, 44, 9); R('rgba(255,255,255,0.45)', x, Math.round(ly) - 4, 44, 2); R('rgba(0,0,0,0.25)', x, Math.round(ly) + 3, 44, 2);
+    if (n.lane === 1) { disc(x + 22, Math.round(ly), 3, n.k === 'K' ? '#fff' : '#7d1424'); }
+  }
+  // persos
+  var leaDy = now - m.fl[0] < 130 ? -2 : 0, kemDy = now - m.fl[2] < 130 ? -2 : 0;
+  if (lea) { drawChar(lea, 30, 296, 2, false, leaDy); }
+  if (kem) { drawChar(kem, 150, 296, 2, true, kemDy); beatMic(150, 296); }
+  beatKit(t, now - m.fl[1] < 110);
+  // étincelles
+  m.fx = m.fx.filter(function (f) { return now - f.t < 420; });
+  m.fx.forEach(function (f) { var k = (now - f.t) / 420, cx = f.lane * 60 + 30; R(f.col, Math.round(cx - 22 - k * 8), BEAT_HIT - Math.round(k * 20), 3, 3); R(f.col, Math.round(cx + 20 + k * 8), BEAT_HIT - Math.round(k * 20), 3, 3); R(f.col, Math.round(cx), BEAT_HIT - 6 - Math.round(k * 26), 3, 3); });
+  // HUD
+  R('rgba(10,6,16,0.7)', 0, 0, W, 20);
+  T('SCORE ' + m.score, 90, 2, P.gold, 8, 'center', P.ink);
+  T('X', 8, 5, P.cream, 8, 'left');
+  if (m.combo >= 2) T('COMBO ' + m.combo + (beatMult(m) > 1 ? '  X' + beatMult(m) : ''), 90, 11, P.mint, 8, 'center', P.ink);
+  if (now - m.msgT < 450 && !m.over) T(m.msg, 90, BEAT_HIT - 40, m.msgC, 8, 'center', P.ink);
+  // décompte
+  if (el < 0) {
+    var cnt = Math.ceil(-el / m.beat); if (cnt > 4) cnt = 4;
+    R('rgba(10,6,16,0.55)', 0, 90, W, 70); Tout(String(cnt), 90, 100, P.gold, 16, '#2a0712', P.red); T('PRÊT ?', 90, 134, P.cream, 8, 'center', P.ink);
+  }
+  if (!m.over && now > m.end) { m.over = true; jingle(); m.grade = beatGrade(m); try { var b0 = +localStorage.getItem('rv_beat_best' + m.lv) || 0; if (m.score > b0) { localStorage.setItem('rv_beat_best' + m.lv, String(m.score)); m.rec = true; } } catch (e) {} }
+  if (m.over) {
+    R('rgba(10,6,16,0.85)', 0, 40, W, 190);
+    Tout('NOTE ' + m.grade, 90, 52, P.gold, 16, '#2a0712', P.red);
+    T('SCORE ' + m.score, 90, 90, P.cream, 8, 'center', P.ink);
+    T(BEAT_LV[m.lv].n, 90, 106, '#8d84b8', 8, 'center');
+    T('PARFAITS ' + m.p, 90, 130, '#ffd24a', 8, 'center', P.ink); T('BIEN ' + m.gd + '  OK ' + m.ok, 90, 144, '#7bd88f', 8, 'center', P.ink); T('RATÉS ' + m.miss, 90, 158, '#e07b7b', 8, 'center', P.ink);
+    T('COMBO MAX ' + m.maxCombo, 90, 176, P.cream, 8, 'center', P.ink);
+    btn(BTN_E1, 'REJOUER', '#2e8b57'); btn(BTN_E2, 'NIVEAUX', '#b3202e');
+  }
 }
 
 /* --- CAR : LA NEUF. 3 niveaux (Montreux, Lausanne, Genève), ligne d'arrivée, pièces bleues, rampes --- */
@@ -4080,7 +4248,8 @@ window.addEventListener('keydown', function (e) {
     var dl = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 5, ArrowUp: -5 }[e.key];
     if (dl) { var ns = sel, tries = 0; do { ns = (ns + dl + NSEL * 2) % NSEL; tries++; } while (!avail(ns) && tries < 20); setSel(ns); }
     else if (e.key === 'Enter') startMode('multi');
-  } else if (scene === 'stage' && mode === 'multi') { if (e.key === 'Escape') { if (vg && vg.phase !== 'end') { if (vg.menu) pauseClose(); else pauseOpen(); } else netLeave(true); } }
+  } else if (scene === 'stage' && mini && mini.id === 'beat' && !mini.sel && !mini.over && { a: 1, s: 1, d: 1, ArrowLeft: 1, ArrowDown: 1, ArrowRight: 1 }[e.key]) { if (!e.repeat) beatPress({ a: 0, s: 1, d: 2, ArrowLeft: 0, ArrowDown: 1, ArrowRight: 2 }[e.key]); e.preventDefault(); }
+  else if (scene === 'stage' && mode === 'multi') { if (e.key === 'Escape') { if (vg && vg.phase !== 'end') { if (vg.menu) pauseClose(); else pauseOpen(); } else netLeave(true); } }
   else if (scene === 'stage' && (e.key === 'Escape' || e.key === 'Backspace')) { scene = 'select'; fadeT = performance.now(); }
 });
 
