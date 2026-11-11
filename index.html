@@ -161,13 +161,19 @@ var ROSTER = [
   { id: 'guest', name: 'GUEST', last: '', role: 'PUBLIC', custom: true, hair: '#5a3a22', skin: '#f0b98d', shirt: '#e07b39', pants: '#2b3a5a' },
   { id: 'virginie', name: 'VIRGINIE', last: '', role: 'COSTUMIÈRE', hair: '#a0522d', skin: '#f6c9a0', shirt: '#b98fd6', pants: '#3a2a4a', style: 'long' },
   { id: 'jeanluc', name: 'JEAN-LUC', last: 'BARBEZAT', role: 'LE PATRON', secret: true, beard: true, hair: '#8a8f98', skin: '#e8b48a', shirt: '#1c1c24', pants: '#1c1c24', acc: 'tie' },
-  { id: 'cuche', name: 'CUCHE', last: '', role: 'ABSENT', ghost: true, hair: '#6b4a2a', skin: '#d8d8e8', shirt: '#8a8fb0', pants: '#555a70', acc: 'glasses' }
+  { id: 'cuche', name: 'CUCHE', last: '', role: 'ABSENT', lvl: 3, hair: '#6b4a2a', skin: '#d8d8e8', shirt: '#8a8fb0', pants: '#555a70', acc: 'glasses' }
 ];
 var NSEL = ROSTER.filter(function (r) { return !r.ghost; }).length;
 var bossUnlocked = false;
 try { bossUnlocked = localStorage.getItem('rv_boss') === '1'; } catch (e) {}
 function unlockBoss() { bossUnlocked = true; try { localStorage.setItem('rv_boss', '1'); } catch (e) {} }
-function avail(i) { return !ROSTER[i].secret || bossUnlocked; }
+/* Déblocages : un perso avec lvl: N se débloque au niveau N du joueur (points gagnés en jouant, voir STAT_LV).
+   Les skins se débloquent pareil : SKIN_LV = { idperso: [niveau skin 1, niveau skin 2, ...] } (le 1er est toujours libre). */
+var SKIN_LV = {};
+function myLevel() { return typeof STATS !== 'undefined' ? statLevel(STATS).n : 1; }
+function avail(i) { var r = ROSTER[i]; return (!r.secret || bossUnlocked) && (!r.lvl || myLevel() >= r.lvl); }
+function skinOk(id, k) { var a = SKIN_LV[id]; return !a || !a[k] || myLevel() >= a[k]; }
+function lockHint(i) { var r = ROSTER[i]; if (r.lvl && myLevel() < r.lvl) return 'NIVEAU ' + r.lvl + ' : ' + STAT_LV[r.lvl - 1][1]; return 'A DEBLOQUER EN JOUANT'; }
 function candList() { var o = []; for (var i = 0; i < ROSTER.length; i++) if (avail(i)) o.push(i); return o; }
 var names = {};
 try { names = JSON.parse(localStorage.getItem('rv_names') || '{}') || {}; } catch (e) { names = {}; }
@@ -921,10 +927,10 @@ function drawHall(t) {
 }
 
 /* ---------- select scene ---------- */
-var SLOT = { x0: 5, y0: 172, w: 31, h: 30, px: 34, py: 34 };
+var SLOT = { x0: 5, y0: 172, w: 26, h: 30, px: 29, py: 34 };
 var BTN_A = { x: 6, y: 276, w: 54, h: 22 }, BTN_B = { x: 63, y: 276, w: 54, h: 22 }, BTN_C = { x: 120, y: 276, w: 54, h: 22 }, BTN_BACK = { x: 48, y: 276, w: 84, h: 22 };
 var BTN_E1 = { x: 8, y: 276, w: 78, h: 22 }, BTN_E2 = { x: 94, y: 276, w: 78, h: 22 };
-function slotRect(i) { return { x: SLOT.x0 + (i % 5) * SLOT.px, y: SLOT.y0 + Math.floor(i / 5) * SLOT.py, w: SLOT.w, h: SLOT.h }; }
+function slotRect(i) { return { x: SLOT.x0 + (i % 6) * SLOT.px, y: SLOT.y0 + Math.floor(i / 6) * SLOT.py, w: SLOT.w, h: SLOT.h }; }
 function btn(b, label, col) {
   R(P.ink, b.x - 1, b.y - 1, b.w + 2, b.h + 2);
   R(col, b.x, b.y, b.w, b.h - 3);
@@ -946,7 +952,7 @@ function drawSelect(t) {
   var isMine = dedicated === sel, l2 = ch.last || ch.role, l2c = P.goldDim;
   if (isMine && Math.floor(t / 1200) % 2) { l2 = 'TON PERSO'; l2c = P.mint; }
   if (ch.custom && !names[ch.id] && Math.floor(t / 500) % 2 === 0) { l2 = 'ÉCRIS TON NOM'; l2c = P.gold; }
-  var rl2 = REAL[ch.id]; if (rl2 && rl2.skins.length > 1 && Math.floor(t / 900) % 2 === 1) { l2 = 'TOUCHE LE PERSO'; l2c = P.gold; }
+  var rl2 = REAL[ch.id], nsk = 0; if (rl2) for (var ks = 0; ks < rl2.skins.length; ks++) if (skinOk(ch.id, ks)) nsk++; if (nsk > 1 && Math.floor(t / 900) % 2 === 1) { l2 = 'TOUCHE LE PERSO'; l2c = P.gold; }
   T(l2, 90, 159, l2c, 8, 'center');
   var on = Math.floor(t / 250) % 2 === 0;
   for (var i = 0; i < NSEL; i++) {
@@ -1998,7 +2004,7 @@ function netVote(s) {
 /* ---------- stats par joueur (stockées sur l'appareil, partagées dans la salle) ---------- */
 var STATS = { pt: 0, so: 0, su: 0, lg: 0, lw: 0, dl: 0, dw: 0, tv: 0 };
 try { var svs = JSON.parse(localStorage.getItem('rv_stats') || '{}') || {}; Object.keys(STATS).forEach(function (k) { if (typeof svs[k] === 'number') STATS[k] = svs[k]; }); } catch (e) {}
-var statToast = { txt: '', t: -1e9 };
+var statToast = { txt: '', t: -1e9, dur: 3200 };
 var STAT_LV = [[0, 'NOUVEAU'], [10, 'HABITUÉ'], [30, 'ARTISTE'], [70, 'VEDETTE'], [150, 'STAR'], [300, 'LÉGENDE']];
 function statCompact() { var o = {}; Object.keys(STATS).forEach(function (k) { o[k] = STATS[k]; }); return o; }
 function statG(st, k) { return (st && +st[k]) || 0; }
@@ -2087,7 +2093,12 @@ function statAdd(k, pts, msg) {
   if (k) STATS[k] += 1;
   STATS.pt += pts;
   var after = statLevel(STATS);
-  statToast = { txt: after.n > before ? 'NIVEAU ' + after.n + ' : ' + after.name : '+' + pts + ' PTS ' + (msg || ''), t: performance.now() };
+  statToast = { txt: after.n > before ? 'NIVEAU ' + after.n + ' : ' + after.name : '+' + pts + ' PTS ' + (msg || ''), t: performance.now(), dur: 3200 };
+  if (after.n > before) {
+    var ul = ROSTER.filter(function (r) { return r.lvl && r.lvl > before && r.lvl <= after.n; });
+    if (ul.length) statToast = { txt: nm(ul[0]) + ' DEBLOQUE !', t: performance.now(), dur: 5000 };
+    else { var us = 0; Object.keys(SKIN_LV).forEach(function (id) { SKIN_LV[id].forEach(function (v) { if (v > before && v <= after.n) us++; }); }); if (us) statToast = { txt: 'NOUVEAU SKIN DEBLOQUE !', t: performance.now(), dur: 5000 }; }
+  }
   statPush();
 }
 function statSolo() { statAdd('so', 1, 'SOLO'); }
@@ -2103,7 +2114,7 @@ function wfStat(my, w) {
 }
 function statToastDraw() {
   var el = performance.now() - statToast.t;
-  if (el > 3200) return;
+  if (el > (statToast.dur || 3200)) return;
   var tx = statToast.txt, wd = Math.min(176, tx.length * 8 + 8), y = el < 200 ? -9 + el / 200 * 9 : 0;
   R(P.gold, 90 - wd / 2 - 1, y - 1, wd + 2, 11); R('#241238', 90 - wd / 2, y, wd, 10);
   T(tx, 90, y + 1, P.gold, 8, 'center');
@@ -3284,7 +3295,7 @@ var BTN_X = { x: 2, y: 2, w: 16, h: 14 }, BTN_MB = { x: 6, y: 276, w: 80, h: 22 
 function mgBtn(i) { return { x: 20, y: 56 + i * 34, w: 140, h: 26 }; }
 function pickOpp() {
   var o, n = 0;
-  do { o = Math.floor(Math.random() * ROSTER.length); n++; } while ((o === sel || ROSTER[o].ghost || (ROSTER[o].secret && !bossUnlocked)) && n < 50);
+  do { o = Math.floor(Math.random() * ROSTER.length); n++; } while ((o === sel || ROSTER[o].ghost || !avail(o)) && n < 50);
   return o;
 }
 function mgStart(id) {
@@ -4347,7 +4358,7 @@ function setSel(i) { if (i !== sel) { sel = i; selT = performance.now(); blip();
 function startEnter() { scene = 'enter'; enterT = performance.now(); jingle(); }
 function startMode(m) {
   mode = m;
-  do { opp = (sel + 1 + Math.floor(Math.random() * (ROSTER.length - 1))) % ROSTER.length; } while ((ROSTER[opp].secret && !bossUnlocked) || ROSTER[opp].ghost);
+  do { opp = (sel + 1 + Math.floor(Math.random() * (ROSTER.length - 1))) % ROSTER.length; } while (!avail(opp) || ROSTER[opp].ghost);
   scene = 'stage'; fadeT = performance.now(); blip(); mini = null;
   if (m === 'multi') lobbyStart();
 }
@@ -4360,10 +4371,15 @@ function handle(x, y) {
     if (inside(PLAQUE, x, y) && ROSTER[sel].custom) { openNameInput(); return; }
     if (x > 58 && x < 122 && y > 40 && y < 136) {
       var rl = REAL[ROSTER[sel].id];
-      if (rl && rl.skins.length > 1) { rl.cur = (rl.cur + 1) % rl.skins.length; selT = performance.now(); blip(); }
+      if (rl && rl.skins.length > 1) {
+        var id0 = ROSTER[sel].id, k2, nx = -1;
+        for (k2 = 1; k2 < rl.skins.length; k2++) { var c2 = (rl.cur + k2) % rl.skins.length; if (skinOk(id0, c2)) { nx = c2; break; } }
+        if (nx >= 0) { rl.cur = nx; selT = performance.now(); blip(); }
+        else { boop(); var lk = SKIN_LV[id0] && SKIN_LV[id0].filter(function (v) { return v > myLevel(); }).sort()[0]; statToast = { txt: lk ? 'AUTRE SKIN AU NIVEAU ' + lk : 'PAS D\'AUTRE SKIN', t: performance.now(), dur: 2600 }; }
+      }
       return;
     }
-    for (var i = 0; i < NSEL; i++) { if (inside(slotRect(i), x, y)) { if (avail(i)) setSel(i); else boop(); return; } }
+    for (var i = 0; i < NSEL; i++) { if (inside(slotRect(i), x, y)) { if (avail(i)) setSel(i); else { boop(); statToast = { txt: lockHint(i), t: performance.now(), dur: 2600 }; } return; } }
     if (inside(BTN_A, x, y)) startMode('arcade');
     else if (inside(BTN_B, x, y)) startMode('versus');
     else if (inside(BTN_C, x, y)) startMode('multi');
