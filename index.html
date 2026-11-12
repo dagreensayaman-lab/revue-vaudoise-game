@@ -3918,21 +3918,23 @@ var BRICK_SHAPES = {
   3: [0.6, 1.5, 2.5, 3.5, 2.5, 1.5, 0.6],
   5: [0.6, 1.5, 2.5, 3.5, 3.5, 3.5]
 };
+/* Couleur = nombre de coups : gris 1, bleu 2, violet 3, rouge 4. La brique reprend la couleur du palier en dessous quand on la touche.
+   10 niveaux : le niveau 1 n'a que des gris, puis un dégradé de plus en plus dur (le haut est le plus résistant). */
+var BRICK_TIER = [null, '#aab0c4', '#3a8fd9', '#8a5ad9', '#d93a3a'];
 function brickLevel(lv, rowsN) {
-  var bricks = [], r, k, rows, on, hp, sh;
-  if (rowsN || lv <= 2) rows = rowsN || Math.min(6, 4 + lv);
-  else rows = 6;
+  var bricks = [], r, k, rows, hp, g = Math.min(1, (lv - 1) / 9), t;
+  rows = rowsN || Math.min(6, 4 + Math.floor(lv / 3));
   for (r = 0; r < rows; r++) for (k = 0; k < 8; k++) {
-    on = true; hp = r < 2 && lv > 1 ? 2 : 1;
-    if (false && lv === 3) { sh = BRICK_SHAPES[3][r]; on = Math.abs(k - 3.5) <= sh; hp = Math.abs(k - 3.5) < 1 && r > 1 && r < 5 ? 2 : 1; }
-    else if (false && lv === 4) { on = !(k % 3 === 2 && r >= 1 && r <= 4); hp = (r === 0 || r === 5) ? 2 : 1; }
-    else if (false && lv >= 5) { sh = BRICK_SHAPES[5][r]; on = Math.abs(k - 3.5) <= sh; hp = r >= 4 ? 2 : 1; }
-    if (on) bricks.push({ x: 10 + k * 20, y: 30 + r * 14, w: 19, h: 13, col: BRICK_COL[r % 6], hp: hp, ci: Math.max(0, rosterIdx(MOLE_POOL[(r * 3 + k * 7) % 10])) });
+    t = rows > 1 ? 1 - r / (rows - 1) : 1;
+    hp = Math.round(1 + t * 3 * g);
+    if (lv >= 6 && (k + r) % 2 === 0) hp++;
+    hp = Math.max(1, Math.min(4, hp));
+    bricks.push({ x: 10 + k * 20, y: 30 + r * 14, w: 19, h: 13, col: BRICK_TIER[hp], hp: hp, ci: Math.max(0, rosterIdx(MOLE_POOL[(r * 3 + k * 7) % 10])) });
   }
   return bricks;
 }
 function brickStart() {
-  mini = { id: 'brick', bricks: brickLevel(1), px: 90, pw: 38, bx: 90, by: 262, vx: 0, vy: 0, stuck: true, go: false, lives: 3, score: 0, lv: 1, speed: 125, last: performance.now(), over: false, won: false, hits: 0, extra: [], items: [], shots: [], miss: [], fastUntil: 0, stickyUntil: 0, laserUntil: 0, pierceUntil: 0, superUntil: 0, bigUntil: 0, smallUntil: 0, slowUntil: 0, shieldUntil: 0, lastShot: 0, combo: 0, lvT0: 0, msg: null };
+  mini = { id: 'brick', bricks: brickLevel(1), px: 90, pw: 38, bx: 90, by: 262, vx: 0, vy: 0, stuck: true, go: false, lives: 3, score: 0, lv: 1, maxLv: 10, speed: 125, lastDrop: 0, last: performance.now(), over: false, won: false, hits: 0, extra: [], items: [], shots: [], miss: [], fastUntil: 0, stickyUntil: 0, laserUntil: 0, pierceUntil: 0, superUntil: 0, bigUntil: 0, smallUntil: 0, slowUntil: 0, shieldUntil: 0, lastShot: 0, combo: 0, lvT0: 0, msg: null };
 }
 function brickTap(x, y) {
   if (mini.net && mini.done) { if (inside(BTN_BACK, x, y) || inside(BTN_E2, x, y)) mgLeave(); return; }
@@ -3945,9 +3947,9 @@ function brickTap(x, y) {
   mini.go = true;
 }
 /* Points : 5 par impact, 10 par brique cassée, multipliés par le combo (se remet à 0 quand la balle touche la raquette).
-   Bonus de temps à chaque niveau fini : plus on est rapide, plus c'est gros (max 400, 0 après 50 s). */
+   Bonus de temps à chaque niveau fini : plus on est rapide, plus c'est gros (max 400, 0 après 40 s au niveau 1, +8 s par niveau). */
 function brickTimeBonus(m) {
-  var sec = m.lvT0 ? (performance.now() - m.lvT0) / 1000 : 99, b = Math.max(0, Math.round(400 - sec * 8));
+  var sec = m.lvT0 ? (performance.now() - m.lvT0) / 1000 : 999, par = 40 + 8 * (m.lv - 1), b = Math.max(0, Math.round(400 * (1 - sec / par)));
   if (b > 0) m.msg = { s: 'BONUS TEMPS +' + b, t: performance.now() };
   return b;
 }
@@ -3956,7 +3958,7 @@ function brickWin(m) {
   var left = 0, i; for (i = 0; i < m.bricks.length; i++) if (m.bricks[i].hp > 0) left++;
   if (!left && !m.over) {
     if (m.lv >= (m.maxLv || 3)) { m.score += brickTimeBonus(m) + (m.lives > 0 ? m.lives * 50 : 0); m.over = true; m.won = true; if (!m.online) jingle(); }
-    else { m.score += brickTimeBonus(m); m.lv++; m.bricks = brickLevel(m.lv); m.lvT0 = 0; m.combo = 0; m.pierceUntil = m.superUntil = m.bigUntil = m.smallUntil = m.slowUntil = m.shieldUntil = 0; m.speed *= 1.12; m.frag = false; m.deb = []; m.stuck = true; m.go = false; m.extra = []; m.items = []; m.shots = []; m.miss = []; m.stkY = 0; m.fastUntil = m.stickyUntil = m.laserUntil = 0; jingle(); }
+    else { m.score += brickTimeBonus(m); m.lv++; m.bricks = brickLevel(m.lv); m.lvT0 = 0; m.combo = 0; m.pierceUntil = m.superUntil = m.bigUntil = m.smallUntil = m.slowUntil = m.shieldUntil = 0; m.speed *= 1.06; m.frag = false; m.deb = []; m.stuck = true; m.go = false; m.extra = []; m.items = []; m.shots = []; m.miss = []; m.stkY = 0; m.fastUntil = m.stickyUntil = m.laserUntil = 0; jingle(); }
   }
 }
 function brickUpdate(t) {
@@ -4032,9 +4034,12 @@ function ballStep(m, b, dt, primary, t) {
 }
 function brickHit(m, k, t) {
   k.hp--; m.hits++; m.combo = Math.min(5, (m.combo || 0) + (k.hp > 0 ? 0 : 0.25)); m.score += Math.round((k.hp > 0 ? 5 : 10) * (1 + Math.floor(m.combo || 0) * 0.5));
-  if (k.hp > 0) k.col = '#c9c9d9'; else if (Math.random() < 0.2) { var bn = Math.floor(Math.random() * 13); m.items.push({ x: k.x + k.w / 2, y: k.y + k.h, kind: bn, bonus: bn }); }
+  if (k.hp > 0) k.col = BRICK_TIER[Math.min(4, k.hp)]; else if (Math.random() < 0.08 && t - (m.lastDrop || 0) > 5000) { var pl = brickPool(m); m.lastDrop = t; var bn = pl[Math.floor(Math.random() * pl.length)]; m.items.push({ x: k.x + k.w / 2, y: k.y + k.h, kind: bn, bonus: bn }); }
   boop();
 }
+/* niveau à partir duquel chaque objet peut tomber (les malus arrivent au niveau 4) */
+var BONUS_LV = { 0: 1, 9: 1, 12: 1, 4: 2, 1: 2, 2: 3, 3: 4, 11: 4, 5: 5, 10: 5, 8: 6, 6: 7, 7: 8 };
+function brickPool(m) { var o = [], k; for (k in BONUS_LV) if (BONUS_LV[k] <= (m.lv || 1)) o.push(+k); return o; }
 var BONUS_NAME = ['3 BILLES !', 'VITESSE !', 'TÊTES CHERCHEUSES !', 'BOULE FRAGMENTÉE !', 'RAYON LASER !', 'BILLE PERFORANTE !', 'SUPER LASER !', 'LA FÉE !', 'CROIX SUISSE !', 'RAQUETTE GÉANTE !', 'RAQUETTE MINUSCULE...', 'BILLE RALENTIE...', 'BOUCLIER !'];
 function brickBonus(m, bo, t) {
   var k, a, sp = m.speed;
@@ -4046,7 +4051,7 @@ function brickBonus(m, bo, t) {
   else if (bo === 4) m.laserUntil = t + 8000;
   else if (bo === 5) m.pierceUntil = t + 6000;
   else if (bo === 6) m.superUntil = t + 3500;
-  else if (bo === 7) { var wl = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12], wi = wl[Math.floor(Math.random() * wl.length)]; brickBonus(m, wi, t); m.msg = { s: 'VOEU : ' + BONUS_NAME[wi], t: t }; return; } /* la fée fait un voeu au hasard */
+  else if (bo === 7) { var wl = brickPool(m).filter(function (q) { return q !== 7; }), wi = wl[Math.floor(Math.random() * wl.length)]; brickBonus(m, wi, t); m.msg = { s: 'VOEU : ' + BONUS_NAME[wi], t: t }; return; } /* la fée fait un voeu au hasard */
   else if (bo === 9) { m.bigUntil = t + 10000; m.smallUntil = 0; }
   else if (bo === 10) { m.smallUntil = t + 8000; m.bigUntil = 0; }
   else if (bo === 11) m.slowUntil = t + 7000;
@@ -4065,7 +4070,7 @@ function brickBonusUpdate(m, t, dt) {
   else if (t < m.laserUntil && t - m.lastShot > 300) { m.lastShot = t; m.shots.push({ x: m.px - 10, y: 292 }, { x: m.px + 10, y: 292 }); blip(); }
   for (i = m.shots.length - 1; i >= 0; i--) {
     s2 = m.shots[i]; s2.y -= (s2.sp ? 340 : 230) * dt; var gone = s2.y < 22;
-    for (n = 0; n < m.bricks.length && !gone; n++) { b = m.bricks[n]; if (b.hp > 0 && s2.x >= b.x && s2.x <= b.x + b.w && s2.y <= b.y + b.h && s2.y >= b.y - 4) { if (s2.sp) { if (s2.seen.indexOf(b) < 0) { s2.seen.push(b); brickHit(m, b, t); } } else { brickHit(m, b, t); gone = true; } } }
+    for (n = 0; n < m.bricks.length && !gone; n++) { b = m.bricks[n]; if (b.hp > 0 && s2.x >= b.x && s2.x <= b.x + b.w && s2.y <= b.y + b.h && s2.y >= b.y - 4) { if (s2.sp) { if (s2.seen.indexOf(b) < 0) { s2.seen.push(b); while (b.hp > 0) brickHit(m, b, t); } } else { brickHit(m, b, t); gone = true; } } }
     if (gone) m.shots.splice(i, 1);
   }
   if (m.deb) for (i = m.deb.length - 1; i >= 0; i--) {
@@ -4127,7 +4132,7 @@ function drawBrick(t) {
     b = m.bricks[i]; if (b.hp <= 0) continue;
     R(b.col, b.x, b.y, b.w, b.h); R('rgba(255,255,255,0.35)', b.x, b.y, b.w, 1); R('rgba(0,0,0,0.3)', b.x, b.y + b.h - 1, b.w, 1);
     drawHead(b.ci, b.x + 2, b.y + 1, b.w - 4, b.h - 2);
-    if (b.hp > 1) R('rgba(255,255,255,0.28)', b.x, b.y, b.w, b.h);
+    for (var pp = 1; pp < b.hp; pp++) R('rgba(255,255,255,0.9)', b.x + 1 + (pp - 1) * 3, b.y + b.h - 3, 2, 2);
   }
   var tn = performance.now();
   if (tn < m.shieldUntil && (m.shieldUntil - tn > 2500 || Math.floor(tn / 150) % 2)) { R('#7fe8ff', 0, 306, W, 2); R('rgba(127,232,255,0.25)', 0, 304, W, 2); }
