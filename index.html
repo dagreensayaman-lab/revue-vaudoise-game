@@ -4051,7 +4051,7 @@ function brickBonus(m, bo, t) {
   else if (bo === 4) m.laserUntil = t + 8000;
   else if (bo === 5) m.pierceUntil = t + 6000;
   else if (bo === 6) m.superUntil = t + 3500;
-  else if (bo === 7) { var wl = brickPool(m).filter(function (q) { return q !== 7; }), wi = wl[Math.floor(Math.random() * wl.length)]; brickBonus(m, wi, t); m.msg = { s: 'VOEU : ' + BONUS_NAME[wi], t: t }; return; } /* la fée fait un voeu au hasard */
+  else if (bo === 7) { var wl = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12], wi = wl[Math.floor(Math.random() * wl.length)]; brickBonus(m, wi, t); m.msg = { s: 'VOEU : ' + BONUS_NAME[wi], t: t }; return; } /* la fée fait un voeu au hasard */
   else if (bo === 9) { m.bigUntil = t + 10000; m.smallUntil = 0; }
   else if (bo === 10) { m.smallUntil = t + 8000; m.bigUntil = 0; }
   else if (bo === 11) m.slowUntil = t + 7000;
