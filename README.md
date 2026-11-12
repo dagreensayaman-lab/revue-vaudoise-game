@@ -72,3 +72,4 @@ Deux modes : PAD (on touche les colonnes, ou A S D) et MICRO (vrai beatbox). Le 
 Le niveau du joueur monte avec les points gagnés en jouant (STAT_LV). Un perso avec `lvl: N` dans ROSTER est débloqué au niveau N (Cuche : niveau 3 ARTISTE). Jean-Luc reste débloqué en finissant un vote. Les skins : `SKIN_LV = { idperso: [0, niveau skin 2, niveau skin 3] }` (le premier est toujours libre) ; toucher le perso à l'écran de choix passe au skin suivant débloqué. Un toast annonce « X DEBLOQUE ! ». L'écran de choix a 6 colonnes (18 persos sur 3 rangées).
 
 - **Ivo** (ingénieur lumière, débloqué au niveau 2 ARTISTE) et **Tommy** (gérant du Contretemps et du bar de la Revue, niveau 4 STAR) : nouveaux persos avec sprites perso.
+- **Skins Keumart** : casquette de face (niv. 1), sans casquette (niv. 2), huissier (niv. 4, STAR).
