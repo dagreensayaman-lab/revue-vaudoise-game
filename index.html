@@ -3934,7 +3934,7 @@ function brickLevel(lv, rowsN) {
   return bricks;
 }
 function brickStart() {
-  mini = { id: 'brick', bricks: brickLevel(1), px: 90, pw: 38, bx: 90, by: 262, vx: 0, vy: 0, stuck: true, go: false, lives: 3, score: 0, lv: 1, maxLv: 10, speed: 125, lastDrop: 0, last: performance.now(), over: false, won: false, hits: 0, extra: [], items: [], shots: [], miss: [], fastUntil: 0, stickyUntil: 0, laserUntil: 0, pierceUntil: 0, superUntil: 0, bigUntil: 0, smallUntil: 0, slowUntil: 0, shieldUntil: 0, lastShot: 0, combo: 0, lvT0: 0, msg: null };
+  mini = { id: 'brick', bricks: brickLevel(1), px: 90, pw: 38, bx: 90, by: 262, vx: 0, vy: 0, stuck: true, go: false, lives: 3, score: 0, lv: 1, maxLv: 10, speed: 125, lastDrop: 0, sinceDrop: 0, lastKind: -1, last: performance.now(), over: false, won: false, hits: 0, extra: [], items: [], shots: [], miss: [], fastUntil: 0, stickyUntil: 0, laserUntil: 0, pierceUntil: 0, superUntil: 0, bigUntil: 0, smallUntil: 0, slowUntil: 0, shieldUntil: 0, lastShot: 0, combo: 0, lvT0: 0, msg: null };
 }
 function brickTap(x, y) {
   if (mini.net && mini.done) { if (inside(BTN_BACK, x, y) || inside(BTN_E2, x, y)) mgLeave(); return; }
@@ -4034,11 +4034,11 @@ function ballStep(m, b, dt, primary, t) {
 }
 function brickHit(m, k, t) {
   k.hp--; m.hits++; m.combo = Math.min(5, (m.combo || 0) + (k.hp > 0 ? 0 : 0.25)); m.score += Math.round((k.hp > 0 ? 5 : 10) * (1 + Math.floor(m.combo || 0) * 0.5));
-  if (k.hp > 0) k.col = BRICK_TIER[Math.min(4, k.hp)]; else if (Math.random() < 0.08 && t - (m.lastDrop || 0) > 5000) { var pl = brickPool(m); m.lastDrop = t; var bn = pl[Math.floor(Math.random() * pl.length)]; m.items.push({ x: k.x + k.w / 2, y: k.y + k.h, kind: bn, bonus: bn }); }
+  if (k.hp > 0) k.col = BRICK_TIER[Math.min(4, k.hp)]; else if (++m.sinceDrop && Math.random() < Math.min(0.6, 0.1 + 0.04 * m.sinceDrop) && t - (m.lastDrop || 0) > 2500) { var pl = brickPool(m).filter(function (q) { return q !== m.lastKind; }); m.lastDrop = t; m.sinceDrop = 0; var bn = m.lastKind = pl[Math.floor(Math.random() * pl.length)]; m.items.push({ x: k.x + k.w / 2, y: k.y + k.h, kind: bn, bonus: bn }); }
   boop();
 }
 /* niveau à partir duquel chaque objet peut tomber (les malus arrivent au niveau 4) */
-var BONUS_LV = { 0: 1, 9: 1, 12: 1, 4: 2, 1: 2, 2: 3, 3: 4, 11: 4, 5: 5, 10: 5, 8: 6, 6: 7, 7: 2 };
+var BONUS_LV = { 0: 1, 9: 1, 12: 1, 4: 1, 1: 1, 2: 2, 7: 2, 3: 3, 5: 3, 11: 4, 10: 4, 8: 4, 6: 4 };
 function brickPool(m) { var o = [], k; for (k in BONUS_LV) if (BONUS_LV[k] <= (m.lv || 1)) o.push(+k); return o; }
 var BONUS_NAME = ['3 BILLES !', 'VITESSE !', 'TÊTES CHERCHEUSES !', 'BOULE FRAGMENTÉE !', 'RAYON LASER !', 'BILLE PERFORANTE !', 'SUPER LASER !', 'LA FÉE !', 'CROIX SUISSE !', 'RAQUETTE GÉANTE !', 'RAQUETTE MINUSCULE...', 'BILLE RALENTIE...', 'BOUCLIER !'];
 function brickBonus(m, bo, t) {
