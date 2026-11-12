@@ -171,8 +171,9 @@ function unlockBoss() { bossUnlocked = true; try { localStorage.setItem('rv_boss
 /* Déblocages : un perso avec lvl: N se débloque au niveau N du joueur (points gagnés en jouant, voir STAT_LV).
    Les skins se débloquent pareil : SKIN_LV = { idperso: [niveau skin 1, niveau skin 2, ...] } (le 1er est toujours libre). */
 var SKIN_LV = { keumart: [0, 1, 2, 4] };
-function myLevel() { return typeof STATS !== 'undefined' ? statLevel(STATS).n : 1; }
-function avail(i) { var r = ROSTER[i]; return (!r.secret || bossUnlocked) && (!r.lvl || myLevel() >= r.lvl); }
+function allOpen() { return dedicated >= 0 && ROSTER[dedicated].id === 'keumart'; } /* le lien perso de Keumart (#keumart) a tout débloqué */
+function myLevel() { if (allOpen()) return 99; return typeof STATS !== 'undefined' ? statLevel(STATS).n : 1; }
+function avail(i) { var r = ROSTER[i]; return (!r.secret || bossUnlocked || allOpen()) && (!r.lvl || myLevel() >= r.lvl); }
 function skinOk(id, k) { var a = SKIN_LV[id]; return !a || !a[k] || myLevel() >= a[k]; }
 function lockHint(i) { var r = ROSTER[i]; if (r.lvl && myLevel() < r.lvl) return 'NIVEAU ' + r.lvl + ' : ' + STAT_LV[r.lvl - 1][1]; return 'A DEBLOQUER EN JOUANT'; }
 function candList() { var o = []; for (var i = 0; i < ROSTER.length; i++) if (avail(i)) o.push(i); return o; }

@@ -73,3 +73,4 @@ Le niveau du joueur monte avec les points gagnés en jouant (STAT_LV). Un perso 
 
 - **Ivo** (ingénieur lumière, débloqué au niveau 2 ARTISTE) et **Tommy** (gérant du Contretemps et du bar de la Revue, niveau 4 STAR) : nouveaux persos avec sprites perso.
 - **Skins Keumart** : casquette de face (niv. 1), sans casquette (niv. 2), huissier (niv. 4, STAR).
+- Le lien perso de Keumart (`...#keumart`) a tout débloqué d'office (persos, skins, Jean-Luc). Les autres débloquent selon leur niveau, chacun sur son téléphone.
