@@ -4038,7 +4038,7 @@ function brickHit(m, k, t) {
   boop();
 }
 /* niveau à partir duquel chaque objet peut tomber (les malus arrivent au niveau 4) */
-var BONUS_LV = { 0: 1, 9: 1, 12: 1, 4: 2, 1: 2, 2: 3, 3: 4, 11: 4, 5: 5, 10: 5, 8: 6, 6: 7, 7: 8 };
+var BONUS_LV = { 0: 1, 9: 1, 12: 1, 4: 2, 1: 2, 2: 3, 3: 4, 11: 4, 5: 5, 10: 5, 8: 6, 6: 7, 7: 2 };
 function brickPool(m) { var o = [], k; for (k in BONUS_LV) if (BONUS_LV[k] <= (m.lv || 1)) o.push(+k); return o; }
 var BONUS_NAME = ['3 BILLES !', 'VITESSE !', 'TÊTES CHERCHEUSES !', 'BOULE FRAGMENTÉE !', 'RAYON LASER !', 'BILLE PERFORANTE !', 'SUPER LASER !', 'LA FÉE !', 'CROIX SUISSE !', 'RAQUETTE GÉANTE !', 'RAQUETTE MINUSCULE...', 'BILLE RALENTIE...', 'BOUCLIER !'];
 function brickBonus(m, bo, t) {
