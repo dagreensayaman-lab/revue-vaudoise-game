@@ -25,8 +25,12 @@ A={i:(i,n) for i,n,r in ART}
 order=['jenny','keumart','lea','pierre','david','olivier','karim','catherine','veronique']
 cards=''.join(artist(*A[i]) for i in order)
 cards+=f'<div class="card"><div class="stage txt"><div class="big">LA REVUE<br>VAUDOISE</div></div><div class="info"><div class="fn">INSTAGRAM</div><div class="ln">LE SPECTACLE</div><div class="qrw"><img class="qr" src="{qf("veronique")}"></div><div class="hd">@larevuevaudoise</div></div></div>'
-cards+=f'<div class="card game"><div class="stage"><img class="ic" src="{ICON}"></div><div class="info"><div class="fn">LE JEU</div><div class="ln">GRATUIT</div><div class="qrw"><img class="qr" src="{qr(GAME)}"></div><div class="hd">SCANNE ET JOUE</div></div></div>'
 cards+='<div class="card note"><div class="nt">BONNE<br>SOIREE<br>AU MAGIC<br>MIRROR !</div></div>'
+cards+='<div class="card note"><div class="nt">MERCI<br>D ETRE<br>VENUS !</div></div>'
+back=['jenny','lea','keumart','karim','veronique']; front=['pierre','david','olivier','catherine']
+lineup=''
+for k,i in enumerate(back): lineup+=f'<img class="ls" style="left:{127+85*k-39}mm;top:262mm" src="{sp[i]}">'
+for k,i in enumerate(front): lineup+=f'<img class="ls" style="left:{169+85*k-39}mm;top:312mm" src="{sp[i]}">'
 html=f"""<!doctype html><meta charset=utf8><style>
 @font-face{{font-family:'Press Start 2P';src:url('ps2p.woff2') format('woff2')}}
 *{{box-sizing:border-box;margin:0;padding:0}}
@@ -39,7 +43,7 @@ body{{width:594mm;height:841mm;position:relative;overflow:hidden;font-family:'Pr
 .eyebrow{{font-size:5.6mm;letter-spacing:1.4mm;color:var(--gold);text-shadow:0 .6mm 0 var(--ink)}}
 .t1{{font-size:30mm;line-height:1.08;color:var(--gold);text-shadow:0 2.2mm 0 #5a0c1a,0 3.6mm 0 var(--ink);margin-top:7mm}}
 .t2{{font-size:7mm;letter-spacing:.8mm;margin-top:11mm;text-shadow:0 .6mm 0 var(--ink)}}
-.msg{{position:absolute;top:340mm;left:0;right:0;text-align:center;font-size:7.4mm;line-height:1.8;color:var(--gold);letter-spacing:.5mm;text-shadow:0 .7mm 0 var(--ink),0 0 3mm var(--ink)}}
+.msg{{position:absolute;top:426mm;left:0;right:0;text-align:center;font-size:4.8mm;line-height:1.6;color:var(--gold);letter-spacing:.5mm;text-shadow:0 .7mm 0 var(--ink),0 0 3mm var(--ink)}}
 .grid{{position:absolute;top:441mm;left:0;right:0;display:grid;grid-template-columns:repeat(4,148.5mm);grid-auto-rows:90mm;row-gap:6mm}}
 .card{{margin:0 11mm 0 11mm;display:flex;align-items:center;gap:2mm;background:rgba(14,8,20,.58);border:.5mm solid rgba(242,193,78,.4);padding:3mm 4mm 3mm 2mm;height:90mm}}
 .stage{{width:58mm;height:100%;flex:none;display:flex;align-items:flex-end;justify-content:center;background:radial-gradient(ellipse at 50% 100%,rgba(255,210,120,.4),transparent 70%);overflow:visible}}
@@ -53,13 +57,21 @@ body{{width:594mm;height:841mm;position:relative;overflow:hidden;font-family:'Pr
 .txt{{align-items:center}}.big{{font-size:6.6mm;line-height:1.5;color:var(--gold);text-align:center;text-shadow:0 .5mm 0 var(--ink)}}
 .ic{{width:46mm;height:46mm;image-rendering:pixelated;align-self:center}}
 .note{{justify-content:center;border-style:dashed}}.nt{{font-size:7.4mm;line-height:1.7;color:var(--gold);text-align:center}}
-.credit{{position:absolute;top:760mm;left:0;right:0;text-align:center;font-size:4.2mm;color:#c9bfe6;letter-spacing:.8mm;line-height:2}}
+.ls{{position:absolute;width:78mm;height:78mm;image-rendering:pixelated;filter:drop-shadow(0 1.5mm 1mm rgba(0,0,0,.55))}}
+.bonus{{position:absolute;left:456mm;top:24mm;width:118mm;text-align:center;background:rgba(14,8,20,.62);border:.5mm solid rgba(242,193,78,.55);padding:5mm 3mm 4mm}}
+.bonus .b1{{font-size:4.6mm;color:var(--gold);line-height:1.5}}
+.bonus .q{{display:block;width:64mm;height:64mm;background:#fff;padding:1.6mm;margin:3.5mm auto 3mm;image-rendering:pixelated}}
+.bonus .b2{{font-size:3.2mm;line-height:1.6}}
+.bonus .b3{{font-size:2.3mm;color:#9a90c0;margin-top:2.6mm}}
+.credit{{position:absolute;top:782mm;left:0;right:0;text-align:center;font-size:4.2mm;color:#c9bfe6;letter-spacing:.8mm;line-height:2}}
 </style><body>
 <img class=bg src="fond-interieur.png"><div class=shade></div><div class=frame></div>
 <div class=head><div class=eyebrow>MAGIC MIRROR - TERRITET - MONTREUX</div><div class=t1>LA REVUE<br>VAUDOISE</div><div class=t2>8E EDITION</div></div>
-<div class=msg>SUIVEZ LES ARTISTES<br>EN SCANNANT LEUR QR CODE</div>
+<div class=msg>SUIVEZ LES ARTISTES EN SCANNANT LEUR QR CODE</div>
+{lineup}
+<div class=bonus><div class=b1>BONUS<br>A SCANNER</div><img class=q src="{qr(GAME)}"><div class=b2>LE JEU DE LA REVUE</div><div class=b3>JEU CRÉÉ PAR KEUMART</div></div>
 <div class=grid>{cards}</div>
-<div class=credit>JEU CRÉÉ PAR KEUMART<br>MAGIC MIRROR - TERRITET - 2026</div>
+<div class=credit>MAGIC MIRROR - TERRITET - 2026</div>
 </body>"""
 open('affiche.html','w').write(html)
 open('conf.json','w').write(json.dumps({'pw':PW,'ph':PH}))
