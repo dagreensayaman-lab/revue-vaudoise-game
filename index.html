@@ -982,9 +982,11 @@ function drawSelect(t) {
     c.restore();
     if (i === dedicated) R(P.mint, r.x + 2, r.y + 2, 3, 3);
   }
+  if (PUBLIC) { btn({ x: 6, y: 276, w: 82, h: 22 }, 'JOUER', '#b3202e'); btn({ x: 92, y: 276, w: 82, h: 22 }, 'SOUTENIR', '#c9892f'); }
+  else {
   btn(BTN_A, 'ARCADE', '#b3202e');
   btn(BTN_B, 'VERSUS', '#2e8b57');
-  btn(BTN_C, 'MULTI', '#2d6fb5');
+  btn(BTN_C, 'MULTI', '#2d6fb5'); }
   muteIcon();
 }
 
@@ -1853,6 +1855,11 @@ function drawFans(t) {
    g: {i: round, ph: 'ask'|'reveal', n: rounds, cd: [candidate ids], q: [{c,q}]}, v: {round: {pid: candidateId}}, res: {round: {pid: candidateId}} }
    The host drives the phases; everyone else only writes their own player record and their own votes. */
 var FB_URL = 'https://revue-vaudoise-2b13c-default-rtdb.europe-west1.firebasedatabase.app';
+/* MODE PUBLIC (affiche du chapiteau) : lien #public. Mini-jeux + quiz de la revue, rien de privé, rien en ligne. */
+var PUBLIC = false; try { PUBLIC = /(^|[#&?])public\b/.test(location.hash + location.search); } catch (e) {}
+var SUPPORT_URL = 'https://buymeacoffee.com/REMPLACER'; /* <- lien Buy Me a Coffee de Marc */
+var BTN_SUP = { x: 20, y: 252, w: 140, h: 22 };
+function openSupport() { try { window.open(SUPPORT_URL, '_blank'); } catch (e) {} }
 var MAXP = 12, net = null, autoRoom = '', memPid = '';
 var BTN_NEW = { x: 20, y: 92, w: 140, h: 26 }, BTN_JOIN = { x: 20, y: 126, w: 140, h: 26 }, BTN_DEMO = { x: 20, y: 160, w: 140, h: 26 };
 var BTN_DUEL = { x: 14, y: 199, w: 76, h: 13 }, BTN_DUEL2 = { x: 94, y: 199, w: 76, h: 13 }, BTN_DUEL3 = { x: 14, y: 214, w: 76, h: 13 }, BTN_DUEL4 = { x: 94, y: 214, w: 76, h: 13 }, BTN_YES = { x: 20, y: 160, w: 66, h: 22 }, BTN_NO = { x: 94, y: 160, w: 66, h: 22 };
@@ -1899,6 +1906,7 @@ function myPid() {
 function rosterIdx(id) { for (var i = 0; i < ROSTER.length; i++) if (ROSTER[i].id === id) return i; return -1; }
 function arr(x) { if (!x) return []; if (Array.isArray(x)) return x; return Object.keys(x).sort(function (a, b) { return a - b; }).map(function (k) { return x[k]; }); }
 function fbReq(method, path, body) {
+  if (PUBLIC) return Promise.reject(new Error('public'));
   var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 7000);
   return fetch(FB_URL + path + '.json', { method: method, body: body === undefined ? undefined : JSON.stringify(body), signal: ctl ? ctl.signal : undefined, cache: 'no-store' })
     .then(function (r) { clearTimeout(to); if (!r.ok) throw new Error('http ' + r.status); return r.json(); }, function (e) { clearTimeout(to); throw e; });
@@ -3264,7 +3272,7 @@ function hsDraw() {
   if (!m || !m.hsOn || !hsLine || hsLine.g !== m.hsOn) return;
   R('rgba(10,6,16,0.9)', 0, 242, W, 30);
   T(hsLine.rec ? 'NOUVEAU RECORD !' : 'TON RECORD ' + hsLine.best, 90, 245, hsLine.rec && Math.floor(performance.now() / 300) % 2 ? P.cream : P.gold, 8, 'center', P.ink);
-  T(hsLine.rank ? 'RANG ' + hsLine.rank + ' SUR ' + hsLine.n : 'RANG...', 90, 258, '#8d84b8', 8, 'center');
+  if (!PUBLIC) T(hsLine.rank ? 'RANG ' + hsLine.rank + ' SUR ' + hsLine.n : 'RANG...', 90, 258, '#8d84b8', 8, 'center');
 }
 function hsKey(m) { if (m.tab === 4) return (m.lv < 3 ? 'beat' : 'bbox') + (m.lv % 3); return HS_G[m.tab][0] + (m.tab === 3 ? m.lv : ''); }
 function hsLoad(m) {
@@ -3304,11 +3312,82 @@ function drawHs(t) {
 }
 
 var mini = null, ptrX = 90, ptrY = 0, ptrDown = false;
+
+/* --- QUIZ DE LA REVUE (public) : vrai / faux sur le spectacle --- */
+var PUB_QUIZ = [
+  { q: 'LA REVUE VAUDOISE EST À SA 8E ÉDITION.', a: 'T', x: 'HUITIÈME ÉDITION !' },
+  { q: 'LE CHAPITEAU SE TROUVE À TERRITET.', a: 'T', x: 'AU PORT DE TERRITET, MONTREUX.' },
+  { q: 'LE CHAPITEAU S\'APPELLE LE MAGIC MIRROR.', a: 'T', x: 'LE MAGIC MIRROR, AU BORD DU LAC.' },
+  { q: 'LE CHAPITEAU EST AU BORD DU LAC.', a: 'T', x: 'VUE SUR LE LÉMAN.' },
+  { q: 'LA REVUE EST PRODUITE PAR LE MONTREUX COMÉDIE.', a: 'T', x: 'AVEC SON ÉQUIPE DE PRODUCTION.' },
+  { q: 'LA REVUE SE JOUE SOUS UN CHAPITEAU À GENÈVE.', a: 'F', x: 'C\'EST À MONTREUX !' },
+  { q: 'LA REVUE EST À SA 3E ÉDITION.', a: 'F', x: 'C\'EST LA 8E.' },
+  { q: 'KARIM ÉCRIT LES SKETCHS CETTE ANNÉE.', a: 'T', x: 'ET IL FAIT AUSSI DU MIME.' },
+  { q: 'VIRGINIE S\'OCCUPE DES COSTUMES.', a: 'T', x: 'LA COSTUMIÈRE DE LA REVUE.' },
+  { q: 'LÉA JOUE DE PLEIN D\'INSTRUMENTS.', a: 'T', x: 'VIOLON, GUITARE, ET LA TECH.' },
+  { q: 'KEUMART FAIT DU BEATBOX.', a: 'T', x: 'ET IL A FAIT CE JEU !' },
+  { q: 'DAVID EST SURNOMMÉ MC ROGER.', a: 'T', x: 'LE ROI DES PARODIES.' },
+  { q: 'LE CONTRETEMPS EST UN RESTAURANT JUSTE À CÔTÉ.', a: 'T', x: 'PRATIQUE POUR MANGER AVANT.' },
+  { q: 'LE SPECTACLE SE JOUE EN ALLEMAND.', a: 'F', x: 'C\'EST EN FRANÇAIS !' }
+];
+var BTN_QV = { x: 12, y: 190, w: 74, h: 26 }, BTN_QF = { x: 94, y: 190, w: 74, h: 26 };
+function quizStart() {
+  var pool = PUB_QUIZ.slice(), qs = [], i;
+  for (i = 0; i < 8; i++) qs.push(takeOne(pool));
+  mini = { id: 'quiz', qs: qs, i: 0, sc: 0, ans: null, over: false, t0: performance.now(), best: 0 };
+  try { mini.best = +localStorage.getItem('rv_quiz') || 0; } catch (e) {}
+}
+function quizTap(x, y) {
+  var m = mini;
+  if (m.over) { if (inside(BTN_MB, x, y)) { mini = null; boop(); } else if (inside(BTN_REC, x, y)) { blip(); quizStart(); } return; }
+  if (m.ans === null) {
+    var a = inside(BTN_QV, x, y) ? 'T' : inside(BTN_QF, x, y) ? 'F' : null;
+    if (!a) { if (inside(BTN_X, x, y)) { mini = null; boop(); } return; }
+    m.ans = a; m.at = performance.now();
+    if (a === m.qs[m.i].a) { m.sc++; blip(); } else boop();
+    return;
+  }
+  if (inside({ x: 0, y: 150, w: 180, h: 140 }, x, y) || performance.now() - m.at > 400) {
+    m.ans = null; m.i++;
+    if (m.i >= m.qs.length) { m.over = true; if (m.sc > m.best) { m.best = m.sc; m.rec = true; try { localStorage.setItem('rv_quiz', String(m.sc)); } catch (e) {} } }
+  }
+}
+function drawQuiz(t) {
+  var m = mini, q, ln, i, ok;
+  drawHall(t); R('rgba(10,6,16,0.7)', 0, 0, W, H);
+  T('QUIZ DE LA REVUE', 90, 8, P.gold, 8, 'center', P.velvet);
+  if (m.over) {
+    T('TERMINÉ !', 90, 50, P.cream, 8, 'center', P.ink);
+    T(m.sc + ' / ' + m.qs.length, 90, 80, P.gold, 16, 'center', P.ink);
+    T(m.sc >= 7 ? 'VRAI FAN DE LA REVUE !' : m.sc >= 4 ? 'BIEN JOUÉ !' : 'A REVOIR LA PROCHAINE !', 90, 118, P.mint, 8, 'center', P.ink);
+    T(m.rec ? 'NOUVEAU RECORD !' : 'TON RECORD ' + m.best, 90, 140, P.cream, 8, 'center', P.ink);
+    T('MERCI D\'ÊTRE VENU !', 90, 180, P.cream, 8, 'center', P.ink);
+    T('LE JEU EST GRATUIT, ON PEUT', 90, 198, '#8d84b8', 8, 'center'); T('LE SOUTENIR AVEC UN CAFÉ', 90, 210, '#8d84b8', 8, 'center');
+    btn(BTN_MB, 'RETOUR', '#3a3f55'); btn(BTN_REC, 'REJOUER', '#b3202e');
+    return;
+  }
+  q = m.qs[m.i];
+  T('QUESTION ' + (m.i + 1) + '/' + m.qs.length, 90, 24, '#8d84b8', 8, 'center');
+  ln = wrapText(q.q, 20);
+  for (i = 0; i < ln.length; i++) T(ln[i], 90, 56 + i * 14, P.cream, 8, 'center', P.ink);
+  btn(BTN_QV, 'VRAI', '#2e8b57'); btn(BTN_QF, 'FAUX', '#b3202e');
+  if (m.ans !== null) {
+    ok = m.ans === q.a;
+    T(ok ? 'BRAVO !' : 'RATÉ...', 90, 150, ok ? P.mint : '#e07b7b', 8, 'center', P.ink);
+    T('C\'ÉTAIT ' + (q.a === 'T' ? 'VRAI' : 'FAUX'), 90, 166, P.gold, 8, 'center', P.ink);
+    ln = wrapText(q.x, 20);
+    for (i = 0; i < ln.length; i++) T(ln[i], 90, 232 + i * 12, '#8d84b8', 8, 'center');
+    T('TOUCHE POUR CONTINUER', 90, 280, P.cream, 8, 'center');
+  }
+  T('SCORE ' + m.sc, 90, 300, P.gold, 8, 'center', P.ink);
+  btn(BTN_X, 'X', '#3a3f55');
+}
 var MG_LIST = {
   arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: "JEU DE L'A9" }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'LE CONCERT' }],
   versus: [{ id: 'online', name: 'DUEL EN LIGNE' }, { id: 'push2', name: 'ARGENTIN À DEUX' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }]
 };
 var BTN_X = { x: 2, y: 2, w: 16, h: 14 }, BTN_MB = { x: 6, y: 276, w: 80, h: 22 }, BTN_REC = { x: 94, y: 276, w: 80, h: 22 };
+function mgList() { var L = MG_LIST[mode] || []; return PUBLIC ? L.concat([{ id: 'quiz', name: 'QUIZ DE LA REVUE' }]) : L; }
 function mgBtn(i) { return { x: 20, y: 56 + i * 34, w: 140, h: 26 }; }
 function pickOpp() {
   var o, n = 0;
@@ -3317,6 +3396,7 @@ function pickOpp() {
 }
 function mgStart(id) {
   if (id === 'online') { mode = 'multi'; scene = 'stage'; mini = null; lobbyStart(); lbMsg('INVITE UN JOUEUR DE LA SALLE', 6000); }
+  else if (id === 'quiz') { quizStart(); }
   else { statSolo(); if (id === 'brick') brickStart(); else if (id === 'car') carStart(); else if (id === 'mole') moleStartSolo(); else if (id === 'beat') beatStart(); else pushStart(id); }
 }
 function mgLeave() { beatKill(mini); bbClose(); if (mini && mini.net && !mini.fin && net) { mini.myFin = mini.id === 'pushnet' ? -1 : -9999; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
@@ -3324,26 +3404,27 @@ function drawGameMenu(t) {
   drawHall(t); R('rgba(10,6,16,0.55)', 0, 0, W, H);
   T(mode === 'versus' ? 'VERSUS' : 'ARCADE', 90, 8, P.gold, 8, 'center', P.velvet);
   T('CHOISIS UN JEU', 90, 30, P.cream, 8, 'center', P.ink);
-  var L = MG_LIST[mode] || [], i;
+  var L = mgList(), i;
   for (i = 0; i < L.length; i++) btn(mgBtn(i), L[i].name, L[i].off ? '#3a3f55' : (i % 2 ? '#2e8b57' : '#b3202e'));
-  drawChar(ROSTER[sel], 90, 250, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
-  T(nm(ROSTER[sel]), 90, 256, P.gold, 8, 'center', P.ink);
-  btn(BTN_MB, 'RETOUR', '#3a3f55'); btn(BTN_REC, 'RECORDS', '#b0734f');
+  if (L.length < 6) { drawChar(ROSTER[sel], 90, 250, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
+  T(nm(ROSTER[sel]), 90, 256, P.gold, 8, 'center', P.ink); }
+  btn(BTN_MB, 'RETOUR', '#3a3f55'); if (PUBLIC) btn(BTN_REC, 'SOUTENIR', '#c9892f'); else btn(BTN_REC, 'RECORDS', '#b0734f');
   muteIcon();
 }
 function mgTap(x, y) {
   if (!mini) {
-    var L = MG_LIST[mode] || [], i;
+    var L = mgList(), i;
     if (inside(BTN_MB, x, y)) { scene = 'select'; fadeT = performance.now(); boop(); return; }
-    if (inside(BTN_REC, x, y)) { blip(); hsOpen(); return; }
+    if (inside(BTN_REC, x, y)) { blip(); if (PUBLIC) openSupport(); else hsOpen(); return; }
     for (i = 0; i < L.length; i++) if (inside(mgBtn(i), x, y)) { if (L[i].off) boop(); else { blip(); mgStart(L[i].id); } return; }
     return;
   }
   if (mini.id === 'hs') { hsTap(x, y); return; }
-  if (mini.id === 'beat') beatTap(x, y); else if (mini.id === 'car') carTap(x, y); else if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
+  if (mini.id === 'quiz') quizTap(x, y); else if (mini.id === 'beat') beatTap(x, y); else if (mini.id === 'car') carTap(x, y); else if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
 }
 function drawMini(t) {
   if (mini.id === 'hs') { drawHs(t); return; }
+  if (mini.id === 'quiz') { drawQuiz(t); muteIcon(); return; }
   if (mini.id === 'beat') { drawBeat(t); hsWatch(); hsDraw(); muteIcon(); return; }
   if (mini.id === 'car') { drawCar(t); if (mini.net) drawCarDuel(t); } else if (mini.id === 'brick') { drawBrick(t); if (mini.net) drawBrickDuel(t); } else if (mini.id === 'mole') drawMoleSolo(t); else if (mini.id === 'molenet') drawMoleDuel(t); else drawPush(t);
   hsWatch(); hsDraw();
@@ -4442,6 +4523,7 @@ function handle(x, y) {
       return;
     }
     for (var i = 0; i < NSEL; i++) { if (inside(slotRect(i), x, y)) { if (avail(i)) setSel(i); else { boop(); statToast = { txt: lockHint(i), t: performance.now(), dur: 2600 }; } return; } }
+    if (PUBLIC) { if (inside({ x: 6, y: 276, w: 82, h: 22 }, x, y)) startMode('arcade'); else if (inside({ x: 92, y: 276, w: 82, h: 22 }, x, y)) { blip(); openSupport(); } return; }
     if (inside(BTN_A, x, y)) startMode('arcade');
     else if (inside(BTN_B, x, y)) startMode('versus');
     else if (inside(BTN_C, x, y)) startMode('multi');
