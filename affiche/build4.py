@@ -1,0 +1,65 @@
+import json,io,base64,sys,subprocess,os
+import qrcode
+from qrcode.constants import ERROR_CORRECT_M
+COLS,ROWS=(int(sys.argv[1]),int(sys.argv[2])) if len(sys.argv)>2 else (3,2)
+GAME='https://dagreensayaman-lab.github.io/revue-vaudoise-game/#public'
+sp=json.load(open('sprites.json')); so=json.load(open('socials.json'))
+H={'jenny':'@jennylorant','keumart':'@keumartdagreensayaman','lea':'@gambalae','pierre':'@pierreaucaigne','david':'@davidcharles_mcroger','olivier':'@olivier_delaloye','karim':'@monsieurkarimslama','catherine':'@catguggi','veronique':'@larevuevaudoise'}
+F={'jenny':'jenny-lorent','keumart':'keumart','lea':'lea-gamba','pierre':'pierre-aucaigne','david':'david-charles','olivier':'olivier-delaloye','karim':'karim-slama','catherine':'catherine-guggisberg','veronique':'veronique-mattana'}
+from PIL import Image
+def qf(id):
+    im=Image.open('qr/'+F[id]+'.png').convert('RGB').resize((600,600),Image.NEAREST);b=io.BytesIO();im.save(b,'PNG');return 'data:image/png;base64,'+base64.b64encode(b.getvalue()).decode()
+ART=[('jenny','JENNY LORENT','ARTISTE'),('keumart','KEUMART','ARTISTE'),('lea','LÉA GAMBA','ARTISTE'),('pierre','PIERRE AUCAIGNE','ARTISTE'),('david','DAVID CHARLES','ARTISTE'),('olivier','OLIVIER DELALOYE','ARTISTE'),('karim','KARIM SLAMA','ARTISTE'),('catherine','CATHERINE GUGGISBERG','ARTISTE'),('veronique','VÉRONIQUE MATTANA','ARTISTE')]
+def qr(url):
+    q=qrcode.QRCode(error_correction=ERROR_CORRECT_M,border=1,box_size=10);q.add_data(url);q.make(fit=True)
+    im=q.make_image(fill_color='#140c18',back_color='white');b=io.BytesIO();im.save(b,'PNG')
+    return 'data:image/png;base64,'+base64.b64encode(b.getvalue()).decode()
+
+
+PW,PH=594,841.0
+ICON='data:image/png;base64,'+base64.b64encode(open('../icons/icon-barbezat-180.png','rb').read()).decode()
+def artist(id,n):
+    nm=n.split(' ',1); first=nm[0]; last=nm[1] if len(nm)>1 else ''
+    return f'<div class="card"><div class="stage"><img class="sp" src="{sp[id]}"></div><div class="info"><div class="fn">{first}</div><div class="ln">{last or "&nbsp;"}</div><div class="qrw"><img class="qr" src="{qf(id)}"></div><div class="hd">{H[id]}</div></div></div>'
+A={i:(i,n) for i,n,r in ART}
+order=['jenny','keumart','lea','pierre','david','olivier','karim','catherine','veronique']
+cards=''.join(artist(*A[i]) for i in order)
+cards+=f'<div class="card"><div class="stage txt"><div class="big">LA REVUE<br>VAUDOISE</div></div><div class="info"><div class="fn">INSTAGRAM</div><div class="ln">LE SPECTACLE</div><div class="qrw"><img class="qr" src="{qf("veronique")}"></div><div class="hd">@larevuevaudoise</div></div></div>'
+cards+=f'<div class="card game"><div class="stage"><img class="ic" src="{ICON}"></div><div class="info"><div class="fn">LE JEU</div><div class="ln">GRATUIT</div><div class="qrw"><img class="qr" src="{qr(GAME)}"></div><div class="hd">SCANNE ET JOUE</div></div></div>'
+cards+='<div class="card note"><div class="nt">BONNE<br>SOIREE<br>AU MAGIC<br>MIRROR !</div></div>'
+html=f"""<!doctype html><meta charset=utf8><style>
+@font-face{{font-family:'Press Start 2P';src:url('ps2p.woff2') format('woff2')}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+:root{{--gold:#f2c14e;--cream:#f6e9c8;--ink:#0e0814}}
+body{{width:594mm;height:841mm;position:relative;overflow:hidden;font-family:'Press Start 2P',monospace;color:var(--cream);background:#2a0612}}
+.bg{{position:absolute;left:0;top:-72mm;width:594mm;height:1056mm;image-rendering:pixelated}}
+.shade{{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,6,20,.5) 0,rgba(8,6,20,.1) 22%,rgba(8,6,20,0) 40%,rgba(8,6,20,.35) 62%,rgba(8,6,20,.75) 100%)}}
+.frame{{position:absolute;inset:8mm;border:1.4mm solid var(--gold);box-shadow:inset 0 0 0 1.6mm rgba(14,8,20,.8)}}
+.head{{position:absolute;top:26mm;left:0;right:0;text-align:center}}
+.eyebrow{{font-size:5.6mm;letter-spacing:1.4mm;color:var(--gold);text-shadow:0 .6mm 0 var(--ink)}}
+.t1{{font-size:30mm;line-height:1.08;color:var(--gold);text-shadow:0 2.2mm 0 #5a0c1a,0 3.6mm 0 var(--ink);margin-top:7mm}}
+.t2{{font-size:7mm;letter-spacing:.8mm;margin-top:11mm;text-shadow:0 .6mm 0 var(--ink)}}
+.msg{{position:absolute;top:340mm;left:0;right:0;text-align:center;font-size:7.4mm;line-height:1.8;color:var(--gold);letter-spacing:.5mm;text-shadow:0 .7mm 0 var(--ink),0 0 3mm var(--ink)}}
+.grid{{position:absolute;top:441mm;left:0;right:0;display:grid;grid-template-columns:repeat(4,148.5mm);grid-auto-rows:90mm;row-gap:6mm}}
+.card{{margin:0 11mm 0 11mm;display:flex;align-items:center;gap:2mm;background:rgba(14,8,20,.58);border:.5mm solid rgba(242,193,78,.4);padding:3mm 4mm 3mm 2mm;height:90mm}}
+.stage{{width:58mm;height:100%;flex:none;display:flex;align-items:flex-end;justify-content:center;background:radial-gradient(ellipse at 50% 100%,rgba(255,210,120,.4),transparent 70%);overflow:visible}}
+.sp{{width:88mm;height:88mm;max-width:none;image-rendering:pixelated;margin-bottom:-4mm}}
+.info{{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}}
+.fn{{font-size:5mm;color:var(--cream)}}
+.ln{{font-size:3.1mm;margin-top:1.4mm;color:var(--gold);min-height:4mm}}
+.qrw{{background:#fff;padding:1.4mm;margin-top:3mm}}
+.qr{{display:block;width:50mm;height:50mm;image-rendering:pixelated}}
+.hd{{font-size:2.6mm;margin-top:2.6mm;color:#c9bfe6;white-space:nowrap}}
+.txt{{align-items:center}}.big{{font-size:6.6mm;line-height:1.5;color:var(--gold);text-align:center;text-shadow:0 .5mm 0 var(--ink)}}
+.ic{{width:46mm;height:46mm;image-rendering:pixelated;align-self:center}}
+.note{{justify-content:center;border-style:dashed}}.nt{{font-size:7.4mm;line-height:1.7;color:var(--gold);text-align:center}}
+.credit{{position:absolute;top:760mm;left:0;right:0;text-align:center;font-size:4.2mm;color:#c9bfe6;letter-spacing:.8mm;line-height:2}}
+</style><body>
+<img class=bg src="fond-interieur.png"><div class=shade></div><div class=frame></div>
+<div class=head><div class=eyebrow>MAGIC MIRROR - TERRITET - MONTREUX</div><div class=t1>LA REVUE<br>VAUDOISE</div><div class=t2>8E EDITION</div></div>
+<div class=msg>SUIVEZ LES ARTISTES<br>EN SCANNANT LEUR QR CODE</div>
+<div class=grid>{cards}</div>
+<div class=credit>JEU CRÉÉ PAR KEUMART<br>MAGIC MIRROR - TERRITET - 2026</div>
+</body>"""
+open('affiche.html','w').write(html)
+open('conf.json','w').write(json.dumps({'pw':PW,'ph':PH}))
