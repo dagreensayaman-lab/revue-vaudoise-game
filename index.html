@@ -185,8 +185,8 @@ function unlockBoss() { bossUnlocked = true; try { localStorage.setItem('rv_boss
 var SKIN_LV = { keumart: [0, 1, 2, 4], olivier: [0, 4, 5], david: [0, 4], pierre: [0, 4], lea: [0, 4], karim: [0, 4], tech: [0], contre: [0], prod: [0], anc: [0] }; /* cases groupées : un niveau par skin/personne */
 function allOpen() { var k = dedicated >= 0 && ROSTER[dedicated].id === 'keumart'; try { if (k) localStorage.setItem('rv_all', '1'); else if (localStorage.getItem('rv_all') === '1') k = true; } catch (e) {} return k; } /* le lien perso de Keumart (#keumart) a tout débloqué */
 function myLevel() { if (allOpen()) return 99; return typeof STATS !== 'undefined' ? statLevel(STATS).n : 1; }
-function avail(i) { var r = ROSTER[i]; return (!r.secret || bossUnlocked || allOpen()) && (!r.lvl || myLevel() >= r.lvl); }
-function skinOk(id, k) { var a = SKIN_LV[id]; return !a || !a[k] || myLevel() >= a[k]; }
+function avail(i) { var r = ROSTER[i]; if (PUBLIC) return !r.secret; return (!r.secret || bossUnlocked || allOpen()) && (!r.lvl || myLevel() >= r.lvl); }
+function skinOk(id, k) { if (PUBLIC) return true; var a = SKIN_LV[id]; return !a || !a[k] || myLevel() >= a[k]; }
 function lockHint(i) { var r = ROSTER[i]; if (r.lvl && myLevel() < r.lvl) return 'NIVEAU ' + r.lvl + ' : ' + STAT_LV[r.lvl - 1][1]; return 'A DEBLOQUER EN JOUANT'; }
 function candList() { var o = []; for (var i = 0; i < ROSTER.length; i++) if (avail(i) && !ROSTER[i].grp) o.push(i); return o; }
 var names = {};
