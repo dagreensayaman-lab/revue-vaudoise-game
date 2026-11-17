@@ -22,15 +22,16 @@ def artist(id,n):
     nm=n.split(' ',1); first=nm[0]; last=nm[1] if len(nm)>1 else ''
     return f'<div class="card"><div class="stage"><img class="sp" src="{sp[id]}"></div><div class="info"><div class="fn">{first}</div><div class="ln">{last or "&nbsp;"}</div><div class="qrw"><img class="qr" src="{qf(id)}"></div><div class="hd">{H[id]}</div></div></div>'
 A={i:(i,n) for i,n,r in ART}
+LOGO='data:image/png;base64,'+base64.b64encode(open('logo-revue.png','rb').read()).decode()
 order=['jenny','keumart','lea','pierre','david','olivier','karim','catherine','veronique']
-cards=''.join(artist(*A[i]) for i in order)
-cards+=f'<div class="card"><div class="stage txt"><div class="big">LA REVUE<br>VAUDOISE</div></div><div class="info"><div class="fn">INSTAGRAM</div><div class="ln">LE SPECTACLE</div><div class="qrw"><img class="qr" src="{qf("veronique")}"></div><div class="hd">@larevuevaudoise</div></div></div>'
-cards+='<div class="card note"><div class="nt">BONNE<br>SOIREE<br>AU MAGIC<br>MIRROR !</div></div>'
-cards+='<div class="card note"><div class="nt">MERCI<br>D ETRE<br>VENUS !</div></div>'
-back=['jenny','lea','keumart','karim','veronique']; front=['pierre','david','olivier','catherine']
+cards=''.join(artist(*A[i]) for i in order[:8])
+cards+=artist(*A['veronique']).replace('<div class="card">','<div class="card" style="grid-column-start:2">',1)
+cards+=f'<div class="card"><div class="stage txt"><img class="logo" src="{LOGO}"></div><div class="info"><div class="fn">INSTAGRAM</div><div class="ln">LE SPECTACLE</div><div class="qrw"><img class="qr" src="{qf("veronique")}"></div><div class="hd">@larevuevaudoise</div></div></div>'
+back=['pierre','olivier','karim','catherine']; front=['jenny','lea','keumart','david','veronique']
+SZ=112
 lineup=''
-for k,i in enumerate(back): lineup+=f'<img class="ls" style="left:{127+85*k-39}mm;top:262mm" src="{sp[i]}">'
-for k,i in enumerate(front): lineup+=f'<img class="ls" style="left:{169+85*k-39}mm;top:312mm" src="{sp[i]}">'
+for k,i in enumerate(back): lineup+=f'<img class="ls" style="left:{202+63.5*k-SZ/2}mm;top:{352-0.9*SZ}mm" src="{sp[i]}">'
+for k,i in enumerate(front): lineup+=f'<img class="ls" style="left:{170+63.5*k-SZ/2}mm;top:{410-0.9*SZ}mm" src="{sp[i]}">'
 html=f"""<!doctype html><meta charset=utf8><style>
 @font-face{{font-family:'Press Start 2P';src:url('ps2p.woff2') format('woff2')}}
 *{{box-sizing:border-box;margin:0;padding:0}}
@@ -54,10 +55,11 @@ body{{width:594mm;height:841mm;position:relative;overflow:hidden;font-family:'Pr
 .qrw{{background:#fff;padding:1.4mm;margin-top:3mm}}
 .qr{{display:block;width:50mm;height:50mm;image-rendering:pixelated}}
 .hd{{font-size:2.6mm;margin-top:2.6mm;color:#c9bfe6;white-space:nowrap}}
+.logo{{width:57mm;height:auto;display:block}}
 .txt{{align-items:center}}.big{{font-size:6.6mm;line-height:1.5;color:var(--gold);text-align:center;text-shadow:0 .5mm 0 var(--ink)}}
 .ic{{width:46mm;height:46mm;image-rendering:pixelated;align-self:center}}
 .note{{justify-content:center;border-style:dashed}}.nt{{font-size:7.4mm;line-height:1.7;color:var(--gold);text-align:center}}
-.ls{{position:absolute;width:78mm;height:78mm;image-rendering:pixelated;filter:drop-shadow(0 1.5mm 1mm rgba(0,0,0,.55))}}
+.ls{{position:absolute;width:112mm;height:112mm;image-rendering:pixelated;filter:drop-shadow(0 1.5mm 1mm rgba(0,0,0,.55))}}
 .bonus{{position:absolute;left:456mm;top:24mm;width:118mm;text-align:center;background:rgba(14,8,20,.62);border:.5mm solid rgba(242,193,78,.55);padding:5mm 3mm 4mm}}
 .bonus .b1{{font-size:4.6mm;color:var(--gold);line-height:1.5}}
 .bonus .q{{display:block;width:64mm;height:64mm;background:#fff;padding:1.6mm;margin:3.5mm auto 3mm;image-rendering:pixelated}}
