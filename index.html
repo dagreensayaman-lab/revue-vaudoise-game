@@ -3334,12 +3334,28 @@ var PUB_QUIZ = [
   { q: 'KEUMART FAIT DU BEATBOX.', a: 'T', x: 'ET IL A FAIT CE JEU !' },
   { q: 'DAVID EST SURNOMMÉ MC ROGER.', a: 'T', x: 'LE ROI DES PARODIES.' },
   { q: 'LE CONTRETEMPS EST UN RESTAURANT JUSTE À CÔTÉ.', a: 'T', x: 'PRATIQUE POUR MANGER AVANT.' },
-  { q: 'LE SPECTACLE SE JOUE EN ALLEMAND.', a: 'F', x: 'C\'EST EN FRANÇAIS !' }
+  { q: 'LE SPECTACLE SE JOUE EN ALLEMAND.', a: 'F', x: 'C\'EST EN FRANÇAIS !' },
+  { q: 'CUCHE JOUE DANS LA REVUE CETTE ANNÉE.', a: 'F', x: 'IL N\'EST PAS SUR SCÈNE.' },
+  { q: 'JEAN-LUC BARBEZAT A FAIT LA MISE EN SCÈNE.', a: 'T', x: 'C\'EST LUI LE METTEUR EN SCÈNE.' },
+  { q: 'IL Y A 8 ARTISTES SUR SCÈNE.', a: 'F', x: 'ON EST 9 !', g: 'nb' },
+  { q: 'IL Y A 9 ARTISTES SUR SCÈNE.', a: 'T', x: 'ON EST 9 !', g: 'nb' },
+  { q: 'LA REVUE VAUDOISE SE JOUE À MONTREUX.', a: 'F', x: 'C\'EST À TERRITET !', g: 'lieu' },
+  { q: 'LE SPECTACLE COMMENCE PAR UN SKETCH.', a: 'F', x: 'IL COMMENCE PAR UNE INTRO MUSICALE.' },
+  { q: 'LÉA JOUE DANS UN SKETCH.', a: 'T', x: 'ELLE JOUE LA FEMME ENCEINTE.' },
+  { q: 'IL Y A DES JOUEURS DE FOOT DANS UN SKETCH.', a: 'F', x: 'CE SONT DES JOUEUSES !' },
+  { q: 'L\'ENTRAÎNEUR DE FOOT A UNE COMBI VERTE.', a: 'F', x: 'ELLE EST BLEUE.' },
+  { q: 'IL Y A DEUX FÉES DANS LE SPECTACLE.', a: 'F', x: 'IL Y EN A 3 !', g: 'fee' },
+  { q: 'IL Y A TROIS FÉES DANS LE SPECTACLE.', a: 'T', x: 'IL Y EN A BIEN 3 !', g: 'fee' },
+  { q: 'IL Y A UN SKETCH SUR LA MIGROS.', a: 'F', x: 'ÇA, C\'ÉTAIT IL Y A 2 ANS.' },
+  { q: 'TRUMP APPARAÎT DANS LE SPECTACLE.', a: 'T', x: 'ET IL FAIT DU BRUIT !', g: 'trump' },
+  { q: 'KARIM SLAMA JOUE TRUMP.', a: 'F', x: 'C\'EST PIERRE AUCAIGNE.', g: 'trump' },
+  { q: 'PIERRE AUCAIGNE JOUE TRUMP.', a: 'T', x: 'C\'EST BIEN LUI !', g: 'trump' }
 ];
 var BTN_QV = { x: 12, y: 190, w: 74, h: 26 }, BTN_QF = { x: 94, y: 190, w: 74, h: 26 };
 function quizStart() {
   var pool = PUB_QUIZ.slice(), qs = [], i;
-  for (i = 0; i < 8; i++) qs.push(takeOne(pool));
+  var used = {}, q, tries = 0;
+  while (qs.length < 8 && pool.length && tries++ < 200) { q = takeOne(pool); if (q.g && used[q.g]) continue; if (q.g) used[q.g] = 1; qs.push(q); }
   mini = { id: 'quiz', qs: qs, i: 0, sc: 0, ans: null, over: false, t0: performance.now(), best: 0 };
   try { mini.best = +localStorage.getItem('rv_quiz') || 0; } catch (e) {}
 }
