@@ -3319,7 +3319,7 @@ function drawHs(t) {
 
 var mini = null, ptrX = 90, ptrY = 0, ptrDown = false;
 
-/* --- QUIZ DE LA REVUE (public) : vrai / faux sur le spectacle --- */
+/* --- QUIZ DE LA REVUE (public + arcade) : vrai / faux sur le spectacle --- */
 var PUB_QUIZ = [
   { q: 'LA REVUE VAUDOISE EST À SA 8E ÉDITION.', a: 'T', x: 'HUITIÈME ÉDITION !' },
   { q: 'LE CHAPITEAU SE TROUVE À TERRITET.', a: 'T', x: 'AU PORT DE TERRITET, MONTREUX.' },
@@ -3443,7 +3443,7 @@ var MG_LIST = {
   versus: [{ id: 'online', name: 'DUEL EN LIGNE' }, { id: 'push2', name: 'ARGENTIN À DEUX' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }]
 };
 var BTN_X = { x: 2, y: 2, w: 16, h: 14 }, BTN_MB = { x: 6, y: 276, w: 80, h: 22 }, BTN_REC = { x: 94, y: 276, w: 80, h: 22 };
-function mgList() { var L = MG_LIST[mode] || []; return PUBLIC ? L.concat([{ id: 'quiz', name: 'QUIZ DE LA REVUE' }]) : L; }
+function mgList() { var L = MG_LIST[mode] || []; return (PUBLIC || mode === 'arcade') ? L.concat([{ id: 'quiz', name: 'QUIZ DE LA REVUE' }]) : L; }
 function mgBtn(i) { return { x: 20, y: 56 + i * 34, w: 140, h: 26 }; }
 function pickOpp() {
   var o, n = 0;
