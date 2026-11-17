@@ -970,6 +970,7 @@ function drawSelect(t) {
   if (isMine && Math.floor(t / 1200) % 2) { l2 = 'TON PERSO'; l2c = P.mint; }
   if (ch.custom && !names[ch.id] && Math.floor(t / 500) % 2 === 0) { l2 = 'ÉCRIS TON NOM'; l2c = P.gold; }
   var rl2 = REAL[ch.id], nsk = 0; if (rl2) for (var ks = 0; ks < rl2.skins.length; ks++) if (skinOk(ch.id, ks)) nsk++; if (nsk > 1 && Math.floor(t / 900) % 2 === 1) { l2 = 'TOUCHE LE PERSO'; l2c = P.gold; }
+  if (PUBLIC && Math.floor(t / 1400) % 2 === 1) { l2 = pubName ? 'PSEUDO ' + pubName : 'TOUCHE : PSEUDO'; l2c = P.mint; }
   T(l2, 90, 159, l2c, 8, 'center');
   var on = Math.floor(t / 250) % 2 === 0;
   for (var i = 0; i < NSEL; i++) {
@@ -1905,8 +1906,9 @@ function myPid() {
 }
 function rosterIdx(id) { for (var i = 0; i < ROSTER.length; i++) if (ROSTER[i].id === id) return i; return -1; }
 function arr(x) { if (!x) return []; if (Array.isArray(x)) return x; return Object.keys(x).sort(function (a, b) { return a - b; }).map(function (k) { return x[k]; }); }
+var pubName = ''; try { pubName = (localStorage.getItem('rv_pub') || '').slice(0, 10); } catch (e) {}
 function fbReq(method, path, body) {
-  if (PUBLIC) return Promise.reject(new Error('public'));
+  if (PUBLIC && path.indexOf('/hs') !== 0) return Promise.reject(new Error('public'));
   var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 7000);
   return fetch(FB_URL + path + '.json', { method: method, body: body === undefined ? undefined : JSON.stringify(body), signal: ctl ? ctl.signal : undefined, cache: 'no-store' })
     .then(function (r) { clearTimeout(to); if (!r.ok) throw new Error('http ' + r.status); return r.json(); }, function (e) { clearTimeout(to); throw e; });
@@ -3244,7 +3246,7 @@ function hsSubmit(g, s) {
   var prev = hsBest[g] || 0, rec = s > prev, line, p;
   if (rec) { hsBest[g] = s; hsSave(); }
   line = hsLine = { g: g, s: s, best: Math.max(prev, s), rec: rec, rank: 0, n: 0 };
-  p = rec ? fbReq('PUT', '/hs/' + g + '/' + myUid(), { c: ROSTER[sel].id, n: nm(ROSTER[sel]), s: s, ts: Date.now() }).catch(function () {}) : Promise.resolve();
+  p = rec ? fbReq('PUT', '/hs/' + g + '/' + myUid(), { c: ROSTER[sel].id, n: PUBLIC ? (pubName || 'PUBLIC') : nm(ROSTER[sel]), s: s, ts: Date.now() }).catch(function () {}) : Promise.resolve();
   p.then(function () { return fbReq('GET', '/hs/' + g); }).then(function (o) {
     var a = hsRows(o), me = myUid(), i; line.n = a.length;
     for (i = 0; i < a.length; i++) if (a[i].uid === me) line.rank = i + 1;
@@ -3272,7 +3274,7 @@ function hsDraw() {
   if (!m || !m.hsOn || !hsLine || hsLine.g !== m.hsOn) return;
   R('rgba(10,6,16,0.9)', 0, 242, W, 30);
   T(hsLine.rec ? 'NOUVEAU RECORD !' : 'TON RECORD ' + hsLine.best, 90, 245, hsLine.rec && Math.floor(performance.now() / 300) % 2 ? P.cream : P.gold, 8, 'center', P.ink);
-  if (!PUBLIC) T(hsLine.rank ? 'RANG ' + hsLine.rank + ' SUR ' + hsLine.n : 'RANG...', 90, 258, '#8d84b8', 8, 'center');
+  T(hsLine.rank ? 'RANG ' + hsLine.rank + ' SUR ' + hsLine.n : 'RANG...', 90, 258, '#8d84b8', 8, 'center');
 }
 function hsKey(m) { if (m.tab === 4) return (m.lv < 3 ? 'beat' : 'bbox') + (m.lv % 3); return HS_G[m.tab][0] + (m.tab === 3 ? m.lv : ''); }
 function hsLoad(m) {
@@ -3408,14 +3410,16 @@ function drawGameMenu(t) {
   for (i = 0; i < L.length; i++) btn(mgBtn(i), L[i].name, L[i].off ? '#3a3f55' : (i % 2 ? '#2e8b57' : '#b3202e'));
   if (L.length < 6) { drawChar(ROSTER[sel], 90, 250, 1, false, (Math.floor(t / 380) % 2) ? -1 : 0);
   T(nm(ROSTER[sel]), 90, 256, P.gold, 8, 'center', P.ink); }
-  btn(BTN_MB, 'RETOUR', '#3a3f55'); if (PUBLIC) btn(BTN_REC, 'SOUTENIR', '#c9892f'); else btn(BTN_REC, 'RECORDS', '#b0734f');
+  if (PUBLIC) { btn(BTN_A, 'RETOUR', '#3a3f55'); btn(BTN_B, 'RECORDS', '#b0734f'); btn(BTN_C, 'CAFE', '#c9892f'); }
+  else { btn(BTN_MB, 'RETOUR', '#3a3f55'); btn(BTN_REC, 'RECORDS', '#b0734f'); }
   muteIcon();
 }
 function mgTap(x, y) {
   if (!mini) {
     var L = mgList(), i;
-    if (inside(BTN_MB, x, y)) { scene = 'select'; fadeT = performance.now(); boop(); return; }
-    if (inside(BTN_REC, x, y)) { blip(); if (PUBLIC) openSupport(); else hsOpen(); return; }
+    if (PUBLIC) { if (inside(BTN_A, x, y)) { scene = 'select'; fadeT = performance.now(); boop(); return; } if (inside(BTN_B, x, y)) { blip(); hsOpen(); return; } if (inside(BTN_C, x, y)) { blip(); openSupport(); return; } }
+    else { if (inside(BTN_MB, x, y)) { scene = 'select'; fadeT = performance.now(); boop(); return; }
+    if (inside(BTN_REC, x, y)) { blip(); hsOpen(); return; } }
     for (i = 0; i < L.length; i++) if (inside(mgBtn(i), x, y)) { if (L[i].off) boop(); else { blip(); mgStart(L[i].id); } return; }
     return;
   }
@@ -4440,9 +4444,9 @@ function placeInput() {
 }
 function openNameInput() {
   var ch = ROSTER[sel];
-  if (!ch.custom) return;
+  if (!ch.custom && !PUBLIC) return;
   inMode = 'name'; nameIn.maxLength = 10;
-  placeInput(); nameIn.value = names[ch.id] || ''; nameIn.style.display = 'block'; nameIn.focus();
+  placeInput(); nameIn.value = PUBLIC ? pubName : (names[ch.id] || ''); nameIn.style.display = 'block'; nameIn.focus();
 }
 function openCodeInput() {
   inMode = 'code'; nameIn.maxLength = 4;
@@ -4483,7 +4487,11 @@ function closeNameInput(commit) {
     nameIn.style.display = 'none'; nameIn.blur(); return;
   }
   var ch = ROSTER[sel];
-  if (commit && ch.custom) {
+  if (commit && PUBLIC) {
+    pubName = nameIn.value.trim().toUpperCase().slice(0, 10);
+    try { localStorage.setItem('rv_pub', pubName); } catch (e) {}
+    selT = performance.now(); blip();
+  } else if (commit && ch.custom) {
     var v = nameIn.value.trim().toUpperCase().slice(0, 10);
     if (v) names[ch.id] = v; else delete names[ch.id];
     saveNames(); selT = performance.now(); blip();
@@ -4511,7 +4519,7 @@ function handle(x, y) {
   if (x >= 158 && y >= 300) { muted = !muted; if (!muted) boop(); return; }
   if (scene === 'title') { if (!titleArmed) { titleArmed = true; blip(); return; } startEnter(); return; }
   if (scene === 'select') {
-    if (inside(PLAQUE, x, y) && ROSTER[sel].custom) { openNameInput(); return; }
+    if (inside(PLAQUE, x, y) && (ROSTER[sel].custom || PUBLIC)) { openNameInput(); return; }
     if (x > 58 && x < 122 && y > 40 && y < 136) {
       var rl = REAL[ROSTER[sel].id];
       if (rl && rl.skins.length > 1) {
