@@ -4,6 +4,11 @@ from qrcode.constants import ERROR_CORRECT_M
 COLS,ROWS=(int(sys.argv[1]),int(sys.argv[2])) if len(sys.argv)>2 else (3,2)
 GAME='https://dagreensayaman-lab.github.io/revue-vaudoise-game/#public'
 sp=json.load(open('sprites.json')); so=json.load(open('socials.json'))
+H={'jenny':'@jennylorant','keumart':'@keumartdagreensayaman','lea':'@gambalae','pierre':'@pierreaucaigne','david':'@davidcharles_mcroger','olivier':'@olivier_delaloye','karim':'@monsieurkarimslama','catherine':'@catguggi','veronique':'@larevuevaudoise'}
+F={'jenny':'jenny-lorent','keumart':'keumart','lea':'lea-gamba','pierre':'pierre-aucaigne','david':'david-charles','olivier':'olivier-delaloye','karim':'karim-slama','catherine':'catherine-guggisberg','veronique':'veronique-mattana'}
+from PIL import Image
+def qf(id):
+    im=Image.open('qr/'+F[id]+'.png').convert('RGB').resize((600,600),Image.NEAREST);b=io.BytesIO();im.save(b,'PNG');return 'data:image/png;base64,'+base64.b64encode(b.getvalue()).decode()
 ART=[('jenny','JENNY LORENT','ARTISTE'),('keumart','KEUMART','ARTISTE'),('lea','LÉA GAMBA','ARTISTE'),('pierre','PIERRE AUCAIGNE','ARTISTE'),('david','DAVID CHARLES','ARTISTE'),('olivier','OLIVIER DELALOYE','ARTISTE'),('karim','KARIM SLAMA','ARTISTE'),('catherine','CATHERINE GUGGISBERG','ARTISTE'),('veronique','VÉRONIQUE MATTANA','ARTISTE')]
 def qr(url):
     q=qrcode.QRCode(error_correction=ERROR_CORRECT_M,border=1,box_size=10);q.add_data(url);q.make(fit=True)
@@ -12,10 +17,9 @@ def qr(url):
 PW,PH=210*COLS,297*ROWS  # mm
 cards=''
 for id,n,r in ART:
-    u=(so.get(id) or '').strip()
-    q=f'<img class="qr" src="{qr(u)}">' if u else '<div class="qr empty">LIEN<br>À AJOUTER</div>'
+    q=f'<img class="qr" src="{qf(id)}">'
     img=f'<img class="sp" src="{sp[id]}">' if id in sp else '<div class="sp"></div>'
-    cards+=f'<div class="card">{img}<div class="nm">{n}</div><div class="ro">{r}</div>{q}<div class="sc">SCANNE ET SUIS-MOI</div></div>'
+    cards+=f'<div class="card">{img}<div class="nm">{n}</div><div class="ro">{r}</div>{q}<div class="sc">{H[id]}</div></div>'
 html=f'''<!doctype html><meta charset=utf8><style>
 @font-face{{font-family:'Press Start 2P';src:url('ps2p.woff2') format('woff2')}}
 *{{box-sizing:border-box;margin:0}}
@@ -36,7 +40,7 @@ body{{width:{PW}mm;height:{PH}mm;background:radial-gradient(circle at 50% 0%,#7a
 .ro{{font-size:{PW*0.0085}mm;color:#f2c14e;margin:{PW*0.003}mm 0 {PW*0.006}mm}}
 .qr{{width:{PW*0.07}mm;height:{PW*0.07}mm;background:#fff;image-rendering:pixelated}}
 .qr.empty{{display:flex;align-items:center;justify-content:center;font-size:{PW*0.01}mm;color:#9a8fb8;border:{PW*0.002}mm dashed #9a8fb8;background:transparent}}
-.sc{{font-size:{PW*0.0075}mm;color:#9a8fb8;margin-top:{PW*0.004}mm}}
+.sc{{font-size:{PW*0.0068}mm;max-width:100%;overflow:hidden;color:#9a8fb8;margin-top:{PW*0.004}mm}}
 .foot{{position:absolute;bottom:{PH*0.015}mm;left:0;right:0;text-align:center;font-size:{PW*0.011}mm;color:#9a8fb8;line-height:1.8}}
 </style><body>
 <div class=head><div class=top><div class=t1>LA REVUE<br>VAUDOISE</div><div class=t2>8E EDITION<br>MAGIC MIRROR<br>TERRITET-MONTREUX</div></div>
