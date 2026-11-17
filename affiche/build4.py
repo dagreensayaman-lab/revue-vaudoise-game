@@ -30,8 +30,8 @@ cards+=f'<div class="card"><div class="stage txt"><img class="logo" src="{LOGO}"
 back=['pierre','olivier','karim','catherine']; front=['jenny','lea','keumart','david','veronique']
 SZ=112
 lineup=''
-for k,i in enumerate(back): lineup+=f'<img class="ls" style="left:{202+63.5*k-SZ/2}mm;top:{352-0.9*SZ}mm" src="{sp[i]}">'
-for k,i in enumerate(front): lineup+=f'<img class="ls" style="left:{170+63.5*k-SZ/2}mm;top:{410-0.9*SZ}mm" src="{sp[i]}">'
+for k,i in enumerate(back): lineup+=f'<img class="ls" style="left:{202+63.5*k-SZ/2}mm;top:{328-0.9*SZ}mm" src="{sp[i]}">'
+for k,i in enumerate(front): lineup+=f'<img class="ls" style="left:{170+63.5*k-SZ/2}mm;top:{384-0.9*SZ}mm" src="{sp[i]}">'
 html=f"""<!doctype html><meta charset=utf8><style>
 @font-face{{font-family:'Press Start 2P';src:url('ps2p.woff2') format('woff2')}}
 *{{box-sizing:border-box;margin:0;padding:0}}
