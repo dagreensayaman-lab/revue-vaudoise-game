@@ -771,7 +771,8 @@ function drawTitle(t, hideUi) {
   }
   if (LOGO.complete && LOGO.naturalWidth) { c.imageSmoothingEnabled = true; c.drawImage(LOGO, 33, 19 + ((Math.floor(t / 600) % 2) ? 1 : 0), 114, 51); c.imageSmoothingEnabled = false; }
   (function () {
-    var msg = 'MERDE ET BELLE PREMIÈRE À VOUS TOUS !  -  8E ÉDITION  -  ', L = msg.length * 8, off = Math.floor(t / 35) % L;
+    var msg = PUBLIC ? '8E ÉDITION  -  MAGIC MIRROR  -  TERRITET  -  ' : 'MERDE ET BELLE PREMIÈRE À VOUS TOUS !  -  8E ÉDITION  -  ', L = msg.length * 8, off = Math.floor(t / 35) % L;
+    if (PUBLIC) { T(['8E ÉDITION', 'MAGIC MIRROR', 'TERRITET'][Math.floor(t / 1800) % 3], 90, 83, (Math.floor(t / 400) % 2) ? P.gold : P.cream, 8, 'center', '#2a0712'); return; }
     c.save(); c.beginPath(); c.rect(20, 79, 140, 14); c.clip();
     var col = (Math.floor(t / 400) % 2) ? P.gold : P.cream;
     T(msg, 22 - off, 83, col, 8, 'left', '#2a0712');
@@ -971,7 +972,7 @@ function drawSelect(t) {
   if (isMine && Math.floor(t / 1200) % 2) { l2 = 'TON PERSO'; l2c = P.mint; }
   if (ch.custom && !names[ch.id] && Math.floor(t / 500) % 2 === 0) { l2 = 'ÉCRIS TON NOM'; l2c = P.gold; }
   var rl2 = REAL[ch.id], nsk = 0; if (rl2) for (var ks = 0; ks < rl2.skins.length; ks++) if (skinOk(ch.id, ks)) nsk++; if (nsk > 1 && Math.floor(t / 900) % 2 === 1) { l2 = 'TOUCHE LE PERSO'; l2c = P.gold; }
-  if (PUBLIC && Math.floor(t / 1400) % 2 === 1) { l2 = pubName ? 'PSEUDO ' + pubName : 'TOUCHE : PSEUDO'; l2c = P.mint; }
+  if (PUBLIC && Math.floor(t / 1400) % 2 === 1) { l2 = pubName ? 'PSEUDO ' + pubName : 'TON PSEUDO ?'; l2c = P.mint; }
   T(l2, 90, 159, l2c, 8, 'center');
   var on = Math.floor(t / 250) % 2 === 0;
   var NS = PUBLIC ? PUBL.length : NSEL;
@@ -2118,6 +2119,7 @@ function statPush() {
   if (net && net.rm) fbReq('PATCH', '/rooms/' + net.code + '/p/' + net.pid, { st: statCompact() }).catch(function () {});
 }
 function statAdd(k, pts, msg) {
+  if (PUBLIC) return;
   var before = statLevel(STATS).n;
   if (k) STATS[k] += 1;
   STATS.pt += pts;
@@ -3358,7 +3360,7 @@ function quizTap(x, y) {
 }
 function drawQuiz(t) {
   var m = mini, q, ln, i, ok;
-  drawHall(t); R('rgba(10,6,16,0.7)', 0, 0, W, H);
+  drawHall(t); R('rgba(10,6,16,0.86)', 0, 0, W, H);
   T('QUIZ DE LA REVUE', 90, 8, P.gold, 8, 'center', P.velvet);
   if (m.over) {
     T('TERMINÉ !', 90, 50, P.cream, 8, 'center', P.ink);
