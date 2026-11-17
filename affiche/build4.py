@@ -44,7 +44,7 @@ body{{width:594mm;height:841mm;position:relative;overflow:hidden;font-family:'Pr
 .bg{{position:absolute;left:0;top:-72mm;width:594mm;height:1056mm;image-rendering:pixelated}}
 .shade{{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,6,20,.5) 0,rgba(8,6,20,.1) 22%,rgba(8,6,20,0) 40%,rgba(8,6,20,.35) 62%,rgba(8,6,20,.75) 100%)}}
 .frame{{position:absolute;inset:8mm;border:1.4mm solid var(--gold);box-shadow:inset 0 0 0 1.6mm rgba(14,8,20,.8)}}
-.head{{position:absolute;top:26mm;left:0;right:0;text-align:center}}
+.head{{position:absolute;top:44mm;left:0;right:0;text-align:center}}
 .eyebrow{{font-size:5.6mm;letter-spacing:1.4mm;color:var(--gold);text-shadow:0 .6mm 0 var(--ink)}}
 .t1{{font-size:30mm;line-height:1.08;color:var(--gold);text-shadow:0 2.2mm 0 #5a0c1a,0 3.6mm 0 var(--ink);margin-top:7mm}}
 .t2{{font-size:7mm;letter-spacing:.8mm;margin-top:11mm;text-shadow:0 .6mm 0 var(--ink)}}
@@ -72,7 +72,7 @@ body{{width:594mm;height:841mm;position:relative;overflow:hidden;font-family:'Pr
 .credit{{position:absolute;top:782mm;left:0;right:0;text-align:center;font-size:4.2mm;color:#c9bfe6;letter-spacing:.8mm;line-height:2}}
 </style><body>
 <img class=bg src="fond-interieur.png"><div class=shade></div><div class=frame></div>
-<div class=head><div class=eyebrow>MAGIC MIRROR - TERRITET - MONTREUX</div><div class=t1>LA REVUE<br>VAUDOISE</div><div class=t2>8E EDITION</div></div>
+<div class=head><div class=eyebrow>MAGIC MIRROR - TERRITET</div><div class=t1>LA REVUE<br>VAUDOISE</div><div class=t2>8E EDITION</div></div>
 <div class=msg>SUIVEZ LES ARTISTES EN SCANNANT LEUR QR CODE</div>
 {lineup}
 <div class=bonus><div class=b1>BONUS<br>A SCANNER</div><img class=q src="{qr(GAME)}"><div class=b2>LE JEU DE LA REVUE</div><div class=b3>JEU CRÉÉ PAR KEUMART</div></div>
