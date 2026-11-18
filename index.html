@@ -3385,11 +3385,35 @@ var PUB_QUIZ = [
   { q: 'ILS SONT 6 CONSEILLERS D\'ÉTAT DANS LE PREMIER SKETCH.', a: 'T', x: 'IL EN MANQUE UN SUR 7 !', g: 'cons' },
   { q: 'GUY PARMELIN ET SA FEMME ORGANISENT UNE SOIRÉE FONDUE.', a: 'F', x: 'C\'EST UNE SOIRÉE TRÈS SPÉCIALE.' }
 ];
+/* anecdotes de la troupe : mode artistes seulement */
+var PRIV_QUIZ = [
+  { q: 'C\'EST JOSÉ QUI APPORTE LES REPAS TOUS LES SOIRS.', a: 'T', x: 'SI TU NE CONNAIS PAS SON PRÉNOM, T\'AS PAS DE RESPECT.', g: 'repas' },
+  { q: 'C\'EST ALAIN BOONE QUI APPORTE LES REPAS TOUS LES SOIRS.', a: 'F', x: 'C\'EST JOSÉ !', g: 'repas' },
+  { q: 'GILLES EST FRANÇAIS.', a: 'F', x: 'NON, IL N\'EST PAS FRANÇAIS !', g: 'gilles' },
+  { q: 'ALAIN BOONE N\'AIME PAS FAIRE LE BOULOT DES AUTRES.', a: 'T', x: 'BOONE, ÇA S\'ÉCRIT AVEC 2 O.', g: 'boone' },
+  { q: 'IL MANQUE 150 000 FRANCS AU BUDGET.', a: 'T', x: 'OH, C\'EST HYPER COOL.', g: 'budget' },
+  { q: 'IL MANQUE 15 000 FRANCS AU BUDGET.', a: 'F', x: 'IL EN MANQUE 150 000.', g: 'budget' },
+  { q: 'LE MERCREDI SOIR, LA BILLETTERIE, C\'EST PATRICIA.', a: 'T', x: 'C\'EST BIEN ELLE.', g: 'mer' },
+  { q: 'LE MERCREDI SOIR, LA BILLETTERIE, C\'EST CORENTINE.', a: 'F', x: 'LE MERCREDI, C\'EST PATRICIA.', g: 'mer' },
+  { q: 'LE SAMEDI SOIR, LA BILLETTERIE, C\'EST CORENTINE.', a: 'T', x: 'C\'EST BIEN ELLE.', g: 'sam' },
+  { q: 'LE SAMEDI SOIR, LA BILLETTERIE, C\'EST PATRICIA.', a: 'F', x: 'LE SAMEDI, C\'EST CORENTINE.', g: 'sam' },
+  { q: 'KEUMART PRÉFÈRE BUZZER AVEC KYOKO.', a: 'T', x: 'PLUTÔT QU\'UNE AFTER À LA REVUE.', g: 'kyoko' },
+  { q: 'KEUMART PRÉFÈRE UNE AFTER À LA REVUE QUE BUZZER AVEC KYOKO.', a: 'F', x: 'IL PRÉFÈRE BUZZER AVEC KYOKO.', g: 'kyoko' },
+  { q: 'LA PERSONNE LA PLUS SUSCEPTIBLE DE L\'ÉQUIPE, C\'EST KEUMART.', a: 'T', x: 'C\'EST OFFICIEL.', g: 'susc' },
+  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST CATHERINE.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
+  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST JENNY.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
+  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST LÉA.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
+  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST VÉRONIQUE.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
+  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST CÉLIA.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
+  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST VIRGINIE.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' }
+];
 var BTN_QV = { x: 12, y: 190, w: 74, h: 26 }, BTN_QF = { x: 94, y: 190, w: 74, h: 26 };
 function quizStart() {
   var pool = PUB_QUIZ.slice(), qs = [], i;
-  var used = {}, q, tries = 0;
-  while (qs.length < 8 && pool.length && tries++ < 200) { q = takeOne(pool); if (q.g && used[q.g]) continue; if (q.g) used[q.g] = 1; qs.push(q); }
+  var used = {}, q, tries = 0, pv = PUBLIC ? [] : PRIV_QUIZ.slice();
+  while (qs.length < 4 && pv.length && tries++ < 200) { q = takeOne(pv); if (used[q.g]) continue; used[q.g] = 1; qs.push(q); }
+  while (qs.length < 8 && pool.length && tries++ < 400) { q = takeOne(pool); if (q.g && used[q.g]) continue; if (q.g) used[q.g] = 1; qs.push(q); }
+  for (i = qs.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = qs[i]; qs[i] = qs[j]; qs[j] = t; }
   mini = { id: 'quiz', qs: qs, i: 0, sc: 0, ans: null, over: false, t0: performance.now(), best: 0 };
   try { mini.best = +localStorage.getItem('rv_quiz') || 0; } catch (e) {}
 }
@@ -3417,8 +3441,10 @@ function drawQuiz(t) {
     T(m.sc + ' / ' + m.qs.length, 90, 80, P.gold, 16, 'center', P.ink);
     T(m.sc >= 7 ? 'VRAI FAN DE LA REVUE !' : m.sc >= 4 ? 'BIEN JOUÉ !' : 'A REVOIR LA PROCHAINE !', 90, 118, P.mint, 8, 'center', P.ink);
     T(m.rec ? 'NOUVEAU RECORD !' : 'TON RECORD ' + m.best, 90, 140, P.cream, 8, 'center', P.ink);
+    if (PUBLIC) {
     T('MERCI D\'ÊTRE VENU !', 90, 180, P.cream, 8, 'center', P.ink);
     T('LE JEU EST GRATUIT, ON PEUT', 90, 198, '#8d84b8', 8, 'center'); T('LE SOUTENIR AVEC UN CAFÉ', 90, 210, '#8d84b8', 8, 'center');
+    }
     btn(BTN_MB, 'RETOUR', '#3a3f55'); btn(BTN_REC, 'REJOUER', '#b3202e');
     return;
   }
