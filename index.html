@@ -1296,9 +1296,9 @@ function drawLiarTell(t, tt, r) {
   Tout('MENTEUR ' + (vg.idx + 1) + '/' + vg.qs.length, 90, 8, P.gold, 8, P.velvet, P.red);
   if (liar) {
     Tout('TU ES', 90, 26, P.cream, 8, '#2a0712', P.ink); Tout('LE MENTEUR', 90, 38, '#ff6b6b', 16, '#2a0712', P.ink);
-    T('INVENTE UNE FAUSSE', 90, 62, P.cream, 8, 'center', P.ink); T('ANECDOTE SUR :', 90, 73, P.cream, 8, 'center', P.ink);
+    T('RACONTE UNE ANECDOTE', 90, 62, P.cream, 8, 'center', P.ink); T('MAIS MENS ! SUR :', 90, 73, P.cream, 8, 'center', P.ink);
   } else {
-    T('RACONTE UNE VRAIE', 90, 30, P.cream, 8, 'center', P.ink); T('ANECDOTE SUR :', 90, 41, P.cream, 8, 'center', P.ink);
+    T('RACONTE UNE ANECDOTE', 90, 30, P.cream, 8, 'center', P.ink); T('SANS MENTIR ! SUR :', 90, 41, P.cream, 8, 'center', P.ink);
     T('UN SEUL JOUEUR MENT', 90, 60, P.gold, 8, 'center', P.ink); T('TROUVE-LE !', 90, 71, P.gold, 8, 'center', P.ink);
   }
   R(P.gold, 8, 88, 164, 18); R(P.ink, 9, 89, 162, 16); T(r.q, 90, 94, P.gold, 8, 'center');
@@ -3402,7 +3402,11 @@ var PRIV_QUIZ = [
   { q: 'VIRGINIE A BEAUCOUP DE BRACELETS.', a: 'T', x: 'C\'EST ELLE QUI EN A LE PLUS.', g: 'brac' },
   { q: 'FRANÇOIS A LES PLUS BEAUX CHAPEAUX.', a: 'T', x: 'BRAVO FRANÇOIS !', g: 'fchap' },
   { q: 'APRÈS LE SPECTACLE, OLIVIER RENTRE DIRECTEMENT CHEZ LUI.', a: 'T', x: 'ET IL RESTE CHEZ LUI.', g: 'rent' },
-  { q: 'APRÈS LE SPECTACLE, CÉLIA EST LA DERNIÈRE À RENTRER.', a: 'T', x: 'C\'EST ELLE QUI FERME.', g: 'rent2' },
+  { q: 'APRÈS LE SPECTACLE, SÉHALIA EST LA DERNIÈRE À RENTRER.', a: 'T', x: 'C\'EST ELLE QUI FERME.', g: 'rent2' },
+  { q: 'APRÈS LE SPECTACLE, CÉLIA EST LA DERNIÈRE À RENTRER.', a: 'F', x: 'C\'EST SÉHALIA QUI FERME.', g: 'rent2' },
+  { q: 'LE BIG CHEF DE LA REVUE, C\'EST JEAN-LUC.', a: 'T', x: 'ET LA BIG CHEF, C\'EST SÉHALIA.', g: 'chef' },
+  { q: 'LA BIG CHEF DE LA REVUE, C\'EST CÉLIA.', a: 'F', x: 'C\'EST SÉHALIA !', g: 'chef' },
+  { q: 'UN SOIR, PIERRE EST RENTRÉ AVEC SON SLIP DU SPECTACLE.', a: 'T', x: 'IL AVAIT OUBLIÉ DE L\'ENLEVER.', g: 'slip' },
   { q: 'L\'ANNÉE PASSÉE, LE TRAVAIL DE THOMAS ÉTAIT D\'AMENER À MANGER.', a: 'F', x: 'C\'ÉTAIT SURTOUT DE COLLER LES CRUSHS SUR LES MURS.', g: 'thom' },
   { q: 'L\'AFFICHE DE LA REVUE A ÉTÉ FAITE À L\'IA.', a: 'T', x: 'À 100 % CETTE ANNÉE.', g: 'ia' },
   { q: 'OLIVIER PÈTE DANS LES LOGES.', a: 'T', x: 'ET ÇA SENT FORT.', g: 'pet1' },
@@ -3425,7 +3429,7 @@ var PRIV_QUIZ = [
   { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST JENNY.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
   { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST LÉA.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
   { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST VÉRONIQUE.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
-  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST CÉLIA.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
+  { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST SÉHALIA.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' },
   { q: 'LA PERSONNE LA PLUS BELLE DE LA REVUE, C\'EST VIRGINIE.', a: 'T', x: 'ET TOUTES LES AUTRES AUSSI, SINON T\'AS PERDU.', g: 'belle' }
 ];
 var BTN_QV = { x: 12, y: 190, w: 74, h: 26 }, BTN_QF = { x: 94, y: 190, w: 74, h: 26 };
