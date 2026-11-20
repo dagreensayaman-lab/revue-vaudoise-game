@@ -334,7 +334,7 @@ var MUSIC_PLAN = { title: 'title', enter: 'title', select: 'tribu', stage: 'sard
 function trackWatch() {
   var want = MUSIC_PLAN[(vg && vg.phase === 'end') ? 'end' : scene] || 'sardines';
   if (net && net.rm && net.rm.w && net.rm.w.ph && net.rm.w.ph !== 'end') want = 'wolf';
-  if (mini) want = mini.id === 'beat' ? (mini.over ? 'champ' : mini.sel ? want : 'silent') : mini.id === 'car' ? 'car' : mini.id === 'brick' ? 'brick' : mini.id === 'cock' ? 'mole' : mini.id === 'mole' || mini.id === 'molenet' ? 'mole' : /^push/.test(mini.id) ? 'fight' : want;
+  if (mini) want = mini.id === 'beat' ? (mini.over ? 'champ' : mini.sel ? want : 'silent') : mini.id === 'car' ? 'car' : mini.id === 'brick' ? 'brick' : (mini.id === 'cock' || mini.id === 'cook') ? 'mole' : mini.id === 'mole' || mini.id === 'molenet' ? 'mole' : /^push/.test(mini.id) ? 'fight' : want;
   if (want === 'sardines') want = null;
   if (want === trackCur) return;
   if (trackCur === null) songSaved = SONG;
@@ -3241,7 +3241,7 @@ function drawBrickRound(t, tt, r) {
 /* ---------- mini-games (each one playable on its own): ARKANOID and POUSSE (tap battle) ---------- */
 
 /* ---------- records par jeu (classement mondial par joueur : /hs/<jeu>/<appareil>) ---------- */
-var HS_G = [['brick', 'ARK'], ['mole', 'TAU'], ['push', 'ARG'], ['neuf', 'A9'], ['beat', 'CON'], ['cock', 'BAR']];
+var HS_G = [['brick', 'AR'], ['mole', 'TA'], ['push', 'AG'], ['neuf', 'A9'], ['beat', 'CO'], ['cock', 'BA'], ['cook', 'GL']];
 var hsBest = {}, hsLine = null;
 try { hsBest = JSON.parse(localStorage.getItem('rv_hs') || '{}') || {}; } catch (e) { hsBest = {}; }
 function hsSave() { try { localStorage.setItem('rv_hs', JSON.stringify(hsBest)); } catch (e) {} }
@@ -3262,6 +3262,7 @@ function hsGid(m) {
   if (m.id === 'brick') return m.online ? null : 'brick';
   if (m.id === 'mole') return 'mole';
   if (m.id === 'cock') return 'cock';
+  if (m.id === 'cook') return 'cook';
   if (m.id === 'beat') return (m.sel || m.wait) ? null : (m.mic ? 'bbox' : 'beat') + m.lv;
   if (m.id === 'pushbot') return m.win === 1 ? 'push' : null;
   return null;
@@ -3290,7 +3291,7 @@ function hsOpen() { mini = { id: 'hs', tab: 0, lv: 0, rows: {} }; hsLoad(mini); 
 function hsTap(x, y) {
   var m = mini, i;
   if (inside(BTN_BACK2, x, y)) { mini = null; boop(); return; }
-  for (i = 0; i < HS_G.length; i++) if (x >= 3 + i * 29 && x <= 31 + i * 29 && y >= 22 && y <= 36) { if (m.tab === i && (i === 3 || i === 4)) m.lv = (m.lv + 1) % (i === 4 ? 6 : 3); else m.lv = 0; m.tab = i; blip(); hsLoad(m); return; }
+  for (i = 0; i < HS_G.length; i++) if (x >= 3 + i * 25 && x <= 27 + i * 25 && y >= 22 && y <= 36) { if (m.tab === i && (i === 3 || i === 4)) m.lv = (m.lv + 1) % (i === 4 ? 6 : 3); else m.lv = 0; m.tab = i; blip(); hsLoad(m); return; }
 }
 function drawHs(t) {
   var m = mini, g = hsKey(m), rows = m.rows[g], me = myUid();
@@ -3298,10 +3299,10 @@ function drawHs(t) {
   T('RECORDS', 90, 8, P.gold, 8, 'center', P.velvet);
   HS_G.forEach(function (tb, i2) {
     var on = m.tab === i2;
-    R(on ? P.gold : '#4a3f6a', 3 + i2 * 29, 22, 28, 14); R(on ? '#6a4a1a' : '#1d1530', 4 + i2 * 29, 23, 26, 12);
-    T(tb[1], 17 + i2 * 29, 26, on ? P.gold : P.cream, 8, 'center');
+    R(on ? P.gold : '#4a3f6a', 3 + i2 * 25, 22, 24, 14); R(on ? '#6a4a1a' : '#1d1530', 4 + i2 * 25, 23, 22, 12);
+    T(tb[1], 15 + i2 * 25, 26, on ? P.gold : P.cream, 8, 'center');
   });
-  T(m.tab === 3 ? CAR_LV[m.lv].n + ' (TOUCHE A9)' : m.tab === 4 ? BEAT_LV[m.lv % 3].s + (m.lv < 3 ? ' PAD' : ' MICRO') : ['POINTS ARKANOID', 'POINTS TAUPES', 'VICTOIRES VS BOT', '', '', 'POINTS DU BAR'][m.tab], 90, 41, '#8d84b8', 8, 'center');
+  T(m.tab === 3 ? CAR_LV[m.lv].n + ' (TOUCHE A9)' : m.tab === 4 ? BEAT_LV[m.lv % 3].s + (m.lv < 3 ? ' PAD' : ' MICRO') : ['POINTS ARKANOID', 'POINTS TAUPES', 'VICTOIRES VS BOT', '', '', 'POINTS DU BAR', 'POINTS GLAÇONS'][m.tab], 90, 41, '#8d84b8', 8, 'center');
   if (rows === 'err') T('CONNEXION IMPOSSIBLE', 90, 120, '#e07b7b', 8, 'center', P.ink);
   else if (!rows || rows === 'load') T('CHARGEMENT...', 90, 120, P.cream, 8, 'center', P.ink);
   else if (!rows.length) T('PERSONNE ENCORE...', 90, 120, P.cream, 8, 'center', P.ink);
@@ -3645,13 +3646,185 @@ function drawCock(t) {
     btn(BTN_E1, 'REJOUER', '#2e8b57'); btn(BTN_E2, 'MENU', '#b3202e');
   }
 }
+/* --- LES GLAÇONS : cuisine à la Overcooked. Tape une case : ton perso y va et agit. Mojito (glace pilée) et Spritz. --- */
+var CK_T = 20, CK_Y = 62, CK_C = 9, CK_R = 12, CK_TIME = 150, CK_GRID = null;
+var CK_ST = [
+  { k: 'src', i: 'glacon', c: 0, r: 0 }, { k: 'crush', c: 1, r: 0 }, { k: 'src', i: 'menthe', c: 2, r: 0 }, { k: 'src', i: 'sucre', c: 3, r: 0 }, { k: 'src', i: 'rhum', c: 4, r: 0 },
+  { k: 'src', i: 'gaz', c: 5, r: 0 }, { k: 'src', i: 'prosecco', c: 6, r: 0 }, { k: 'src', i: 'aperol', c: 7, r: 0 }, { k: 'src', i: 'orange', c: 8, r: 0 },
+  { k: 'glass', c: 0, r: 3 }, { k: 'table', c: 0, r: 5 }, { k: 'bin', c: 0, r: 8 }, { k: 'serve', c: 8, r: 5 },
+  { k: 'table', c: 3, r: 5 }, { k: 'table', c: 4, r: 5 }, { k: 'table', c: 5, r: 5 }, { k: 'table', c: 8, r: 8 }
+];
+var CK_REC = [{ n: 'MOJITO', r: ['pilee', 'menthe', 'sucre', 'rhum', 'gaz'] }, { n: 'SPRITZ', r: ['glacon', 'prosecco', 'aperol', 'gaz', 'orange'] }];
+window.__dbg = function () { return mini; };
+function ckInit() {
+  var r, c; CK_GRID = [];
+  for (r = 0; r < CK_R; r++) { CK_GRID[r] = []; for (c = 0; c < CK_C; c++) CK_GRID[r][c] = -1; }
+  CK_ST.forEach(function (st, i) { CK_GRID[st.r][st.c] = i; });
+}
+function ckPx(c) { return c * CK_T + CK_T / 2; }
+function ckPy(r) { return CK_Y + r * CK_T + CK_T / 2; }
+function ckPath(sc, sr, goal) {
+  var q = [[sc, sr]], prev = {}, d = [[1, 0], [-1, 0], [0, 1], [0, -1]], i, cur, nc, nr, k, path;
+  prev[sr * CK_C + sc] = -1;
+  while (q.length) {
+    cur = q.shift();
+    if (goal(cur[0], cur[1])) { path = []; k = cur[1] * CK_C + cur[0]; while (prev[k] !== -1) { path.unshift([k % CK_C, Math.floor(k / CK_C)]); k = prev[k]; } return path; }
+    for (i = 0; i < 4; i++) {
+      nc = cur[0] + d[i][0]; nr = cur[1] + d[i][1];
+      if (nc < 0 || nr < 0 || nc >= CK_C || nr >= CK_R || CK_GRID[nr][nc] !== -1 || prev[nr * CK_C + nc] !== undefined) continue;
+      prev[nr * CK_C + nc] = cur[1] * CK_C + cur[0]; q.push([nc, nr]);
+    }
+  }
+  return null;
+}
+function ckStart() {
+  if (!CK_GRID) ckInit();
+  var starts = [[4, 9], [2, 9], [6, 9], [4, 10]];
+  mini = { id: 'cook', t: 0, score: 0, served: 0, over: false, last: performance.now(), orders: [], nextO: 0, msg: null, tb: {}, cr: { st: 0, t: 0 }, pl: [], tStart: performance.now(), oid: 0 };
+  mini.pl.push({ x: ckPx(starts[0][0]), y: ckPy(starts[0][1]), cc: starts[0][0], cr: starts[0][1], path: [], tgt: -1, hold: null, ci: sel });
+}
+function ckMsg(m, s) { m.msg = { s: s, t: performance.now() }; }
+function ckTap(x, y) {
+  var m = mini, p, c, r, idx, st, path;
+  if (m.over) { if (inside(BTN_E1, x, y)) { blip(); ckStart(); } else if (inside(BTN_E2, x, y)) mgLeave(); return; }
+  if (inside(BTN_X, x, y)) { mgLeave(); return; }
+  c = Math.floor(x / CK_T); r = Math.floor((y - CK_Y) / CK_T);
+  if (c < 0 || c >= CK_C || r < 0 || r >= CK_R) return;
+  ckCmd(m, 0, c, r);
+}
+function ckCmd(m, pi, c, r) {
+  var p = m.pl[pi], idx = CK_GRID[r][c], st, path;
+  if (!p) return;
+  if (idx >= 0) {
+    st = CK_ST[idx];
+    path = ckPath(p.cc, p.cr, function (a, b) { return Math.abs(a - st.c) + Math.abs(b - st.r) === 1; });
+    if (path) { p.path = path; p.tgt = idx; } else ckMsg(m, 'IMPOSSIBLE D\'Y ALLER');
+  } else {
+    path = ckPath(p.cc, p.cr, function (a, b) { return a === c && b === r; });
+    if (path) { p.path = path; p.tgt = -1; }
+  }
+}
+function ckSame(a, b) { var i; if (a.length !== b.length) return false; for (i = 0; i < a.length; i++) if (b.indexOf(a[i]) < 0) return false; return true; }
+function ckAct(m, p, idx) {
+  var st = CK_ST[idx], h = p.hold, tbl, i, o;
+  if (st.k === 'src') {
+    if (h && h.t === 'glass') {
+      if (h.c.indexOf(st.i) >= 0) { ckMsg(m, 'DÉJÀ DEDANS'); boop(); }
+      else if (h.c.length >= 5) { ckMsg(m, 'VERRE PLEIN'); boop(); }
+      else { h.c.push(st.i); blip(); }
+    } else if (!h && st.i === 'glacon') { p.hold = { t: 'ing', k: 'glacon' }; blip(); }
+    else if (!h) { ckMsg(m, 'PRENDS UN VERRE D\'ABORD'); boop(); }
+    else { ckMsg(m, 'TES MAINS SONT PLEINES'); boop(); }
+  } else if (st.k === 'glass') {
+    if (!h) { p.hold = { t: 'glass', c: [] }; blip(); } else { ckMsg(m, 'TES MAINS SONT PLEINES'); boop(); }
+  } else if (st.k === 'crush') {
+    if (h && h.t === 'ing' && h.k === 'glacon') {
+      if (m.cr.st === 0) { m.cr.st = 1; m.cr.t = 3; p.hold = null; blip(); } else { ckMsg(m, 'LA PILEUSE EST OCCUPÉE'); boop(); }
+    } else if (m.cr.st === 2) {
+      if (!h) { p.hold = { t: 'ing', k: 'pilee' }; m.cr.st = 0; blip(); }
+      else if (h.t === 'glass' && h.c.indexOf('pilee') < 0 && h.c.length < 5) { h.c.push('pilee'); m.cr.st = 0; blip(); }
+      else { ckMsg(m, 'TES MAINS SONT PLEINES'); boop(); }
+    } else if (m.cr.st === 1) { ckMsg(m, 'ÇA PILE...'); }
+    else { ckMsg(m, 'APPORTE DES GLAÇONS'); boop(); }
+  } else if (st.k === 'table') {
+    tbl = m.tb[idx];
+    if (h && !tbl) { m.tb[idx] = h; p.hold = null; blip(); }
+    else if (!h && tbl) { p.hold = tbl; delete m.tb[idx]; blip(); }
+    else if (h && tbl && h.t === 'ing' && tbl.t === 'glass' && tbl.c.indexOf(h.k) < 0 && tbl.c.length < 5) { tbl.c.push(h.k); p.hold = null; blip(); }
+    else if (h && tbl && h.t === 'glass' && tbl.t === 'ing' && h.c.indexOf(tbl.k) < 0 && h.c.length < 5) { h.c.push(tbl.k); delete m.tb[idx]; blip(); }
+    else { boop(); }
+  } else if (st.k === 'bin') {
+    if (h) { p.hold = null; boop(); ckMsg(m, 'À LA POUBELLE'); }
+  } else if (st.k === 'serve') {
+    if (h && h.t === 'glass') {
+      for (i = 0; i < m.orders.length; i++) if (ckSame(h.c, m.orders[i].r)) break;
+      if (i < m.orders.length) {
+        o = m.orders[i]; var left = Math.max(0, 1 - (m.t - o.t0) / o.tmax), pts = 100 + Math.round(left * 60);
+        m.score += pts; m.served++; m.orders.splice(i, 1); p.hold = null; ckMsg(m, 'SERVI ! +' + pts); jingle();
+      } else { p.hold = null; ckMsg(m, 'PAS COMMANDÉ !'); boop(); }
+    } else if (h) { ckMsg(m, 'IL FAUT UN VERRE'); boop(); }
+  }
+}
+function ckUpdate(t) {
+  var m = mini, dt = Math.min(0.05, (t - m.last) / 1000), i, p, nx, tx, ty, d, o, a;
+  m.last = t;
+  if (m.over) return;
+  m.t += dt;
+  if (m.t >= CK_TIME) { m.over = true; return; }
+  if (m.cr.st === 1) { m.cr.t -= dt; if (m.cr.t <= 0) { m.cr.st = 2; blip(); } }
+  if ((m.orders.length === 0 || (m.orders.length < 2 && m.t >= m.nextO))) {
+    a = CK_REC[Math.floor(Math.random() * CK_REC.length)];
+    m.orders.push({ n: a.n, r: a.r, t0: m.t, tmax: 75, id: m.oid++ }); m.nextO = m.t + 20;
+  }
+  for (i = m.orders.length - 1; i >= 0; i--) { o = m.orders[i]; if (m.t - o.t0 > o.tmax) { m.orders.splice(i, 1); m.score = Math.max(0, m.score - 20); ckMsg(m, 'COMMANDE RATÉE -20'); boop(); } }
+  for (i = 0; i < m.pl.length; i++) {
+    p = m.pl[i];
+    if (p.path.length) {
+      nx = p.path[0]; tx = ckPx(nx[0]); ty = ckPy(nx[1]); d = Math.hypot(tx - p.x, ty - p.y);
+      if (d <= 95 * dt) { p.x = tx; p.y = ty; p.cc = nx[0]; p.cr = nx[1]; p.path.shift(); }
+      else { p.x += (tx - p.x) / d * 95 * dt; p.y += (ty - p.y) / d * 95 * dt; }
+    } else if (p.tgt >= 0) { ckAct(m, p, p.tgt); p.tgt = -1; }
+  }
+}
+function ckGlass(cx, cy, c, big) {
+  var i, w = big ? 9 : 7, h = big ? 11 : 9, lh = Math.max(1, Math.floor((h - 1) / 5));
+  R('rgba(200,230,255,0.45)', cx - w / 2, cy - h / 2, w, h); R('#cfeeff', cx - w / 2 - 1, cy - h / 2, 1, h + 1); R('#cfeeff', cx + w / 2, cy - h / 2, 1, h + 1); R('#cfeeff', cx - w / 2 - 1, cy + h / 2, w + 2, 1);
+  for (i = 0; i < c.length; i++) R(COCK_ING[c[i]].a, cx - w / 2, cy + h / 2 - (i + 1) * lh, w, lh);
+}
+function ckItem(it, cx, cy) { if (!it) return; if (it.t === 'glass') ckGlass(Math.round(cx), Math.round(cy), it.c, true); else cockIcon(it.k, cx, cy); }
+function drawCook(t) {
+  var m = mini, i, j, st, x, y, o, p, tn = performance.now(), left, cx;
+  ckUpdate(t);
+  R('#150a1c', 0, 0, W, H);
+  for (j = 0; j < CK_R; j++) for (i = 0; i < CK_C; i++) R((i + j) % 2 ? '#241833' : '#1d1229', i * CK_T, CK_Y + j * CK_T, CK_T, CK_T);
+  for (i = 0; i < CK_ST.length; i++) {
+    st = CK_ST[i]; x = st.c * CK_T; y = CK_Y + st.r * CK_T;
+    R(st.k === 'serve' ? '#2e6b3a' : st.k === 'table' ? '#6b4423' : st.k === 'bin' ? '#3a3030' : st.k === 'crush' ? '#4a5266' : st.k === 'glass' ? '#2a4a5a' : '#3a2a4a', x, y, CK_T, CK_T);
+    R('rgba(255,255,255,0.18)', x, y, CK_T, 1); R('rgba(0,0,0,0.35)', x, y + CK_T - 1, CK_T, 1);
+    if (st.k === 'src') cockIcon(st.i, x + 10, y + 10);
+    else if (st.k === 'glass') { ckGlass(x + 10, y + 10, [], true); R('#cfeeff', x + 3, y + 17, 14, 1); }
+    else if (st.k === 'bin') { R('#7a7a86', x + 4, y + 5, 12, 12); R('#a0a0ae', x + 3, y + 3, 14, 3); R('#3a3a44', x + 7, y + 8, 1, 7); R('#3a3a44', x + 12, y + 8, 1, 7); }
+    else if (st.k === 'serve') { R('#f2c14e', x + 4, y + 7, 12, 7); R('#f2c14e', x + 7, y + 4, 6, 3); R('#a07a1e', x + 3, y + 14, 14, 2); R('#fff2b8', x + 9, y + 2, 2, 2); }
+    else if (st.k === 'crush') {
+      R('#8a92a8', x + 4, y + 4, 12, 12); R('#2a2f3c', x + 6, y + 6, 8, 8);
+      if (m.cr.st === 1) { R('#e0503a', x + 2, y + 17, Math.round(16 * (1 - m.cr.t / 3)), 2); if (Math.floor(tn / 90) % 2) R('#cfeeff', x + 8, y + 8, 4, 4); else R('#8fc8ea', x + 7, y + 9, 6, 3); }
+      else if (m.cr.st === 2) cockIcon('pilee', x + 10, y + 10);
+    }
+    else if (st.k === 'table') { R('#8a5a30', x + 1, y + 1, CK_T - 2, CK_T - 2); if (m.tb[i]) ckItem(m.tb[i], x + 10, y + 10); }
+  }
+  R('#1c1330', 0, 0, W, 20); R(P.gold, 0, 20, W, 1);
+  T('SCORE ' + m.score, 22, 6, P.cream, 8, 'left');
+  left = Math.max(0, Math.ceil(CK_TIME - m.t)); T(Math.floor(left / 60) + ':' + ('0' + (left % 60)).slice(-2), 176, 6, left <= 20 ? '#ff7a7a' : P.cream, 8, 'right');
+  R('#3a3f55', BTN_X.x, BTN_X.y, BTN_X.w, BTN_X.h); T('X', BTN_X.x + 8, BTN_X.y + 3, P.cream, 8, 'center');
+  for (j = 0; j < 2; j++) {
+    x = 3 + j * 90; R('rgba(10,6,16,0.8)', x, 22, 86, 38); R(P.gold, x, 22, 86, 1);
+    o = m.orders[j]; if (!o) { T('...', x + 43, 36, '#6a5f8a', 8, 'center'); continue; }
+    T(o.n, x + 43, 25, P.gold, 8, 'center');
+    for (i = 0; i < o.r.length; i++) cockIcon(o.r[i], x + 8 + i * 17, 41);
+    left = Math.max(0, 1 - (m.t - o.t0) / o.tmax); R('#3a3f55', x + 3, 54, 80, 3); R(left < 0.25 ? '#e03030' : P.gold, x + 3, 54, Math.round(80 * left), 3);
+  }
+  for (i = 0; i < m.pl.length; i++) {
+    p = m.pl[i]; disc(Math.round(p.x), Math.round(p.y) + 6, 6, 'rgba(0,0,0,0.35)');
+    drawHead(p.ci, Math.round(p.x) - 8, Math.round(p.y) - 9, 16, 16);
+    if (p.hold) { R('rgba(10,6,16,0.6)', Math.round(p.x) - 9, Math.round(p.y) - 29, 18, 18); ckItem(p.hold, p.x, p.y - 20); }
+  }
+  if (m.msg && tn - m.msg.t < 1600) T(m.msg.s, 90, 304, P.gold, 8, 'center', P.ink);
+  else if (tn - m.tStart < 6000) { T('TAPE UNE CASE POUR Y ALLER', 90, 304, P.cream, 8, 'center', P.ink); }
+  if (m.over) {
+    R('rgba(10,6,16,0.85)', 0, 90, W, 120);
+    Tout('SERVICE FINI', 90, 104, P.gold, 16, '#2a0712', P.red);
+    T('SCORE ' + m.score, 90, 144, P.cream, 8, 'center', P.ink);
+    T(m.served + ' COCKTAIL' + (m.served > 1 ? 'S' : '') + ' SERVI' + (m.served > 1 ? 'S' : ''), 90, 160, P.mint, 8, 'center', P.ink);
+    btn(BTN_E1, 'REJOUER', '#2e8b57'); btn(BTN_E2, 'MENU', '#b3202e');
+  }
+}
 var MG_LIST = {
-  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: "JEU DE L'A9" }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'LE CONCERT' }, { id: 'cock', name: 'LE BAR' }],
+  arcade: [{ id: 'brick', name: 'ARKANOID' }, { id: 'mole', name: 'TAUPES' }, { id: 'car', name: "JEU DE L'A9" }, { id: 'pushbot', name: 'FOOT ARGENTIN' }, { id: 'beat', name: 'LE CONCERT' }, { id: 'cock', name: 'LE BAR' }, { id: 'cook', name: 'LES GLAÇONS' }],
   versus: [{ id: 'online', name: 'DUEL EN LIGNE' }, { id: 'push2', name: 'ARGENTIN À DEUX' }, { id: 'pushbot', name: 'FOOT ARGENTIN' }]
 };
 var BTN_X = { x: 2, y: 2, w: 16, h: 14 }, BTN_MB = { x: 6, y: 276, w: 80, h: 22 }, BTN_REC = { x: 94, y: 276, w: 80, h: 22 };
 function mgList() { var L = MG_LIST[mode] || []; return (PUBLIC || mode === 'arcade') ? L.concat([{ id: 'quiz', name: 'QUIZ DE LA REVUE' }]) : L; }
-function mgBtn(i) { var n = mgList().length, st = n > 6 ? 29 : 34; return { x: 20, y: (n > 6 ? 50 : 56) + i * st, w: 140, h: n > 6 ? 25 : 26 }; }
+function mgBtn(i) { var n = mgList().length, st = n > 7 ? 27 : n > 6 ? 29 : 34; return { x: 20, y: (n > 7 ? 46 : n > 6 ? 50 : 56) + i * st, w: 140, h: n > 7 ? 23 : n > 6 ? 25 : 26 }; }
 function pickOpp() {
   var o, n = 0;
   do { o = Math.floor(Math.random() * ROSTER.length); n++; } while ((o === sel || ROSTER[o].ghost || !avail(o)) && n < 50);
@@ -3661,6 +3834,7 @@ function mgStart(id) {
   if (id === 'online') { mode = 'multi'; scene = 'stage'; mini = null; lobbyStart(); lbMsg('INVITE UN JOUEUR DE LA SALLE', 6000); }
   else if (id === 'quiz') { quizStart(); }
   else if (id === 'cock') { statSolo(); cockStart(); }
+  else if (id === 'cook') { statSolo(); ckStart(); }
   else { statSolo(); if (id === 'brick') brickStart(); else if (id === 'car') carStart(); else if (id === 'mole') moleStartSolo(); else if (id === 'beat') beatStart(); else pushStart(id); }
 }
 function mgLeave() { beatKill(mini); bbClose(); if (mini && mini.net && !mini.fin && net) { mini.myFin = mini.id === 'pushnet' ? -1 : -9999; mini.fin = true; duelFinish(mini); } if (mini && mini.net && net) net.fast = false; mini = null; boop(); }
@@ -3686,11 +3860,12 @@ function mgTap(x, y) {
     return;
   }
   if (mini.id === 'hs') { hsTap(x, y); return; }
-  if (mini.id === 'cock') cockTap(x, y); else if (mini.id === 'quiz') quizTap(x, y); else if (mini.id === 'beat') beatTap(x, y); else if (mini.id === 'car') carTap(x, y); else if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
+  if (mini.id === 'cook') ckTap(x, y); else if (mini.id === 'cock') cockTap(x, y); else if (mini.id === 'quiz') quizTap(x, y); else if (mini.id === 'beat') beatTap(x, y); else if (mini.id === 'car') carTap(x, y); else if (mini.id === 'brick') brickTap(x, y); else if (mini.id === 'mole' || mini.id === 'molenet') moleSoloTap(x, y); else pushTap(x, y);
 }
 function drawMini(t) {
   if (mini.id === 'hs') { drawHs(t); return; }
   if (mini.id === 'quiz') { drawQuiz(t); muteIcon(); return; }
+  if (mini.id === 'cook') { drawCook(t); hsWatch(); hsDraw(); muteIcon(); return; }
   if (mini.id === 'cock') { drawCock(t); hsWatch(); hsDraw(); muteIcon(); return; }
   if (mini.id === 'beat') { drawBeat(t); hsWatch(); hsDraw(); muteIcon(); return; }
   if (mini.id === 'car') { drawCar(t); if (mini.net) drawCarDuel(t); } else if (mini.id === 'brick') { drawBrick(t); if (mini.net) drawBrickDuel(t); } else if (mini.id === 'mole') drawMoleSolo(t); else if (mini.id === 'molenet') drawMoleDuel(t); else drawPush(t);
