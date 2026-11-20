@@ -1984,7 +1984,7 @@ function netPoll() {
     if (net !== my) return;
     my.busy = false; my.err = 0;
     if (!rm) { netGone('SALLE FERMÉE'); return; }
-    my.rm = rm; netObserve(my); netHost(my); netSync(my); netDuel(my); netWolf(my);
+    my.rm = rm; netObserve(my); netHost(my); netSync(my); netDuel(my); netWolf(my); netCook(my);
     if (my.fast) setTimeout(netPoll, 250);
   }, function () { if (net === my) { my.busy = false; my.err++; } });
 }
@@ -2292,6 +2292,7 @@ function lobbyTap(x, y) {
       if (inside(GM1, x, y)) { lb.gm = false; netStart(); }
       else if (inside(GM2, x, y)) { lb.gm = false; wfStartSetup(); }
       else if (inside(GM3, x, y)) { lb.gm = false; lbMsg('TOUCHE UN JOUEUR POUR LE DÉFIER', 6000); blip(); }
+      else if (inside(GM4, x, y)) { lb.gm = false; blip(); ckCoopHost(); }
       else if (inside(BTN_BACK2, x, y)) { lb.gm = false; boop(); }
       return;
     }
@@ -2784,16 +2785,17 @@ function wfSleep(t, w, lines, dead, el) {
 
 var BTN_RANK = { x: 20, y: 200, w: 140, h: 22 };
 var BTN_CARD = { x: 35, y: 186, w: 110, h: 12 };
-var GM1 = { x: 10, y: 34, w: 160, h: 30 }, GM2 = { x: 10, y: 90, w: 160, h: 30 }, GM3 = { x: 10, y: 146, w: 160, h: 30 };
+var GM1 = { x: 10, y: 30, w: 160, h: 28 }, GM2 = { x: 10, y: 76, w: 160, h: 28 }, GM3 = { x: 10, y: 122, w: 160, h: 28 }, GM4 = { x: 10, y: 168, w: 160, h: 28 };
 function drawRoomGames(t) {
   R('rgba(10,6,16,0.85)', 0, 0, W, H);
   T('CHOISIS UN JEU', 90, 10, P.gold, 8, 'center', P.velvet);
   T('POUR TOUTE LA SALLE', 90, 21, P.cream, 8, 'center', P.ink);
-  btn(GM1, 'C\'EST QUI ?', '#b3202e'); T('VOTE ENTRE JOUEURS', 90, GM1.y + 34, '#8d84b8', 8, 'center');
-  btn(GM2, 'LOUP-GAROU', '#6a2a8a'); T('MIN. 4 JOUEURS', 90, GM2.y + 34, '#8d84b8', 8, 'center');
-  btn(GM3, 'DUEL 1 CONTRE 1', '#3a6fb0'); T('FOOT TAUPES ARKANOID', 90, GM3.y + 34, '#8d84b8', 8, 'center');
-  T('JOUEURS : ' + lb.players.length, 90, 210, P.gold, 8, 'center', P.ink);
-  lobbyMsg(t, 230);
+  btn(GM1, 'C\'EST QUI ?', '#b3202e'); T('VOTE ENTRE JOUEURS', 90, GM1.y + 31, '#8d84b8', 8, 'center');
+  btn(GM2, 'LOUP-GAROU', '#6a2a8a'); T('MIN. 4 JOUEURS', 90, GM2.y + 31, '#8d84b8', 8, 'center');
+  btn(GM3, 'DUEL 1 CONTRE 1', '#3a6fb0'); T('FOOT TAUPES ARKANOID', 90, GM3.y + 31, '#8d84b8', 8, 'center');
+  btn(GM4, 'BAR EN COOP', '#c47a1a'); T('GLAÇONS A 2-4 JOUEURS', 90, GM4.y + 31, '#8d84b8', 8, 'center');
+  T('JOUEURS : ' + lb.players.length, 90, 232, P.gold, 8, 'center', P.ink);
+  lobbyMsg(t, 246);
   btn(BTN_BACK2, 'RETOUR', '#3a3f55');
   muteIcon();
 }
@@ -3262,7 +3264,7 @@ function hsGid(m) {
   if (m.id === 'brick') return m.online ? null : 'brick';
   if (m.id === 'mole') return 'mole';
   if (m.id === 'cock') return 'cock';
-  if (m.id === 'cook') return 'cook';
+  if (m.id === 'cook') return m.net ? null : 'cook';
   if (m.id === 'beat') return (m.sel || m.wait) ? null : (m.mic ? 'bbox' : 'beat') + m.lv;
   if (m.id === 'pushbot') return m.win === 1 ? 'push' : null;
   return null;
@@ -3655,7 +3657,7 @@ var CK_ST = [
   { k: 'table', c: 3, r: 5 }, { k: 'table', c: 4, r: 5 }, { k: 'table', c: 5, r: 5 }, { k: 'table', c: 8, r: 8 }
 ];
 var CK_REC = [{ n: 'MOJITO', r: ['pilee', 'menthe', 'sucre', 'rhum', 'gaz'] }, { n: 'SPRITZ', r: ['glacon', 'prosecco', 'aperol', 'gaz', 'orange'] }];
-window.__dbg = function () { return mini; };
+window.__dbg = function () { return mini; }; window.__net = function () { return net; };
 function ckInit() {
   var r, c; CK_GRID = [];
   for (r = 0; r < CK_R; r++) { CK_GRID[r] = []; for (c = 0; c < CK_C; c++) CK_GRID[r][c] = -1; }
@@ -3677,20 +3679,77 @@ function ckPath(sc, sr, goal) {
   }
   return null;
 }
-function ckStart() {
+function ckStart(plist) {
   if (!CK_GRID) ckInit();
-  var starts = [[4, 9], [2, 9], [6, 9], [4, 10]];
-  mini = { id: 'cook', t: 0, score: 0, served: 0, over: false, last: performance.now(), orders: [], nextO: 0, msg: null, tb: {}, cr: { st: 0, t: 0 }, pl: [], tStart: performance.now(), oid: 0 };
-  mini.pl.push({ x: ckPx(starts[0][0]), y: ckPy(starts[0][1]), cc: starts[0][0], cr: starts[0][1], path: [], tgt: -1, hold: null, ci: sel });
+  var starts = [[4, 9], [2, 9], [6, 9], [4, 10]], i, q;
+  plist = plist || [{ pid: null, ci: sel }];
+  mini = { id: 'cook', t: 0, score: 0, served: 0, over: false, last: performance.now(), orders: [], nextO: 0, msg: null, msgN: 0, tb: {}, cr: { st: 0, t: 0 }, pl: [], tStart: performance.now(), oid: 0, me: 0, np: plist.length };
+  for (i = 0; i < plist.length && i < 4; i++) { q = plist[i]; mini.pl.push({ pid: q.pid, x: ckPx(starts[i][0]), y: ckPy(starts[i][1]), sx: ckPx(starts[i][0]), sy: ckPy(starts[i][1]), cc: starts[i][0], cr: starts[i][1], path: [], tgt: -1, hold: null, ci: q.ci }); }
 }
-function ckMsg(m, s) { m.msg = { s: s, t: performance.now() }; }
+function ckMsg(m, s) { m.msg = { s: s, t: performance.now() }; m.msgN++; }
+function ckSend(m, c, r) {
+  m.cmdN = (m.cmdN || 0) + 1;
+  if (net) fbReq('PUT', '/rooms/' + net.code + '/ck/cm/' + net.pid, { n: m.cmdN, c: c, r: r }).catch(function () {});
+}
+function ckEnc(it) { return it ? [it.t === 'glass' ? 2 : 1, it.k || 0, it.c ? it.c.join(',') : ''] : 0; }
+function ckDec(a) { if (!a) return null; a = arr(a); return a[0] === 2 ? { t: 'glass', c: a[2] ? String(a[2]).split(',') : [] } : { t: 'ing', k: a[1] }; }
+function ckSnap(m) {
+  var w = { q: ++m.seq, t: Math.round(m.t * 10) / 10, sc: m.score, sv: m.served, ov: m.over ? 1 : 0, cr: [m.cr.st, Math.round(m.cr.t * 10) / 10], tb: {}, g: m.msg ? [m.msg.s, m.msgN] : 0 }, k;
+  w.o = m.orders.map(function (o) { return [o.n === 'MOJITO' ? 0 : 1, Math.round(o.t0 * 10) / 10, o.tmax, o.id]; });
+  w.p = m.pl.map(function (q) { return [Math.round(q.x), Math.round(q.y), q.cc, q.cr, ckEnc(q.hold)]; });
+  for (k in m.tb) w.tb[k] = ckEnc(m.tb[k]);
+  return w;
+}
+function ckApply(m, w) {
+  var i, a, q, o, k;
+  m.tSnap = w.t; m.tSnapAt = performance.now(); m.snapAt = performance.now();
+  m.score = w.sc || 0; m.served = w.sv || 0; m.over = !!w.ov;
+  m.orders = arr(w.o).map(function (x) { x = arr(x); var rc = CK_REC[x[0]] || CK_REC[0]; return { n: rc.n, r: rc.r, t0: x[1], tmax: x[2], id: x[3] }; });
+  a = arr(w.cr); m.cr.st = a[0] || 0; m.cr.t = a[1] || 0;
+  m.tb = {}; if (w.tb) for (k in w.tb) m.tb[k] = ckDec(w.tb[k]);
+  arr(w.p).forEach(function (x, i2) { x = arr(x); q = m.pl[i2]; if (!q) return; q.sx = x[0]; q.sy = x[1]; q.hold = ckDec(x[4]); });
+  if (w.g) { a = arr(w.g); if (a[1] !== m.msgSeen) { m.msgSeen = a[1]; m.msg = { s: a[0], t: performance.now() }; } }
+}
+function ckBegin(my, pl, host) {
+  ckStart(pl.map(function (q) { return { pid: q.pid, ci: Math.max(0, rosterIdx(q.c)) }; }));
+  var m = mini; m.net = true; m.host = host; m.fin = true; m.cmdN = 0; m.seen = {}; m.snapQ = 0; m.seq = 0; m.lastW = 0; m.snapAt = performance.now(); m.tSnap = 0; m.tSnapAt = performance.now();
+  m.me = 0; m.pl.forEach(function (q, i) { if (q.pid === my.pid) m.me = i; });
+  scene = 'stage'; mode = 'multi'; jingle();
+}
+function ckCoopHost() {
+  var my = net, rm = my && my.rm, pl = [], p, id = Date.now(), act;
+  if (!my || !rm) return;
+  p = rm.p || {};
+  act = netActive(my).filter(function (k) { return k !== my.pid; }).sort(function (a, b) { return ((p[a] || {}).j || 0) - ((p[b] || {}).j || 0); }).slice(0, 3);
+  [my.pid].concat(act).forEach(function (pid) { pl.push({ pid: pid, c: (p[pid] || {}).c || ROSTER[sel].id }); });
+  my.ckSeen = id;
+  fbReq('PUT', '/rooms/' + my.code + '/ck', { id: id, st: 'play', hst: my.pid, pl: pl }).then(function () { netPoll(); }, function () { lbMsg('ERREUR RÉSEAU'); });
+  ckBegin(my, pl, true);
+}
+function netCook(my) {
+  var rm = my.rm, ck = rm.ck, m = mini, k, c, i, cm, pl, me = false;
+  if (!ck) return;
+  if (m && m.id === 'cook' && m.net) {
+    if (m.host) {
+      cm = ck.cm || {};
+      for (k in cm) { c = cm[k]; if (!c || typeof c.n !== 'number') continue; if (c.n > (m.seen[k] || 0)) { m.seen[k] = c.n; for (i = 0; i < m.pl.length; i++) if (m.pl[i].pid === k) ckCmd(m, i, c.c, c.r); } }
+    } else if (ck.w && ck.w.q > m.snapQ) { m.snapQ = ck.w.q; ckApply(m, ck.w); }
+    return;
+  }
+  if (ck.st === 'play' && ck.id !== my.ckSeen && Date.now() - ck.id < 25000 && !(m && m.net)) {
+    my.ckSeen = ck.id; pl = arr(ck.pl);
+    pl.forEach(function (q) { if (q && q.pid === my.pid) me = true; });
+    if (me) ckBegin(my, pl, false);
+  }
+}
 function ckTap(x, y) {
   var m = mini, p, c, r, idx, st, path;
   if (m.over) { if (inside(BTN_E1, x, y)) { blip(); ckStart(); } else if (inside(BTN_E2, x, y)) mgLeave(); return; }
   if (inside(BTN_X, x, y)) { mgLeave(); return; }
   c = Math.floor(x / CK_T); r = Math.floor((y - CK_Y) / CK_T);
   if (c < 0 || c >= CK_C || r < 0 || r >= CK_R) return;
-  ckCmd(m, 0, c, r);
+  if (m.net && !m.host) { ckSend(m, c, r); return; }
+  ckCmd(m, m.me || 0, c, r);
 }
 function ckCmd(m, pi, c, r) {
   var p = m.pl[pi], idx = CK_GRID[r][c], st, path;
@@ -3748,13 +3807,19 @@ function ckAct(m, p, idx) {
 function ckUpdate(t) {
   var m = mini, dt = Math.min(0.05, (t - m.last) / 1000), i, p, nx, tx, ty, d, o, a;
   m.last = t;
+  if (m.net && !m.host) {
+    m.t = Math.min(CK_TIME, (m.tSnap || 0) + (performance.now() - m.tSnapAt) / 1000);
+    if (m.cr.st === 1) m.cr.t = Math.max(0, m.cr.t - dt);
+    for (i = 0; i < m.pl.length; i++) { p = m.pl[i]; p.x += (p.sx - p.x) * Math.min(1, dt * 7); p.y += (p.sy - p.y) * Math.min(1, dt * 7); }
+    return;
+  }
   if (m.over) return;
   m.t += dt;
   if (m.t >= CK_TIME) { m.over = true; return; }
   if (m.cr.st === 1) { m.cr.t -= dt; if (m.cr.t <= 0) { m.cr.st = 2; blip(); } }
   if ((m.orders.length === 0 || (m.orders.length < 2 && m.t >= m.nextO))) {
     a = CK_REC[Math.floor(Math.random() * CK_REC.length)];
-    m.orders.push({ n: a.n, r: a.r, t0: m.t, tmax: 75, id: m.oid++ }); m.nextO = m.t + 20;
+    m.orders.push({ n: a.n, r: a.r, t0: m.t, tmax: 75, id: m.oid++ }); m.nextO = m.t + (m.np > 2 ? 13 : 20);
   }
   for (i = m.orders.length - 1; i >= 0; i--) { o = m.orders[i]; if (m.t - o.t0 > o.tmax) { m.orders.splice(i, 1); m.score = Math.max(0, m.score - 20); ckMsg(m, 'COMMANDE RATÉE -20'); boop(); } }
   for (i = 0; i < m.pl.length; i++) {
@@ -3805,9 +3870,12 @@ function drawCook(t) {
   }
   for (i = 0; i < m.pl.length; i++) {
     p = m.pl[i]; disc(Math.round(p.x), Math.round(p.y) + 6, 6, 'rgba(0,0,0,0.35)');
+    if (i === m.me && m.np > 1) R(P.gold, Math.round(p.x) - 7, Math.round(p.y) + 8, 14, 1);
     drawHead(p.ci, Math.round(p.x) - 8, Math.round(p.y) - 9, 16, 16);
-    if (p.hold) { R('rgba(10,6,16,0.6)', Math.round(p.x) - 9, Math.round(p.y) - 29, 18, 18); ckItem(p.hold, p.x, p.y - 20); }
+    if (p.hold) { R(P.gold, Math.round(p.x) - 10, Math.round(p.y) - 30, 20, 20); R('#1d1530', Math.round(p.x) - 9, Math.round(p.y) - 29, 18, 18); ckItem(p.hold, p.x, p.y - 20); }
   }
+  if (m.net && m.host && net && tn - m.lastW > 380 && !m.wbusy) { m.lastW = tn; m.wbusy = true; fbReq('PUT', '/rooms/' + net.code + '/ck/w', ckSnap(m)).then(function () { m.wbusy = false; }, function () { m.wbusy = false; }); }
+  if (m.net && !m.host && tn - m.snapAt > 8000 && !m.over) T('HÔTE INJOIGNABLE...', 90, 296, '#e07b7b', 8, 'center', P.ink);
   if (m.msg && tn - m.msg.t < 1600) T(m.msg.s, 90, 304, P.gold, 8, 'center', P.ink);
   else if (tn - m.tStart < 6000) { T('TAPE UNE CASE POUR Y ALLER', 90, 304, P.cream, 8, 'center', P.ink); }
   if (m.over) {
