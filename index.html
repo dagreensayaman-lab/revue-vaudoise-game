@@ -3532,6 +3532,7 @@ var COCK_ING = {
   prosecco: { n: 'PROSECCO', s: 'bottle', a: '#2f7d3a', b: '#f2c14e' },
   aperol: { n: 'APEROL', s: 'bottle', a: '#ff6a1a', b: '#ffd0a0' },
   orange: { n: 'TRANCHE ORANGE', s: 'slice', a: '#ff9a1a', b: '#ffd27a' },
+  orangeE: { n: 'ORANGE', s: 'whole', a: '#ff9a1a', b: '#ffd27a' },
   cola: { n: 'COLA', s: 'can', a: '#4a1a14', b: '#e03030' },
   vert: { n: 'CITRON VERT', s: 'slice', a: '#8fe03a', b: '#d8ff9a' },
   gin: { n: 'GIN', s: 'bottle', a: '#7fd0a8', b: '#2a7a58' },
@@ -3549,6 +3550,7 @@ function cockIcon(k, cx, cy) {
   else if (g.s === 'leaf') { R(K, x + 3, y + 1, 10, 14); R(g.a, x + 4, y + 2, 8, 12); R(K, x + 1, y + 5, 14, 6); R(g.a, x + 2, y + 6, 12, 4); R(g.b, x + 7, y + 3, 2, 10); }
   else if (g.s === 'bottle') { R(K, x + 6, y, 4, 6); R(g.a, x + 7, y + 1, 2, 5); R(K, x + 3, y + 5, 10, 11); R(g.a, x + 4, y + 6, 8, 9); R(g.b, x + 4, y + 9, 8, 4); R('#f2c14e', x + 6, y, 4, 2); if (k === 'gaz' || k === 'tonic') { R('#ffffff', x + 5, y + 7, 1, 1); R('#ffffff', x + 10, y + 8, 1, 1); R('#ffffff', x + 7, y + 14, 1, 1); } }
   else if (g.s === 'slice') { disc(cx, cy, 7, K); disc(cx, cy, 6, g.a); disc(cx, cy, 4, g.b); R(g.a, cx - 4, cy, 9, 1); R(g.a, cx, cy - 4, 1, 9); }
+  else if (g.s === 'whole') { disc(cx, cy + 1, 7, K); disc(cx, cy + 1, 6, g.a); R(g.b, cx - 4, cy - 3, 3, 2); R(K, cx - 1, cy - 8, 2, 3); R('#3fbf4f', cx, cy - 7, 4, 3); }
   else if (g.s === 'can') { R(K, x + 4, y + 1, 8, 14); R(g.a, x + 5, y + 2, 6, 12); R(g.b, x + 5, y + 6, 6, 4); R('#cccccc', x + 5, y + 1, 6, 1); }
 }
 /* --- LES GLAÇONS : cuisine à la Overcooked. Tape une case : ton perso y va et agit. Mojito (glace pilée) et Spritz. --- */
@@ -3558,10 +3560,10 @@ function ckIce(k) { return k === 'glacon' || k === 'pilee'; }
 function ckPut(g, k, m0) { g.c.push(k); if (ckIce(k) && m0 != null) g.m0 = g.m0 == null ? m0 : Math.min(g.m0, m0); }
 function ckLeft(m, it) { return (!it || it.m0 == null) ? null : Math.max(0, 1 - (m.t - it.m0) / CK_MELT[ckLv(m)]); }
 var CK_ST = [
-  { k: 'src', i: 'glacon', c: 0, r: 0 }, { k: 'crush', c: 1, r: 0 }, { k: 'src', i: 'menthe', c: 2, r: 0 }, { k: 'src', i: 'sucre', c: 3, r: 0 }, { k: 'src', i: 'rhum', c: 4, r: 0 },
-  { k: 'src', i: 'gaz', c: 5, r: 0 }, { k: 'src', i: 'prosecco', c: 6, r: 0 }, { k: 'src', i: 'aperol', c: 7, r: 0 }, { k: 'src', i: 'orange', c: 8, r: 0 },
-  { k: 'glass', c: 0, r: 3 }, { k: 'table', c: 0, r: 5 }, { k: 'bin', c: 0, r: 8 }, { k: 'serve', c: 8, r: 5 },
-  { k: 'table', c: 3, r: 5 }, { k: 'table', c: 4, r: 5 }, { k: 'table', c: 5, r: 5 }, { k: 'table', c: 8, r: 8 }
+  { k: 'glass', c: 1, r: 0 }, { k: 'src', i: 'rhum', c: 2, r: 0 }, { k: 'src', i: 'prosecco', c: 3, r: 0 }, { k: 'src', i: 'aperol', c: 4, r: 0 }, { k: 'src', i: 'gaz', c: 5, r: 0 },
+  { k: 'src', i: 'glacon', c: 0, r: 3 }, { k: 'crush', c: 0, r: 4 }, { k: 'bin', c: 0, r: 7 }, { k: 'mop', c: 8, r: 2 }, { k: 'serve', c: 8, r: 5 },
+  { k: 'src', i: 'menthe', c: 1, r: 11 }, { k: 'src', i: 'sucre', c: 2, r: 11 }, { k: 'src', i: 'orange', c: 3, r: 11 }, { k: 'cut', c: 7, r: 11 },
+  { k: 'table', c: 3, r: 6 }, { k: 'table', c: 4, r: 6 }, { k: 'table', c: 5, r: 6 }, { k: 'table', c: 8, r: 8 }
 ];
 var CK_REC = [{ n: 'MOJITO', r: ['pilee', 'menthe', 'sucre', 'rhum', 'gaz'] }, { n: 'SPRITZ', r: ['glacon', 'prosecco', 'aperol', 'gaz', 'orange'] }];
 window.__dbg = function () { return mini; }; window.__net = function () { return net; };
@@ -3588,9 +3590,9 @@ function ckPath(sc, sr, goal) {
 }
 function ckStart(plist) {
   if (!CK_GRID) ckInit();
-  var starts = [[4, 9], [2, 9], [6, 9], [4, 10]], i, q;
+  var starts = [[4, 9], [3, 9], [5, 9], [4, 8]], i, q;
   plist = plist || [{ pid: null, ci: sel }];
-  mini = { id: 'cook', t: 0, score: 0, served: 0, over: false, last: performance.now(), orders: [], nextO: 0, msg: null, msgN: 0, tb: {}, cr: { st: 0, t: 0 }, pl: [], tStart: performance.now(), oid: 0, me: 0, np: plist.length };
+  mini = { id: 'cook', t: 0, score: 0, served: 0, over: false, last: performance.now(), orders: [], nextO: 0, msg: null, msgN: 0, tb: {}, cr: { st: 0, t: 0 }, cb: { st: 0, t: 0 }, pd: {}, pl: [], tStart: performance.now(), oid: 0, me: 0, np: plist.length };
   for (i = 0; i < plist.length && i < 4; i++) { q = plist[i]; mini.pl.push({ pid: q.pid, x: ckPx(starts[i][0]), y: ckPy(starts[i][1]), sx: ckPx(starts[i][0]), sy: ckPy(starts[i][1]), cc: starts[i][0], cr: starts[i][1], path: [], tgt: -1, hold: null, ci: q.ci }); }
 }
 function ckMsg(m, s) { m.msg = { s: s, t: performance.now() }; m.msgN++; }
@@ -3598,10 +3600,10 @@ function ckSend(m, c, r) {
   m.cmdN = (m.cmdN || 0) + 1;
   if (net) fbReq('PUT', '/rooms/' + net.code + '/ck/cm/' + net.pid, { n: m.cmdN, c: c, r: r }).catch(function () {});
 }
-function ckEnc(it) { return it ? [it.t === 'glass' ? 2 : 1, it.k || 0, it.c ? it.c.join(',') : '', it.m0 == null ? -1 : Math.round(it.m0 * 10) / 10] : 0; }
-function ckDec(a) { if (!a) return null; a = arr(a); var o = a[0] === 2 ? { t: 'glass', c: a[2] ? String(a[2]).split(',') : [] } : { t: 'ing', k: a[1] }; if (a[3] >= 0) o.m0 = a[3]; return o; }
+function ckEnc(it) { return it ? [it.t === 'glass' ? 2 : it.t === 'mop' ? 3 : 1, it.k || 0, it.c ? it.c.join(',') : '', it.m0 == null ? -1 : Math.round(it.m0 * 10) / 10] : 0; }
+function ckDec(a) { if (!a) return null; a = arr(a); var o = a[0] === 3 ? { t: 'mop' } : a[0] === 2 ? { t: 'glass', c: a[2] ? String(a[2]).split(',') : [] } : { t: 'ing', k: a[1] }; if (a[3] >= 0) o.m0 = a[3]; return o; }
 function ckSnap(m) {
-  var w = { q: ++m.seq, t: Math.round(m.t * 10) / 10, sc: m.score, sv: m.served, ov: m.over ? 1 : 0, cr: [m.cr.st, Math.round(m.cr.t * 10) / 10, m.cr.m0 == null ? -1 : Math.round(m.cr.m0 * 10) / 10], tb: {}, g: m.msg ? [m.msg.s, m.msgN] : 0 }, k;
+  var w = { q: ++m.seq, t: Math.round(m.t * 10) / 10, sc: m.score, sv: m.served, ov: m.over ? 1 : 0, cr: [m.cr.st, Math.round(m.cr.t * 10) / 10, m.cr.m0 == null ? -1 : Math.round(m.cr.m0 * 10) / 10], cb: [m.cb.st, Math.round(m.cb.t * 10) / 10], pd: Object.keys(m.pd).map(Number), tb: {}, g: m.msg ? [m.msg.s, m.msgN] : 0 }, k;
   w.o = m.orders.map(function (o) { return [o.n === 'MOJITO' ? 0 : 1, Math.round(o.t0 * 10) / 10, o.tmax, o.id]; });
   w.p = m.pl.map(function (q) { return [Math.round(q.x), Math.round(q.y), q.cc, q.cr, ckEnc(q.hold)]; });
   for (k in m.tb) w.tb[k] = ckEnc(m.tb[k]);
@@ -3613,6 +3615,8 @@ function ckApply(m, w) {
   m.score = w.sc || 0; m.served = w.sv || 0; m.over = !!w.ov;
   m.orders = arr(w.o).map(function (x) { x = arr(x); var rc = CK_REC[x[0]] || CK_REC[0]; return { n: rc.n, r: rc.r, t0: x[1], tmax: x[2], id: x[3] }; });
   a = arr(w.cr); m.cr.st = a[0] || 0; m.cr.t = a[1] || 0; m.cr.m0 = a[2] >= 0 ? a[2] : null;
+  a = arr(w.cb); m.cb.st = a[0] || 0; m.cb.t = a[1] || 0;
+  m.pd = {}; arr(w.pd).forEach(function (k) { m.pd[k] = 1; });
   m.tb = {}; if (w.tb) for (k in w.tb) m.tb[k] = ckDec(w.tb[k]);
   arr(w.p).forEach(function (x, i2) { x = arr(x); q = m.pl[i2]; if (!q) return; q.sx = x[0]; q.sy = x[1]; q.hold = ckDec(x[4]); });
   if (w.g) { a = arr(w.g); if (a[1] !== m.msgSeen) { m.msgSeen = a[1]; m.msg = { s: a[0], t: performance.now() }; } }
@@ -3672,9 +3676,12 @@ function ckCmd(m, pi, c, r) {
 }
 function ckSame(a, b) { var i; if (a.length !== b.length) return false; for (i = 0; i < a.length; i++) if (b.indexOf(a[i]) < 0) return false; return true; }
 function ckAct(m, p, idx) {
-  var st = CK_ST[idx], h = p.hold, tbl, i, o;
+  var st = CK_ST[idx], h = p.hold, tbl, i, o, left, pts;
   if (st.k === 'src') {
-    if (h && h.t === 'glass') {
+    if (st.i === 'orange') {
+      if (!h) { p.hold = { t: 'ing', k: 'orangeE' }; blip(); }
+      else { ckMsg(m, h.t === 'glass' ? 'IL FAUT LA COUPER !' : 'TES MAINS SONT PLEINES'); boop(); }
+    } else if (h && h.t === 'glass') {
       if (h.c.indexOf(st.i) >= 0) { ckMsg(m, 'DÉJÀ DEDANS'); boop(); }
       else if (h.c.length >= 5) { ckMsg(m, 'VERRE PLEIN'); boop(); }
       else { ckPut(h, st.i, m.t); blip(); }
@@ -3692,20 +3699,34 @@ function ckAct(m, p, idx) {
       else { ckMsg(m, 'TES MAINS SONT PLEINES'); boop(); }
     } else if (m.cr.st === 1) { ckMsg(m, 'ÇA PILE...'); }
     else { ckMsg(m, 'APPORTE DES GLAÇONS'); boop(); }
+  } else if (st.k === 'cut') {
+    if (h && h.t === 'ing' && h.k === 'orangeE') {
+      if (m.cb.st === 0) { m.cb.st = 1; m.cb.t = 2.5; p.hold = null; blip(); } else { ckMsg(m, 'LA PLANCHE EST OCCUPÉE'); boop(); }
+    } else if (m.cb.st === 2) {
+      if (!h) { p.hold = { t: 'ing', k: 'orange' }; m.cb.st = 0; blip(); }
+      else if (h.t === 'glass' && h.c.indexOf('orange') < 0 && h.c.length < 5) { ckPut(h, 'orange'); m.cb.st = 0; blip(); }
+      else { ckMsg(m, 'TES MAINS SONT PLEINES'); boop(); }
+    } else if (m.cb.st === 1) { ckMsg(m, 'ÇA COUPE...'); }
+    else { ckMsg(m, 'APPORTE UNE ORANGE'); boop(); }
+  } else if (st.k === 'mop') {
+    if (!h) { p.hold = { t: 'mop' }; blip(); ckMsg(m, 'PANOSSE ! MARCHE SUR LES FLAQUES'); }
+    else if (h.t === 'mop') { p.hold = null; blip(); }
+    else { ckMsg(m, 'TES MAINS SONT PLEINES'); boop(); }
   } else if (st.k === 'table') {
     tbl = m.tb[idx];
-    if (h && !tbl) { m.tb[idx] = h; p.hold = null; blip(); }
+    if (h && h.t === 'mop') { boop(); }
+    else if (h && !tbl) { m.tb[idx] = h; p.hold = null; blip(); }
     else if (!h && tbl) { p.hold = tbl; delete m.tb[idx]; blip(); }
-    else if (h && tbl && h.t === 'ing' && tbl.t === 'glass' && tbl.c.indexOf(h.k) < 0 && tbl.c.length < 5) { ckPut(tbl, h.k, h.m0); p.hold = null; blip(); }
-    else if (h && tbl && h.t === 'glass' && tbl.t === 'ing' && h.c.indexOf(tbl.k) < 0 && h.c.length < 5) { ckPut(h, tbl.k, tbl.m0); delete m.tb[idx]; blip(); }
+    else if (h && tbl && h.t === 'ing' && h.k !== 'orangeE' && tbl.t === 'glass' && tbl.c.indexOf(h.k) < 0 && tbl.c.length < 5) { ckPut(tbl, h.k, h.m0); p.hold = null; blip(); }
+    else if (h && tbl && h.t === 'glass' && tbl.t === 'ing' && tbl.k !== 'orangeE' && h.c.indexOf(tbl.k) < 0 && h.c.length < 5) { ckPut(h, tbl.k, tbl.m0); delete m.tb[idx]; blip(); }
     else { boop(); }
   } else if (st.k === 'bin') {
-    if (h) { p.hold = null; boop(); ckMsg(m, 'À LA POUBELLE'); }
+    if (h && h.t !== 'mop') { p.hold = null; boop(); ckMsg(m, 'À LA POUBELLE'); }
   } else if (st.k === 'serve') {
     if (h && h.t === 'glass') {
       for (i = 0; i < m.orders.length; i++) if (ckSame(h.c, m.orders[i].r)) break;
       if (i < m.orders.length) {
-        o = m.orders[i]; var left = Math.max(0, 1 - (m.t - o.t0) / o.tmax), pts = 100 + Math.round(left * 60);
+        o = m.orders[i]; left = Math.max(0, 1 - (m.t - o.t0) / o.tmax); pts = 100 + Math.round(left * 60);
         m.score += pts; m.served++; m.orders.splice(i, 1); p.hold = null; ckMsg(m, 'SERVI ! +' + pts); jingle();
       } else { p.hold = null; ckMsg(m, 'PAS COMMANDÉ !'); boop(); }
     } else if (h) { ckMsg(m, 'IL FAUT UN VERRE'); boop(); }
@@ -3718,19 +3739,26 @@ function ckMelted(m, it) {
   for (i = it.c.length - 1; i >= 0; i--) if (ckIce(it.c[i])) it.c.splice(i, 1);
   delete it.m0; return 1;
 }
+function ckNear(c, r) {
+  var d = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, 1]], i, x, y;
+  for (i = 0; i < d.length; i++) { x = c + d[i][0]; y = r + d[i][1]; if (x >= 0 && x < CK_C && y >= 0 && y < CK_R && CK_GRID[y][x] < 0) return [x, y]; }
+  return [c, r];
+}
+function ckPuddle(m, c, r) { m.pd[r * CK_C + c] = 1; }
 function ckMeltTick(m) {
-  var i, k, r, any = false;
-  for (i = 0; i < m.pl.length; i++) { r = ckMelted(m, m.pl[i].hold); if (r === 2) m.pl[i].hold = null; if (r) any = true; }
-  for (k in m.tb) { r = ckMelted(m, m.tb[k]); if (r === 2) delete m.tb[k]; if (r) any = true; }
-  if (m.cr.st === 2 && m.cr.m0 != null && m.t - m.cr.m0 > CK_MELT[ckLv(m)]) { m.cr.st = 0; any = true; }
-  if (any) { ckMsg(m, 'ÇA A FONDU !'); boop(); }
+  var i, k, r, any = false, a;
+  for (i = 0; i < m.pl.length; i++) { r = ckMelted(m, m.pl[i].hold); if (r === 2) m.pl[i].hold = null; if (r) { any = true; ckPuddle(m, m.pl[i].cc, m.pl[i].cr); } }
+  for (k in m.tb) { r = ckMelted(m, m.tb[k]); if (r === 2) delete m.tb[k]; if (r) { any = true; a = ckNear(CK_ST[k].c, CK_ST[k].r); ckPuddle(m, a[0], a[1]); } }
+  if (m.cr.st === 2 && m.cr.m0 != null && m.t - m.cr.m0 > CK_MELT[ckLv(m)]) { m.cr.st = 0; any = true; a = ckNear(0, 4); ckPuddle(m, a[0], a[1]); }
+  if (any) { ckMsg(m, 'FLAQUE ! VITE LA PANOSSE'); boop(); }
 }
 function ckUpdate(t) {
-  var m = mini, dt = Math.min(0.05, (t - m.last) / 1000), i, p, nx, tx, ty, d, o, a;
+  var m = mini, dt = Math.min(0.05, (t - m.last) / 1000), i, p, nx, tx, ty, d, o, a, sp;
   m.last = t;
   if (m.net && !m.host) {
     m.t = Math.min(CK_TIME, (m.tSnap || 0) + (performance.now() - m.tSnapAt) / 1000);
     if (m.cr.st === 1) m.cr.t = Math.max(0, m.cr.t - dt);
+    if (m.cb.st === 1) m.cb.t = Math.max(0, m.cb.t - dt);
     for (i = 0; i < m.pl.length; i++) { p = m.pl[i]; p.x += (p.sx - p.x) * Math.min(1, dt * 7); p.y += (p.sy - p.y) * Math.min(1, dt * 7); }
     return;
   }
@@ -3738,6 +3766,7 @@ function ckUpdate(t) {
   m.t += dt;
   if (m.t >= CK_TIME) { m.over = true; return; }
   if (m.cr.st === 1) { m.cr.t -= dt; if (m.cr.t <= 0) { m.cr.st = 2; blip(); } }
+  if (m.cb.st === 1) { m.cb.t -= dt; if (m.cb.t <= 0) { m.cb.st = 2; blip(); } }
   if ((m.orders.length === 0 || (m.orders.length < 2 && m.t >= m.nextO))) {
     a = CK_REC[Math.floor(Math.random() * CK_REC.length)];
     m.orders.push({ n: a.n, r: a.r, t0: m.t, tmax: 75, id: m.oid++ }); m.nextO = m.t + (m.np > 2 ? 13 : 20);
@@ -3748,9 +3777,11 @@ function ckUpdate(t) {
     p = m.pl[i];
     if (p.path.length) {
       nx = p.path[0]; tx = ckPx(nx[0]); ty = ckPy(nx[1]); d = Math.hypot(tx - p.x, ty - p.y);
-      if (d <= 95 * dt) { p.x = tx; p.y = ty; p.cc = nx[0]; p.cr = nx[1]; p.path.shift(); }
-      else { p.x += (tx - p.x) / d * 95 * dt; p.y += (ty - p.y) / d * 95 * dt; }
+      sp = (!(p.hold && p.hold.t === 'mop') && (m.pd[nx[1] * CK_C + nx[0]] || m.pd[p.cr * CK_C + p.cc])) ? 38 : 95;
+      if (d <= sp * dt) { p.x = tx; p.y = ty; p.cc = nx[0]; p.cr = nx[1]; p.path.shift(); }
+      else { p.x += (tx - p.x) / d * sp * dt; p.y += (ty - p.y) / d * sp * dt; }
     } else if (p.tgt >= 0) { ckAct(m, p, p.tgt); p.tgt = -1; }
+    if (p.hold && p.hold.t === 'mop' && m.pd[p.cr * CK_C + p.cc] && Math.hypot(ckPx(p.cc) - p.x, ckPy(p.cr) - p.y) < 6) { delete m.pd[p.cr * CK_C + p.cc]; blip(); }
   }
 }
 function ckGlass(cx, cy, c, big) {
@@ -3762,15 +3793,16 @@ function ckBar(m, it, x, y) {
   var f = ckLeft(m, it); if (f == null) return;
   R('#0c0816', x - 1, y - 1, 18, 4); R(f < 0.3 ? '#ff5a4a' : f < 0.6 ? '#f2c14e' : '#8fe0ff', x, y, Math.round(16 * f), 2);
 }
-function ckItem(it, cx, cy) { if (!it) return; if (it.t === 'glass') ckGlass(Math.round(cx), Math.round(cy), it.c, true); else cockIcon(it.k, cx, cy); }
+function ckItem(it, cx, cy) { if (!it) return; if (it.t === 'mop') { cx = Math.round(cx); cy = Math.round(cy); R('#caa070', cx + 2, cy - 8, 2, 15); R('#e6e6e6', cx - 5, cy + 3, 10, 4); R('#8fc8ea', cx - 5, cy + 6, 10, 1); return; } if (it.t === 'glass') ckGlass(Math.round(cx), Math.round(cy), it.c, true); else cockIcon(it.k, cx, cy); }
 function drawCook(t) {
   var m = mini, i, j, st, x, y, o, p, tn = performance.now(), left, cx, lv;
   ckUpdate(t);
   R('#150a1c', 0, 0, W, H);
   for (j = 0; j < CK_R; j++) for (i = 0; i < CK_C; i++) R((i + j) % 2 ? '#241833' : '#1d1229', i * CK_T, CK_Y + j * CK_T, CK_T, CK_T);
+  R('rgba(255,170,60,0.09)', 0, CK_Y, CK_C * CK_T, 2 * CK_T); R('rgba(120,200,255,0.12)', 0, CK_Y + 2 * CK_T, 2 * CK_T, 4 * CK_T); R('rgba(80,200,90,0.13)', 0, CK_Y + 10 * CK_T, CK_C * CK_T, 2 * CK_T);
   for (i = 0; i < CK_ST.length; i++) {
     st = CK_ST[i]; x = st.c * CK_T; y = CK_Y + st.r * CK_T;
-    R(st.k === 'serve' ? '#2e6b3a' : st.k === 'table' ? '#6b4423' : st.k === 'bin' ? '#3a3030' : st.k === 'crush' ? '#4a5266' : st.k === 'glass' ? '#2a4a5a' : '#3a2a4a', x, y, CK_T, CK_T);
+    R(st.k === 'serve' ? '#2e6b3a' : st.k === 'table' ? '#6b4423' : st.k === 'bin' ? '#3a3030' : st.k === 'cut' ? '#5a3a1c' : st.k === 'mop' ? '#2d4a3a' : st.k === 'crush' ? '#4a5266' : st.k === 'glass' ? '#2a4a5a' : '#3a2a4a', x, y, CK_T, CK_T);
     R('rgba(255,255,255,0.18)', x, y, CK_T, 1); R('rgba(0,0,0,0.35)', x, y + CK_T - 1, CK_T, 1);
     if (st.k === 'src') cockIcon(st.i, x + 10, y + 10);
     else if (st.k === 'glass') { ckGlass(x + 10, y + 10, [], true); R('#cfeeff', x + 3, y + 17, 14, 1); }
@@ -3781,8 +3813,16 @@ function drawCook(t) {
       if (m.cr.st === 1) { R('#e0503a', x + 2, y + 17, Math.round(16 * (1 - m.cr.t / 3)), 2); if (Math.floor(tn / 90) % 2) R('#cfeeff', x + 8, y + 8, 4, 4); else R('#8fc8ea', x + 7, y + 9, 6, 3); }
       else if (m.cr.st === 2) { cockIcon('pilee', x + 10, y + 10); ckBar(m, { m0: m.cr.m0 }, x + 2, y + 17); }
     }
+    else if (st.k === 'cut') {
+      R('#d9b27a', x + 3, y + 4, 14, 11); R('#b8894a', x + 3, y + 14, 14, 1);
+      if (m.cb.st === 1) { R('#e0503a', x + 2, y + 17, Math.round(16 * (1 - m.cb.t / 2.5)), 2); cockIcon('orangeE', x + 10, y + 9); R('#cfd6e0', x + 4 + (Math.floor(tn / 110) % 2) * 6, y + 3, 7, 2); }
+      else if (m.cb.st === 2) cockIcon('orange', x + 10, y + 9);
+      else { R('#cfd6e0', x + 5, y + 8, 8, 2); R('#3a2a1a', x + 13, y + 8, 3, 2); }
+    }
+    else if (st.k === 'mop') { R('#3a7bbf', x + 4, y + 9, 10, 8); R('#8fc8ea', x + 4, y + 9, 10, 2); R('#caa070', x + 14, y + 1, 2, 14); R('#e6e6e6', x + 12, y + 13, 6, 3); }
     else if (st.k === 'table') { R('#8a5a30', x + 1, y + 1, CK_T - 2, CK_T - 2); if (m.tb[i]) { ckItem(m.tb[i], x + 10, y + 9); ckBar(m, m.tb[i], x + 2, y + 16); } }
   }
+  for (i in m.pd) { x = (i % CK_C) * CK_T; y = CK_Y + Math.floor(i / CK_C) * CK_T; R('rgba(70,150,225,0.6)', x + 2, y + 7, 16, 8); R('rgba(70,150,225,0.6)', x + 5, y + 4, 10, 14); R('rgba(190,230,255,0.7)', x + 6, y + 8, 4, 1); }
   lv = ckLv(m); R('#1c1330', 0, 0, W, 20); R(P.gold, 0, 20, W, 1);
   T('SCORE ' + m.score, 22, 6, P.cream, 8, 'left');
   T(String(1980 + lv * 10), 112, 6, ['#8fe0ff', '#bfe8ff', '#ffe9a0', '#ffc24a', '#ff8a3a', '#ff4a3a'][lv], 8, 'center');
